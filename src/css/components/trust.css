@@ -1,0 +1,136 @@
+/* Trust Section */
+.trust {
+    padding: 80px 0;
+    background-color: var(--bg-secondary);
+}
+
+.trust-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.trust-text h2 {
+    margin-bottom: 1.5rem;
+}
+
+.trust-text p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.trust-list {
+    list-style: none;
+    margin-bottom: 2rem;
+}
+
+.trust-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.trust-list i {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.trust-badges {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+}
+
+.badge i {
+    color: var(--primary-color);
+}
+
+.trust-visual {
+    display: flex;
+    justify-content: center;
+}
+
+.trust-score-display {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    min-width: 300px;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    color: white;
+}
+
+.score-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.score-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.score-breakdown {
+    text-align: left;
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.score-item span:first-child {
+    min-width: 100px;
+    font-weight: 500;
+}
+
+.score-bar {
+    flex: 1;
+    height: 8px;
+    background-color: var(--bg-accent);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+.score-item span:last-child {
+    min-width: 30px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--primary-color);
+}

@@ -1,0 +1,21 @@
+/* CareLuva Main Stylesheet - Modular Architecture */
+
+/* Base Styles */
+@import url('./base/reset.css');
+@import url('./base/typography.css');
+@import url('./base/utilities.css');
+@import url('./base/animations.css');
+
+/* Layout */
+@import url('./layout/container.css');
+@import url('./layout/responsive.css');
+
+/* Components */
+@import url('./components/buttons.css');
+@import url('./components/navigation.css');
+@import url('./components/hero.css');
+@import url('./components/features.css');
+@import url('./components/trust.css');
+@import url('./components/testimonials.css');
+@import url('./components/cta.css');
+@import url('./components/footer.css');

@@ -1,0 +1,67 @@
+/* CTA Section */
+.cta {
+    padding: 80px 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    text-align: center;
+}
+
+.cta-content h2 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.cta-content p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.cta .btn-primary {
+    background-color: white;
+    color: var(--primary-color);
+}
+
+.cta .btn-primary:hover {
+    background-color: var(--bg-accent);
+    transform: translateY(-2px);
+}
+
+.cta .btn-outline {
+    border-color: white;
+    color: white;
+}
+
+.cta .btn-outline:hover {
+    background-color: white;
+    color: var(--primary-color);
+}
+
+.cta-features {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.cta-feature i {
+    color: var(--secondary-color);
+}

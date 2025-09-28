@@ -1,0 +1,25 @@
+/* Utility classes */
+.text-center {
+    text-align: center;
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
+.mt-2 {
+    margin-top: 2rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
