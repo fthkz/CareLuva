@@ -1,5 +1,20 @@
 /* Modern AI Matching Section - Cutting Edge Healthcare UI */
 
+/* Fieldset styling for better accessibility */
+fieldset {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+legend {
+    font-weight: var(--font-semibold);
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+    padding: 0 var(--space-2);
+}
+
 /* AI Matching Container */
 .ai-matching {
     padding: var(--space-24) 0;

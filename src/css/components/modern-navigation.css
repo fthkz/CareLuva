@@ -1,5 +1,23 @@
 /* Modern Navigation - Cutting Edge Healthcare UI */
 
+/* Skip Link for Accessibility */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--primary-600);
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
 /* Navigation Container */
 .navbar {
     position: fixed;
@@ -43,7 +61,7 @@
     transform: scale(1.05);
 }
 
-.nav-logo h2 {
+.nav-logo h1 {
     font-family: var(--font-display);
     font-size: var(--font-size-2xl);
     font-weight: var(--font-bold);
@@ -357,7 +375,7 @@
         height: 4rem;
     }
     
-    .nav-logo h2 {
+    .nav-logo h1 {
         font-size: var(--font-size-xl);
     }
     
@@ -387,7 +405,7 @@
         padding: 0 var(--space-3);
     }
     
-    .nav-logo h2 {
+    .nav-logo h1 {
         font-size: var(--font-size-lg);
     }
     
