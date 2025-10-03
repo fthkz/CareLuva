@@ -5,30 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareLuva - Trusted Healthcare Marketplace in Turkey</title>
     <meta name="description" content="Discover verified clinics, doctors, and hospitals in Turkey. Transparent reviews, real patient stories, and trusted ratings for dental care, hair transplants, and more.">
-    <meta name="keywords" content="healthcare, Turkey, clinics, doctors, dental care, hair transplant, medical tourism, verified providers">
-    <meta name="author" content="CareLuva">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="CareLuva - Trusted Healthcare Marketplace in Turkey">
-    <meta property="og:description" content="Discover verified clinics, doctors, and hospitals in Turkey. Transparent reviews, real patient stories, and trusted ratings for dental care, hair transplants, and more.">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="CareLuva - Trusted Healthcare Marketplace in Turkey">
-    <meta name="twitter:description" content="Discover verified clinics, doctors, and hospitals in Turkey. Transparent reviews, real patient stories, and trusted ratings for dental care, hair transplants, and more.">
-    <link rel="preload" href="src/css/main.css" as="style">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
     <link rel="stylesheet" href="src/css/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <h1>CareLuva</h1>
+                <h2>CareLuva</h2>
             </div>
             <ul class="nav-menu">
                 <li><a href="#home">Home</a></li>
@@ -37,232 +23,121 @@
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
-            <div class="nav-search">
-                <i class="fas fa-search nav-search-icon" aria-hidden="true"></i>
-                <input type="text" placeholder="Search clinics, doctors..." aria-label="Search for clinics and doctors">
-            </div>
             <div class="nav-cta">
-                <button type="button" class="btn-secondary">Find Clinics</button>
-                <button type="button" class="btn-primary">Join as Provider</button>
+                <button class="btn-secondary">Find Clinics</button>
+                <button class="btn-primary">Join as Provider</button>
             </div>
-            <button type="button" class="hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+            <div class="hamburger">
                 <span></span>
                 <span></span>
                 <span></span>
-            </button>
-        </div>
-        <div class="mobile-menu">
-            <div class="mobile-search">
-                <i class="fas fa-search" aria-hidden="true"></i>
-                <input type="text" placeholder="Search clinics, doctors..." aria-label="Search for clinics and doctors">
-            </div>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#trust">Trust</a></li>
-                <li><a href="#testimonials">Reviews</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div class="mobile-cta">
-                <button type="button" class="btn-secondary">Find Clinics</button>
-                <button type="button" class="btn-primary">Join as Provider</button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main id="main-content">
-    <!-- Modern Hero Section -->
+    <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-container">
             <div class="hero-content">
-                <div class="hero-badge">
-                    <div class="hero-badge-icon">
-                        <i class="fas fa-check" aria-hidden="true"></i>
-                    </div>
-                    <span>Trusted by 10,000+ Patients Worldwide</span>
-                </div>
-                
-                <h2 class="hero-title">
-                    World-Class Healthcare in <span class="highlight">Turkey</span>
-                </h2>
-                
+                <h1 class="hero-title">
+                    Trusted Healthcare in <span class="highlight">Turkey</span>
+                </h1>
                 <p class="hero-subtitle">
                     Connect with verified clinics, doctors, and hospitals. Get transparent reviews, real patient stories, and trusted ratings for dental care, hair transplants, and more.
                 </p>
-                
-                
                 <div class="hero-stats">
-                    <div class="stat-card">
+                    <div class="stat">
                         <span class="stat-number">500+</span>
                         <span class="stat-label">Verified Clinics</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat">
                         <span class="stat-number">10,000+</span>
                         <span class="stat-label">Happy Patients</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat">
                         <span class="stat-number">9.2</span>
                         <span class="stat-label">Trust Score</span>
                     </div>
                 </div>
-                
                 <div class="hero-actions">
-                    <button type="button" class="btn btn-cta">Find Your Perfect Clinic</button>
-                    <button type="button" class="btn btn-outline">Watch Video Tour</button>
+                    <button class="btn-primary btn-large">Find Your Clinic</button>
+                    <button class="btn-outline btn-large">Watch Video Tour</button>
                 </div>
             </div>
-            
             <div class="hero-visual">
-                <div class="hero-visual-bg"></div>
-                <div class="hero-visual-content">
+                <div class="hero-image">
                     <div class="floating-card card-1">
-                        <div class="floating-card-icon">
-                            <i class="fas fa-shield-check" aria-hidden="true"></i>
-                        </div>
-                        <div class="floating-card-content">
-                            <div class="floating-card-title">Verified Clinic</div>
-                            <div class="floating-card-subtitle">100% Authentic</div>
-                        </div>
+                        <i class="fas fa-shield-check"></i>
+                        <span>Verified Clinic</span>
                     </div>
                     <div class="floating-card card-2">
-                        <div class="floating-card-icon">
-                            <i class="fas fa-star" aria-hidden="true"></i>
-                        </div>
-                        <div class="floating-card-content">
-                            <div class="floating-card-title">4.9 Rating</div>
-                            <div class="floating-card-subtitle">Patient Reviews</div>
-                        </div>
+                        <i class="fas fa-star"></i>
+                        <span>4.9 Rating</span>
                     </div>
                     <div class="floating-card card-3">
-                        <div class="floating-card-icon">
-                            <i class="fas fa-video" aria-hidden="true"></i>
-                        </div>
-                        <div class="floating-card-content">
-                            <div class="floating-card-title">Video Tour</div>
-                            <div class="floating-card-subtitle">See Before You Go</div>
-                        </div>
+                        <i class="fas fa-video"></i>
+                        <span>Video Tour</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Modern Features Section -->
+    <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <header class="section-header">
+            <div class="section-header">
                 <h2>Why Choose CareLuva?</h2>
-                <p>We ensure every healthcare provider meets our strict verification standards and delivers world-class care</p>
-            </header>
+                <p>We ensure every healthcare provider meets our strict verification standards</p>
+            </div>
             <div class="features-grid">
-                <div class="feature-card highlighted">
+                <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-shield-check" aria-hidden="true"></i>
+                        <i class="fas fa-shield-check"></i>
                     </div>
                     <h3>Verified Providers</h3>
                     <p>Only licensed clinics with certifications, malpractice insurance, and proven experience make it to our platform.</p>
-                    <div class="feature-stats">
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">500+</span>
-                            <span class="feature-stat-label">Clinics</span>
-                        </div>
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">100%</span>
-                            <span class="feature-stat-label">Verified</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <i class="fas fa-star"></i>
                     </div>
                     <h3>Authentic Reviews</h3>
                     <p>Real patient testimonials with video stories, before/after photos, and verified outcome tracking.</p>
-                    <div class="feature-stats">
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">10K+</span>
-                            <span class="feature-stat-label">Reviews</span>
-                        </div>
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">4.9</span>
-                            <span class="feature-stat-label">Rating</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        <i class="fas fa-chart-line"></i>
                     </div>
                     <h3>Trust Score</h3>
                     <p>Simple 1-10 rating combining reviews, outcomes, responsiveness, and certifications for easy decision making.</p>
-                    <div class="feature-stats">
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">9.2</span>
-                            <span class="feature-stat-label">Avg Score</span>
-                        </div>
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">95%</span>
-                            <span class="feature-stat-label">Satisfied</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-video" aria-hidden="true"></i>
+                        <i class="fas fa-video"></i>
                     </div>
                     <h3>Clinic Walkthroughs</h3>
                     <p>Visual tours of clinics and staff to familiarize patients and reduce uncertainty before treatment.</p>
-                    <div class="feature-stats">
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">500+</span>
-                            <span class="feature-stat-label">Videos</span>
-                        </div>
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">HD</span>
-                            <span class="feature-stat-label">Quality</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-user-md" aria-hidden="true"></i>
+                        <i class="fas fa-user-md"></i>
                     </div>
                     <h3>Provider Transparency</h3>
                     <p>Real bios with education, certifications, patient feedback, and availability indicators.</p>
-                    <div class="feature-stats">
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">2K+</span>
-                            <span class="feature-stat-label">Doctors</span>
-                        </div>
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">15+</span>
-                            <span class="feature-stat-label">Years Exp</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-headset" aria-hidden="true"></i>
+                        <i class="fas fa-headset"></i>
                     </div>
                     <h3>24/7 Support</h3>
                     <p>Dedicated support team to help you throughout your healthcare journey in Turkey.</p>
-                    <div class="feature-stats">
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">24/7</span>
-                            <span class="feature-stat-label">Available</span>
-                        </div>
-                        <div class="feature-stat">
-                            <span class="feature-stat-number">5min</span>
-                            <span class="feature-stat-label">Response</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Modern Trust Section -->
+    <!-- Trust Section -->
     <section id="trust" class="trust">
         <div class="container">
             <div class="trust-content">
@@ -270,38 +145,24 @@
                     <h2>Building Trust Through Verification</h2>
                     <p>We rigorously verify every healthcare provider to ensure you receive the highest quality care. Our multi-step verification process includes:</p>
                     <ul class="trust-list">
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Medical license verification</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Malpractice insurance confirmation</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Minimum 5 years experience requirement</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Patient outcome tracking</li>
-                        <li><i class="fas fa-check" aria-hidden="true"></i> Regular quality assessments</li>
+                        <li><i class="fas fa-check"></i> Medical license verification</li>
+                        <li><i class="fas fa-check"></i> Malpractice insurance confirmation</li>
+                        <li><i class="fas fa-check"></i> Minimum 5 years experience requirement</li>
+                        <li><i class="fas fa-check"></i> Patient outcome tracking</li>
+                        <li><i class="fas fa-check"></i> Regular quality assessments</li>
                     </ul>
                     <div class="trust-badges">
                         <div class="badge">
-                            <i class="fas fa-certificate" aria-hidden="true"></i>
+                            <i class="fas fa-certificate"></i>
                             <span>Certified</span>
                         </div>
                         <div class="badge">
-                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            <i class="fas fa-shield-alt"></i>
                             <span>Insured</span>
                         </div>
                         <div class="badge">
-                            <i class="fas fa-award" aria-hidden="true"></i>
+                            <i class="fas fa-award"></i>
                             <span>Verified</span>
-                        </div>
-                    </div>
-                    <div class="trust-metrics">
-                        <div class="trust-metric">
-                            <span class="trust-metric-number">500+</span>
-                            <span class="trust-metric-label">Verified Clinics</span>
-                        </div>
-                        <div class="trust-metric">
-                            <span class="trust-metric-number">10K+</span>
-                            <span class="trust-metric-label">Happy Patients</span>
-                        </div>
-                        <div class="trust-metric">
-                            <span class="trust-metric-number">99%</span>
-                            <span class="trust-metric-label">Success Rate</span>
                         </div>
                     </div>
                 </div>
@@ -315,21 +176,21 @@
                             <div class="score-item">
                                 <span>Reviews</span>
                                 <div class="score-bar">
-                                    <div class="score-fill score-fill-95"></div>
+                                    <div class="score-fill" style="width: 95%"></div>
                                 </div>
                                 <span>9.5</span>
                             </div>
                             <div class="score-item">
                                 <span>Outcomes</span>
                                 <div class="score-bar">
-                                    <div class="score-fill score-fill-90"></div>
+                                    <div class="score-fill" style="width: 90%"></div>
                                 </div>
                                 <span>9.0</span>
                             </div>
                             <div class="score-item">
                                 <span>Responsiveness</span>
                                 <div class="score-bar">
-                                    <div class="score-fill score-fill-88"></div>
+                                    <div class="score-fill" style="width: 88%"></div>
                                 </div>
                                 <span>8.8</span>
                             </div>
@@ -340,116 +201,74 @@
         </div>
     </section>
 
-    <!-- Modern Testimonials Section -->
+    <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials">
         <div class="container">
-            <header class="section-header">
+            <div class="section-header">
                 <h2>Real Patient Stories</h2>
                 <p>Hear from patients who found their perfect healthcare match through CareLuva</p>
-            </header>
+            </div>
             <div class="testimonials-grid">
-                <div class="testimonial-card featured">
+                <div class="testimonial-card">
                     <div class="testimonial-video">
                         <div class="video-placeholder">
-                            <i class="fas fa-play" aria-hidden="true"></i>
+                            <i class="fas fa-play"></i>
                         </div>
-                        <div class="video-duration">2:45</div>
                     </div>
                     <div class="testimonial-content">
                         <div class="testimonial-rating">
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
                         </div>
-                        <p class="testimonial-quote">The dental clinic I found through CareLuva exceeded all my expectations. The transparency and verification process gave me complete confidence.</p>
+                        <p>"The dental clinic I found through CareLuva exceeded all my expectations. The transparency and verification process gave me complete confidence."</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar">SM</div>
-                            <div class="author-info">
-                                <div class="author-name">Sarah M.</div>
-                                <div class="author-treatment">Dental Treatment</div>
-                            </div>
-                        </div>
-                        <div class="testimonial-stats">
-                            <div class="testimonial-stat">
-                                <span class="testimonial-stat-number">5.0</span>
-                                <span class="testimonial-stat-label">Rating</span>
-                            </div>
-                            <div class="testimonial-stat">
-                                <span class="testimonial-stat-number">6mo</span>
-                                <span class="testimonial-stat-label">Ago</span>
-                            </div>
+                            <strong>Sarah M.</strong>
+                            <span>Dental Treatment</span>
                         </div>
                     </div>
                 </div>
                 <div class="testimonial-card">
                     <div class="testimonial-video">
                         <div class="video-placeholder">
-                            <i class="fas fa-play" aria-hidden="true"></i>
+                            <i class="fas fa-play"></i>
                         </div>
-                        <div class="video-duration">3:12</div>
                     </div>
                     <div class="testimonial-content">
                         <div class="testimonial-rating">
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
                         </div>
-                        <p class="testimonial-quote">The hair transplant clinic had a perfect Trust Score and the walkthrough video helped me feel comfortable before arriving.</p>
+                        <p>"The hair transplant clinic had a perfect Trust Score and the walkthrough video helped me feel comfortable before arriving."</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar">JL</div>
-                            <div class="author-info">
-                                <div class="author-name">James L.</div>
-                                <div class="author-treatment">Hair Transplant</div>
-                            </div>
-                        </div>
-                        <div class="testimonial-stats">
-                            <div class="testimonial-stat">
-                                <span class="testimonial-stat-number">5.0</span>
-                                <span class="testimonial-stat-label">Rating</span>
-                            </div>
-                            <div class="testimonial-stat">
-                                <span class="testimonial-stat-number">4mo</span>
-                                <span class="testimonial-stat-label">Ago</span>
-                            </div>
+                            <strong>James L.</strong>
+                            <span>Hair Transplant</span>
                         </div>
                     </div>
                 </div>
                 <div class="testimonial-card">
                     <div class="testimonial-video">
                         <div class="video-placeholder">
-                            <i class="fas fa-play" aria-hidden="true"></i>
+                            <i class="fas fa-play"></i>
                         </div>
-                        <div class="video-duration">2:58</div>
                     </div>
                     <div class="testimonial-content">
                         <div class="testimonial-rating">
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
-                            <i class="fas fa-star filled" aria-hidden="true"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
                         </div>
-                        <p class="testimonial-quote">CareLuva's verification process and patient reviews made it easy to choose the right clinic for my cosmetic surgery.</p>
+                        <p>"CareLuva's verification process and patient reviews made it easy to choose the right clinic for my cosmetic surgery."</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar">EK</div>
-                            <div class="author-info">
-                                <div class="author-name">Emma K.</div>
-                                <div class="author-treatment">Cosmetic Surgery</div>
-                            </div>
-                        </div>
-                        <div class="testimonial-stats">
-                            <div class="testimonial-stat">
-                                <span class="testimonial-stat-number">5.0</span>
-                                <span class="testimonial-stat-label">Rating</span>
-                            </div>
-                            <div class="testimonial-stat">
-                                <span class="testimonial-stat-number">2mo</span>
-                                <span class="testimonial-stat-label">Ago</span>
-                            </div>
+                            <strong>Emma K.</strong>
+                            <span>Cosmetic Surgery</span>
                         </div>
                     </div>
                 </div>
@@ -457,270 +276,33 @@
         </div>
     </section>
 
-    <!-- AI Matching Section -->
-    <section class="ai-matching">
-        <div class="container">
-            <div class="ai-matching-content">
-                <div class="ai-matching-text">
-                    <h2>AI-Powered Healthcare Matching</h2>
-                    <p>Our advanced AI algorithm analyzes your specific needs, preferences, and medical history to find the perfect healthcare provider match.</p>
-                    <ul class="ai-features">
-                        <li><i class="fas fa-brain" aria-hidden="true"></i> Intelligent matching algorithm</li>
-                        <li><i class="fas fa-shield-check" aria-hidden="true"></i> Verified provider database</li>
-                        <li><i class="fas fa-chart-line" aria-hidden="true"></i> Compatibility scoring system</li>
-                        <li><i class="fas fa-clock" aria-hidden="true"></i> Real-time availability checking</li>
-                        <li><i class="fas fa-star" aria-hidden="true"></i> Patient satisfaction integration</li>
-                    </ul>
-                </div>
-                <div class="ai-matching-visual">
-                    <div class="ai-brain">
-                        <i class="fas fa-brain" aria-hidden="true"></i>
-                    </div>
-                    <div class="neural-network">
-                        <div class="neural-line"></div>
-                        <div class="neural-line"></div>
-                        <div class="neural-line"></div>
-                        <div class="neural-line"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="ai-matching-form">
-                <h3>Find Your Perfect Match</h3>
-                <form action="#" method="post" novalidate>
-                    <fieldset>
-                        <legend>Treatment Information</legend>
-                        <div class="form-group">
-                            <label for="treatment">Treatment Type *</label>
-                            <select id="treatment" name="treatment" required aria-describedby="treatment-error">
-                                <option value="">Select treatment type</option>
-                                <option value="dental">Dental Care</option>
-                                <option value="hair">Hair Transplant</option>
-                                <option value="cosmetic">Cosmetic Surgery</option>
-                                <option value="medical">Medical Treatment</option>
-                            </select>
-                            <div id="treatment-error" class="error-message" role="alert" aria-live="polite"></div>
-                        </div>
-                    <div class="form-group">
-                        <label for="location">Preferred Location *</label>
-                        <select id="location" name="location" required aria-describedby="location-error">
-                            <option value="">Select location</option>
-                            <option value="istanbul">Istanbul</option>
-                            <option value="ankara">Ankara</option>
-                            <option value="izmir">Izmir</option>
-                            <option value="antalya">Antalya</option>
-                        </select>
-                        <div id="location-error" class="error-message" role="alert" aria-live="polite"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="budget">Budget Range *</label>
-                        <select id="budget" name="budget" required aria-describedby="budget-error">
-                            <option value="">Select budget range</option>
-                            <option value="low">$1,000 - $3,000</option>
-                            <option value="medium">$3,000 - $7,000</option>
-                            <option value="high">$7,000+</option>
-                        </select>
-                        <div id="budget-error" class="error-message" role="alert" aria-live="polite"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="timeline">Preferred Timeline</label>
-                        <select id="timeline" name="timeline">
-                            <option value="">Select timeline</option>
-                            <option value="asap">As soon as possible</option>
-                            <option value="1month">Within 1 month</option>
-                            <option value="3months">Within 3 months</option>
-                            <option value="flexible">Flexible</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="preferences">Special Preferences</label>
-                        <textarea id="preferences" name="preferences" placeholder="Any specific requirements or preferences..." rows="4" maxlength="500"></textarea>
-                    </div>
-                    </fieldset>
-                    <button type="submit" class="ai-match-btn">
-                        <i class="fas fa-brain" aria-hidden="true"></i> Find My Match
-                    </button>
-                </form>
-                <div class="ai-processing">
-                    <div class="processing-spinner"></div>
-                    <div class="processing-text">Analyzing your requirements...</div>
-                </div>
-                <div class="ai-results"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Real-time Dashboard Section -->
-    <section class="realtime">
-        <div class="container">
-            <header class="section-header">
-                <h2>Live Healthcare Insights</h2>
-                <p>Real-time data and insights from our healthcare network</p>
-            </header>
-            <div class="realtime-dashboard">
-                <div class="realtime-card">
-                    <div class="realtime-header">
-                        <div class="realtime-icon">
-                            <i class="fas fa-users" aria-hidden="true"></i>
-                        </div>
-                        <div class="realtime-title">Active Patients</div>
-                        <div class="realtime-status">
-                            <div class="realtime-status-dot"></div>
-                            <span>Live</span>
-                        </div>
-                    </div>
-                    <div class="realtime-content">
-                        <div class="realtime-counter">
-                            <span class="realtime-counter-value" data-counter="activePatients">1,247</span>
-                            <span class="realtime-counter-label">patients online</span>
-                        </div>
-                        <div class="realtime-metric">
-                            <span class="realtime-metric-label">Today's New</span>
-                            <span class="realtime-metric-value">
-                                47
-                                <span class="realtime-metric-change positive">+12%</span>
-                            </span>
-                        </div>
-                        <div class="realtime-chart"></div>
-                    </div>
-                </div>
-                <div class="realtime-card">
-                    <div class="realtime-header">
-                        <div class="realtime-icon">
-                            <i class="fas fa-hospital" aria-hidden="true"></i>
-                        </div>
-                        <div class="realtime-title">Available Clinics</div>
-                        <div class="realtime-status">
-                            <div class="realtime-status-dot"></div>
-                            <span>Live</span>
-                        </div>
-                    </div>
-                    <div class="realtime-content">
-                        <div class="realtime-counter">
-                            <span class="realtime-counter-value" data-counter="availableClinics">523</span>
-                            <span class="realtime-counter-label">clinics ready</span>
-                        </div>
-                        <div class="realtime-metric">
-                            <span class="realtime-metric-label">Response Time</span>
-                            <span class="realtime-metric-value">
-                                2.3min
-                                <span class="realtime-metric-change positive">-15%</span>
-                            </span>
-                        </div>
-                        <div class="realtime-chart"></div>
-                    </div>
-                </div>
-                <div class="realtime-card">
-                    <div class="realtime-header">
-                        <div class="realtime-icon">
-                            <i class="fas fa-check-circle" aria-hidden="true"></i>
-                        </div>
-                        <div class="realtime-title">Completed Treatments</div>
-                        <div class="realtime-status">
-                            <div class="realtime-status-dot"></div>
-                            <span>Live</span>
-                        </div>
-                    </div>
-                    <div class="realtime-content">
-                        <div class="realtime-counter">
-                            <span class="realtime-counter-value" data-counter="completedTreatments">8,942</span>
-                            <span class="realtime-counter-label">treatments done</span>
-                        </div>
-                        <div class="realtime-metric">
-                            <span class="realtime-metric-label">Success Rate</span>
-                            <span class="realtime-metric-value">
-                                98.7%
-                                <span class="realtime-metric-change positive">+0.3%</span>
-                            </span>
-                        </div>
-                        <div class="realtime-chart"></div>
-                    </div>
-                </div>
-                <div class="realtime-card">
-                    <div class="realtime-header">
-                        <div class="realtime-icon">
-                            <i class="fas fa-clock" aria-hidden="true"></i>
-                        </div>
-                        <div class="realtime-title">Average Wait Time</div>
-                        <div class="realtime-status">
-                            <div class="realtime-status-dot"></div>
-                            <span>Live</span>
-                        </div>
-                    </div>
-                    <div class="realtime-content">
-                        <div class="realtime-counter">
-                            <span class="realtime-counter-value" data-counter="averageWaitTime">12</span>
-                            <span class="realtime-counter-label">minutes</span>
-                        </div>
-                        <div class="realtime-metric">
-                            <span class="realtime-metric-label">Satisfaction</span>
-                            <span class="realtime-metric-value">
-                                4.9/5
-                                <span class="realtime-metric-change positive">+0.1</span>
-                            </span>
-                        </div>
-                        <div class="realtime-activity"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Modern CTA Section -->
+    <!-- CTA Section -->
     <section class="cta">
         <div class="container">
             <div class="cta-content">
                 <h2>Ready to Find Your Perfect Healthcare Provider?</h2>
-                <p>Join thousands of patients who have found trusted healthcare providers through CareLuva</p>
+                <p>Join thousands of patients who trust CareLuva for their healthcare needs in Turkey</p>
                 <div class="cta-actions">
-                    <button type="button" class="btn btn-primary">Find Clinics</button>
-                    <button type="button" class="btn btn-outline">Join as Provider</button>
+                    <button class="btn-primary btn-large">Browse Clinics</button>
+                    <button class="btn-outline btn-large">Get Free Consultation</button>
                 </div>
                 <div class="cta-features">
                     <div class="cta-feature">
-                        <i class="fas fa-shield-check" aria-hidden="true"></i>
-                        <span>100% Verified Providers</span>
+                        <i class="fas fa-check"></i>
+                        <span>Free consultation</span>
                     </div>
                     <div class="cta-feature">
-                        <i class="fas fa-clock" aria-hidden="true"></i>
-                        <span>24/7 Support</span>
+                        <i class="fas fa-check"></i>
+                        <span>No booking fees</span>
                     </div>
                     <div class="cta-feature">
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <span>4.9/5 Rating</span>
-                    </div>
-                </div>
-                <div class="cta-stats">
-                    <div class="cta-stat">
-                        <span class="cta-stat-number">10K+</span>
-                        <span class="cta-stat-label">Happy Patients</span>
-                    </div>
-                    <div class="cta-stat">
-                        <span class="cta-stat-number">500+</span>
-                        <span class="cta-stat-label">Verified Clinics</span>
-                    </div>
-                    <div class="cta-stat">
-                        <span class="cta-stat-number">99%</span>
-                        <span class="cta-stat-label">Success Rate</span>
-                    </div>
-                </div>
-                <div class="cta-trust">
-                    <div class="cta-trust-item">
-                        <i class="fas fa-check-circle" aria-hidden="true"></i>
-                        <span>Free Consultation</span>
-                    </div>
-                    <div class="cta-trust-item">
-                        <i class="fas fa-check-circle" aria-hidden="true"></i>
-                        <span>No Hidden Fees</span>
-                    </div>
-                    <div class="cta-trust-item">
-                        <i class="fas fa-check-circle" aria-hidden="true"></i>
-                        <span>Money Back Guarantee</span>
+                        <i class="fas fa-check"></i>
+                        <span>24/7 support</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -730,66 +312,76 @@
                     <h3>CareLuva</h3>
                     <p>Connecting patients with trusted healthcare providers in Turkey through transparency and verification.</p>
                     <div class="social-links">
-                        <a href="https://facebook.com/careluva" aria-label="Follow us on Facebook" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-                        <a href="https://twitter.com/careluva" aria-label="Follow us on Twitter" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter" aria-hidden="true"></i></a>
-                        <a href="https://instagram.com/careluva" aria-label="Follow us on Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-                        <a href="https://linkedin.com/company/careluva" aria-label="Follow us on LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
                     </div>
                 </div>
                 <div class="footer-section">
                     <h4>For Patients</h4>
                     <ul>
-                        <li><a href="/clinics">Find Clinics</a></li>
-                        <li><a href="/procedures">Browse Procedures</a></li>
-                        <li><a href="/stories">Patient Stories</a></li>
-                        <li><a href="/support">Support</a></li>
+                        <li><a href="#">Find Clinics</a></li>
+                        <li><a href="#">Browse Procedures</a></li>
+                        <li><a href="#">Patient Stories</a></li>
+                        <li><a href="#">Support</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>For Providers</h4>
                     <ul>
-                        <li><a href="/providers/join">Join as Provider</a></li>
-                        <li><a href="/providers/verification">Verification Process</a></li>
-                        <li><a href="/providers/resources">Provider Resources</a></li>
-                        <li><a href="/providers/contact">Contact Sales</a></li>
+                        <li><a href="#">Join as Provider</a></li>
+                        <li><a href="#">Verification Process</a></li>
+                        <li><a href="#">Provider Resources</a></li>
+                        <li><a href="#">Contact Sales</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Company</h4>
                     <ul>
-                        <li><a href="/about">About Us</a></li>
-                        <li><a href="/careers">Careers</a></li>
-                        <li><a href="/press">Press</a></li>
-                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                        <li><a href="#">Contact</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2024 CareLuva. All rights reserved.</p>
                 <div class="footer-links">
-                    <a href="/privacy">Privacy Policy</a>
-                    <a href="/terms">Terms of Service</a>
-                    <a href="/cookies">Cookie Policy</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Load JavaScript modules in dependency order -->
+    <!-- Utility Scripts -->
     <script src="src/js/utils/DOMUtils.js"></script>
     <script src="src/js/utils/AnimationUtils.js"></script>
     <script src="src/js/utils/IntersectionObserver.js"></script>
+    <script src="src/js/utils/EventUtils.js"></script>
+    
+    <!-- Component Scripts -->
     <script src="src/js/components/NavigationComponent.js"></script>
     <script src="src/js/components/HeroComponent.js"></script>
+    <script src="src/js/components/FeaturesComponent.js"></script>
     <script src="src/js/components/TrustComponent.js"></script>
-    <script src="src/js/components/VideoModalComponent.js"></script>
-    <script src="src/js/components/AIMatchingComponent.js"></script>
-    <script src="src/js/components/RealtimeComponent.js"></script>
+    <script src="src/js/components/TestimonialsComponent.js"></script>
+    
+    <!-- Manager Scripts -->
     <script src="src/js/managers/AnimationManager.js"></script>
-    <script src="src/js/managers/NotificationManager.js"></script>
     <script src="src/js/managers/ButtonManager.js"></script>
+    <script src="src/js/managers/NotificationManager.js"></script>
+    
+    <!-- View Model Scripts -->
     <script src="src/js/viewmodels/AppViewModel.js"></script>
+    
+    <!-- Coordinator Scripts -->
     <script src="src/js/coordinators/AppCoordinator.js"></script>
+    
+    <!-- Main Application Script -->
     <script src="src/js/app.js"></script>
 </body>
 </html>

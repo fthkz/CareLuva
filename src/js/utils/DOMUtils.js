@@ -11,10 +11,11 @@ class DOMUtils {
     static getElement(selector, parent = document) {
         const element = parent.querySelector(selector);
         if (!element) {
-            // Element not found
+            console.warn(`Element not found: ${selector}`);
         }
         return element;
     }
+
     /**
      * Get all elements by selector
      * @param {string} selector - CSS selector
@@ -30,11 +31,11 @@ class DOMUtils {
      * @param {Element} element - Target element
      * @param {string} event - Event type
      * @param {Function} handler - Event handler
-     * @param {Object} options - Event options
+     * @param {Object} options - Event options (optional)
      */
     static addEventListener(element, event, handler, options = {}) {
         if (!element) {
-            // Cannot add event listener to null element
+            console.warn('Cannot add event listener to null element');
             return;
         }
         element.addEventListener(event, handler, options);
@@ -55,11 +56,10 @@ class DOMUtils {
      * Toggle class on element
      * @param {Element} element - Target element
      * @param {string} className - Class name to toggle
-     * @param {boolean} force - Force add/remove (optional)
      */
-    static toggleClass(element, className, force) {
+    static toggleClass(element, className) {
         if (!element) return;
-        element.classList.toggle(className, force);
+        element.classList.toggle(className);
     }
 
     /**
@@ -111,5 +111,54 @@ class DOMUtils {
      */
     static getStyle(element, property) {
         return element ? element.style[property] : '';
+    }
+
+    /**
+     * Create element with attributes and content
+     * @param {string} tag - HTML tag name
+     * @param {Object} attributes - Element attributes
+     * @param {string} content - Element content
+     * @returns {Element}
+     */
+    static createElement(tag, attributes = {}, content = '') {
+        const element = document.createElement(tag);
+        
+        Object.entries(attributes).forEach(([key, value]) => {
+            if (key === 'className') {
+                element.className = value;
+            } else if (key === 'innerHTML') {
+                element.innerHTML = value;
+            } else {
+                element.setAttribute(key, value);
+            }
+        });
+        
+        if (content) {
+            element.textContent = content;
+        }
+        
+        return element;
+    }
+
+    /**
+     * Append child to parent
+     * @param {Element} parent - Parent element
+     * @param {Element} child - Child element
+     */
+    static appendChild(parent, child) {
+        if (!parent || !child) return;
+        parent.appendChild(child);
+    }
+
+    /**
+     * Remove child from parent
+     * @param {Element} parent - Parent element
+     * @param {Element} child - Child element
+     */
+    static removeChild(parent, child) {
+        if (!parent || !child) return;
+        if (parent.contains(child)) {
+            parent.removeChild(child);
+        }
     }
 }

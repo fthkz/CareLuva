@@ -1,4 +1,4 @@
-/* Testimonials Section */
+/* Testimonials Component */
 .testimonials {
     padding: 80px 0;
     background-color: var(--bg-primary);
@@ -87,4 +87,10 @@
     font-size: 0.9rem;
     display: block;
     margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
 }

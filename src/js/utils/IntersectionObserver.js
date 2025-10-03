@@ -23,67 +23,147 @@ class IntersectionObserverUtil {
 
     /**
      * Observe element with animation callback
-     * @param {string} selector - CSS selector
-     * @param {string} animationClass - Class to add on intersection
+     * @param {Element} element - Target element
+     * @param {string} animationClass - CSS class to add on intersection
      * @param {Object} options - Observer options
+     * @returns {IntersectionObserver}
      */
-    observeForAnimation(selector, animationClass = 'animate-in', options = {}) {
-        const elements = document.querySelectorAll(selector);
-        if (elements.length === 0) return;
-
+    observeWithAnimation(element, animationClass = 'animate-in', options = {}) {
         const observer = this.createObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add(animationClass);
+                    observer.unobserve(entry.target);
                 }
             });
         }, options);
 
-        elements.forEach(el => observer.observe(el));
-        this.observers.set(selector, observer);
+        observer.observe(element);
+        return observer;
+    }
+
+    /**
+     * Observe multiple elements with animation
+     * @param {NodeList|Array} elements - Target elements
+     * @param {string} animationClass - CSS class to add on intersection
+     * @param {Object} options - Observer options
+     * @returns {IntersectionObserver}
+     */
+    observeMultipleWithAnimation(elements, animationClass = 'animate-in', options = {}) {
+        const observer = this.createObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add(animationClass);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+
+        elements.forEach(element => {
+            observer.observe(element);
+        });
+
+        return observer;
     }
 
     /**
      * Observe element with custom callback
-     * @param {string} selector - CSS selector
+     * @param {Element} element - Target element
      * @param {Function} callback - Custom callback function
      * @param {Object} options - Observer options
+     * @returns {IntersectionObserver}
      */
-    observeWithCallback(selector, callback, options = {}) {
-        const elements = document.querySelectorAll(selector);
-        if (elements.length === 0) return;
-
+    observeWithCallback(element, callback, options = {}) {
         const observer = this.createObserver(callback, options);
-        elements.forEach(el => observer.observe(el));
-        this.observers.set(selector, observer);
+        observer.observe(element);
+        return observer;
     }
 
     /**
-     * Stop observing elements
-     * @param {string} selector - CSS selector
+     * Observe element for counter animation
+     * @param {Element} element - Target element
+     * @param {Function} animationCallback - Animation function to call
+     * @param {Object} options - Observer options
+     * @returns {IntersectionObserver}
      */
-    unobserve(selector) {
-        const observer = this.observers.get(selector);
+    observeForCounterAnimation(element, animationCallback, options = {}) {
+        const observerOptions = { threshold: 0.5, ...options };
+        const observer = this.createObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animationCallback();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        observer.observe(element);
+        return observer;
+    }
+
+    /**
+     * Observe element for scroll-based effects
+     * @param {Element} element - Target element
+     * @param {Function} callback - Callback function
+     * @param {Object} options - Observer options
+     * @returns {IntersectionObserver}
+     */
+    observeForScrollEffects(element, callback, options = {}) {
+        const observer = this.createObserver(callback, options);
+        observer.observe(element);
+        return observer;
+    }
+
+    /**
+     * Disconnect observer
+     * @param {IntersectionObserver} observer - Observer to disconnect
+     */
+    disconnect(observer) {
         if (observer) {
             observer.disconnect();
-            this.observers.delete(selector);
         }
     }
 
     /**
-     * Stop all observers
+     * Disconnect all observers
      */
     disconnectAll() {
-        this.observers.forEach(observer => observer.disconnect());
+        this.observers.forEach(observer => {
+            observer.disconnect();
+        });
         this.observers.clear();
     }
 
     /**
-     * Get observer by selector
-     * @param {string} selector - CSS selector
+     * Store observer for later management
+     * @param {string} key - Unique key for observer
+     * @param {IntersectionObserver} observer - Observer to store
+     */
+    storeObserver(key, observer) {
+        this.observers.set(key, observer);
+    }
+
+    /**
+     * Get stored observer
+     * @param {string} key - Observer key
      * @returns {IntersectionObserver|null}
      */
-    getObserver(selector) {
-        return this.observers.get(selector) || null;
+    getObserver(key) {
+        return this.observers.get(key) || null;
+    }
+
+    /**
+     * Remove stored observer
+     * @param {string} key - Observer key
+     */
+    removeObserver(key) {
+        const observer = this.observers.get(key);
+        if (observer) {
+            observer.disconnect();
+            this.observers.delete(key);
+        }
     }
 }
+
+// Create global instance
+window.IntersectionObserverUtil = new IntersectionObserverUtil();

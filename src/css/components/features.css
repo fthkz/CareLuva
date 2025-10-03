@@ -1,22 +1,7 @@
-/* Features Section */
+/* Features Component */
 .features {
     padding: 80px 0;
     background-color: var(--bg-primary);
-}
-
-.section-header {
-    text-align: center;
-    margin-bottom: 4rem;
-}
-
-.section-header h2 {
-    margin-bottom: 1rem;
-}
-
-.section-header p {
-    font-size: 1.1rem;
-    max-width: 600px;
-    margin: 0 auto;
 }
 
 .features-grid {
@@ -64,4 +49,10 @@
 .feature-card p {
     color: var(--text-secondary);
     line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
 }

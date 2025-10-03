@@ -1,25 +1,16 @@
-/* CareLuva Main Stylesheet - Modern Modular Architecture */
+/* CareLuva Main Stylesheet - Modular Architecture */
 
 /* Base Styles */
 @import url('./base/reset.css');
 @import url('./base/typography.css');
-@import url('./base/utilities.css');
 @import url('./base/animations.css');
-@import url('./base/design-system.css');
+@import url('./base/utilities.css');
 
 /* Layout */
 @import url('./layout/container.css');
 @import url('./layout/responsive.css');
 
 /* Components */
-@import url('./components/modern-buttons.css');
-@import url('./components/modern-hero.css');
-@import url('./components/modern-features.css');
-@import url('./components/modern-trust.css');
-@import url('./components/modern-testimonials.css');
-@import url('./components/modern-cta.css');
-@import url('./components/modern-ai-matching.css');
-@import url('./components/modern-realtime.css');
 @import url('./components/buttons.css');
 @import url('./components/navigation.css');
 @import url('./components/hero.css');

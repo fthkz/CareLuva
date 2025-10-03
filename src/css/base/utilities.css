@@ -1,25 +1,21 @@
-/* Utility classes */
-.text-center {
+/* Utility Classes */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.section-header {
     text-align: center;
+    margin-bottom: 4rem;
 }
 
-.mb-0 {
-    margin-bottom: 0;
+.section-header h2 {
+    margin-bottom: 1rem;
 }
 
-.mt-2 {
-    margin-top: 2rem;
-}
-
-.hidden {
-    display: none;
-}
-
-.visible {
-    display: block;
-}
-
-.loading {
-    opacity: 0.7;
-    pointer-events: none;
+.section-header p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
 }

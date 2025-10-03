@@ -1,4 +1,4 @@
-/* Buttons */
+/* Button Components */
 .btn-primary, .btn-secondary, .btn-outline {
     display: inline-flex;
     align-items: center;
@@ -11,6 +11,8 @@
     cursor: pointer;
     transition: var(--transition);
     font-size: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary {
@@ -50,4 +52,14 @@
 .btn-large {
     padding: 16px 32px;
     font-size: 1.1rem;
+}
+
+/* Ripple Effect */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
 }

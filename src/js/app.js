@@ -1,66 +1,84 @@
 /**
- * CareLuva Application Entry Point
- * Single responsibility: Application initialization and coordination
+ * CareLuva Application - Main entry point
+ * Modular architecture following single responsibility principle
  */
-class CareLuvaApp {
-    constructor() {
-        this.coordinator = null;
-        this.isInitialized = false;
-    }
 
-    /**
-     * Initialize application
-     */
-    init() {
-        if (this.isInitialized) return;
+// Global application instance
+let appCoordinator = null;
 
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeApp());
-        } else {
-            this.initializeApp();
+/**
+ * Initialize application when DOM is ready
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Initialize the application coordinator
+        appCoordinator = new AppCoordinator();
+        appCoordinator.init();
+        
+        console.log('CareLuva application initialized successfully!');
+        
+        // Emit application ready event
+        EventUtils.createCustomEvent('app:ready', {
+            timestamp: Date.now(),
+            version: '1.0.0'
+        });
+        
+    } catch (error) {
+        console.error('Failed to initialize CareLuva application:', error);
+        
+        // Show error notification if notification manager is available
+        if (window.NotificationManager) {
+            const notificationManager = new NotificationManager();
+            notificationManager.init();
+            notificationManager.error('Failed to load the application. Please refresh the page.');
         }
     }
+});
 
-    /**
-     * Initialize application components
-     */
-    initializeApp() {
-        try {
-            // Initialize the main coordinator
-            this.coordinator = new AppCoordinator();
-            this.coordinator.init();
+/**
+ * Cleanup application when page is unloaded
+ */
+window.addEventListener('beforeunload', function() {
+    if (appCoordinator) {
+        appCoordinator.destroy();
+        appCoordinator = null;
+    }
+});
 
-            this.isInitialized = true;
-            // CareLuva application initialized successfully!
-        } catch (error) {
-            // Failed to initialize CareLuva application
+/**
+ * Handle application errors
+ */
+window.addEventListener('error', function(event) {
+    console.error('Application error:', event.error);
+    
+    if (appCoordinator) {
+        const notificationManager = appCoordinator.getNotificationManager();
+        if (notificationManager) {
+            notificationManager.error('An unexpected error occurred. Please try again.');
         }
     }
+});
 
-    /**
-     * Get application coordinator
-     * @returns {AppCoordinator}
-     */
-    getCoordinator() {
-        return this.coordinator;
-    }
-
-    /**
-     * Destroy application
-     */
-    destroy() {
-        if (this.coordinator) {
-            this.coordinator.destroy();
+/**
+ * Handle unhandled promise rejections
+ */
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    
+    if (appCoordinator) {
+        const notificationManager = appCoordinator.getNotificationManager();
+        if (notificationManager) {
+            notificationManager.error('An unexpected error occurred. Please try again.');
         }
-        this.isInitialized = false;
     }
-}
+});
 
-// Initialize application
-const app = new CareLuvaApp();
-app.init();
-
-// Export for potential external use
-window.CareLuvaApp = CareLuvaApp;
-window.app = app;
+/**
+ * Export for global access
+ */
+window.CareLuva = {
+    getAppCoordinator: () => appCoordinator,
+    getComponent: (name) => appCoordinator ? appCoordinator.getComponent(name) : null,
+    getManager: (name) => appCoordinator ? appCoordinator.getManager(name) : null,
+    getViewModel: (name) => appCoordinator ? appCoordinator.getViewModel(name) : null
+};

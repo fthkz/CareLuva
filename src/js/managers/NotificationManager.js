@@ -1,56 +1,216 @@
 /**
- * Notification Manager - Single responsibility: Managing notifications and user feedback
+ * Notification Manager - Single responsibility: Notification display and management
  */
 class NotificationManager {
     constructor() {
-        this.notifications = [];
-        this.isInitialized = false;
+        this.notifications = new Map();
+        this.notificationQueue = [];
+        this.maxNotifications = 5;
+        this.defaultDuration = 5000;
+        this.cleanupFunctions = [];
     }
 
     /**
      * Initialize notification manager
      */
     init() {
-        if (this.isInitialized) return;
+        this.setupNotificationContainer();
+        this.setupGlobalHandlers();
+        console.log('Notification manager initialized');
+    }
 
-        this.addNotificationStyles();
-        this.isInitialized = true;
-        // Notification manager initialized
+    /**
+     * Setup notification container
+     */
+    setupNotificationContainer() {
+        let container = DOMUtils.getElement('.notification-container');
+        
+        if (!container) {
+            container = DOMUtils.createElement('div', {
+                className: 'notification-container'
+            });
+            
+            // Add container styles
+            this.addContainerStyles();
+            
+            document.body.appendChild(container);
+        }
+    }
+
+    /**
+     * Add notification container styles
+     */
+    addContainerStyles() {
+        const containerStyles = `
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 3000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
+            }
+            
+            .notification {
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: translateX(100%);
+                transition: transform 0.3s ease, opacity 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .notification.show {
+                transform: translateX(0);
+            }
+            
+            .notification-success {
+                background-color: #10b981;
+            }
+            
+            .notification-error {
+                background-color: #ef4444;
+            }
+            
+            .notification-warning {
+                background-color: #f59e0b;
+            }
+            
+            .notification-info {
+                background-color: #2563eb;
+            }
+            
+            .notification-close {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                font-size: 1.2rem;
+                opacity: 0.7;
+                transition: opacity 0.2s ease;
+            }
+            
+            .notification-close:hover {
+                opacity: 1;
+            }
+            
+            .notification-progress {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                height: 3px;
+                background: rgba(255, 255, 255, 0.3);
+                transition: width linear;
+            }
+        `;
+
+        const styleSheet = DOMUtils.createElement('style', {}, containerStyles);
+        document.head.appendChild(styleSheet);
+    }
+
+    /**
+     * Setup global handlers
+     */
+    setupGlobalHandlers() {
+        // Listen for custom notification events
+        const cleanup = EventUtils.listenForCustomEvent('notification:show', (event) => {
+            this.show(event.detail.message, event.detail.type, event.detail.options);
+        });
+        
+        this.cleanupFunctions.push(cleanup);
     }
 
     /**
      * Show notification
      * @param {string} message - Notification message
-     * @param {string} type - Notification type (success, error, info)
-     * @param {number} duration - Duration in milliseconds
+     * @param {string} type - Notification type (success, error, warning, info)
+     * @param {Object} options - Notification options
      */
-    showNotification(message, type = 'info', duration = 5000) {
-        const notification = this.createNotification(message, type);
-        this.addNotificationToDOM(notification);
+    show(message, type = 'info', options = {}) {
+        const notificationId = this.generateNotificationId();
+        const duration = options.duration || this.defaultDuration;
+        const closable = options.closable !== false;
+        const persistent = options.persistent || false;
+
+        const notification = this.createNotification(notificationId, message, type, closable);
+        
+        this.notifications.set(notificationId, {
+            element: notification,
+            type: type,
+            message: message,
+            options: options,
+            timer: null
+        });
+
+        this.addNotificationToContainer(notification);
         this.animateNotificationIn(notification);
-        this.scheduleNotificationRemoval(notification, duration);
+
+        // Auto-remove notification if not persistent
+        if (!persistent && duration > 0) {
+            this.scheduleNotificationRemoval(notificationId, duration);
+        }
+
+        // Limit number of notifications
+        this.limitNotifications();
+
+        return notificationId;
     }
 
     /**
      * Create notification element
+     * @param {string} id - Notification ID
      * @param {string} message - Notification message
      * @param {string} type - Notification type
-     * @returns {Element}
+     * @param {boolean} closable - Is closable
+     * @returns {Element} Notification element
      */
-    createNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
+    createNotification(id, message, type, closable) {
+        const notification = DOMUtils.createElement('div', {
+            className: `notification notification-${type}`,
+            'data-notification-id': id
+        });
+
+        const content = DOMUtils.createElement('div', {
+            className: 'notification-content'
+        }, message);
+
+        DOMUtils.appendChild(notification, content);
+
+        if (closable) {
+            const closeButton = DOMUtils.createElement('button', {
+                className: 'notification-close'
+            }, '×');
+            
+            const closeHandler = () => {
+                this.hide(id);
+            };
+            
+            const cleanup = EventUtils.addEventListenerWithCleanup(closeButton, 'click', closeHandler);
+            this.cleanupFunctions.push(cleanup);
+            
+            DOMUtils.appendChild(notification, closeButton);
+        }
+
         return notification;
     }
 
     /**
-     * Add notification to DOM
+     * Add notification to container
      * @param {Element} notification - Notification element
      */
-    addNotificationToDOM(notification) {
-        document.body.appendChild(notification);
-        this.notifications.push(notification);
+    addNotificationToContainer(notification) {
+        const container = DOMUtils.getElement('.notification-container');
+        if (container) {
+            container.appendChild(notification);
+        }
     }
 
     /**
@@ -58,99 +218,167 @@ class NotificationManager {
      * @param {Element} notification - Notification element
      */
     animateNotificationIn(notification) {
-        setTimeout(() => {
-            DOMUtils.addClass(notification, 'show');
-        }, 100);
+        // Force reflow
+        notification.offsetHeight;
+        
+        // Add show class
+        DOMUtils.addClass(notification, 'show');
     }
 
     /**
      * Schedule notification removal
-     * @param {Element} notification - Notification element
+     * @param {string} notificationId - Notification ID
      * @param {number} duration - Duration in milliseconds
      */
-    scheduleNotificationRemoval(notification, duration) {
-        setTimeout(() => {
-            this.removeNotification(notification);
+    scheduleNotificationRemoval(notificationId, duration) {
+        const notificationData = this.notifications.get(notificationId);
+        if (!notificationData) return;
+
+        const timer = setTimeout(() => {
+            this.hide(notificationId);
         }, duration);
+
+        notificationData.timer = timer;
     }
 
     /**
-     * Remove notification
-     * @param {Element} notification - Notification element
+     * Hide notification
+     * @param {string} notificationId - Notification ID
      */
-    removeNotification(notification) {
+    hide(notificationId) {
+        const notificationData = this.notifications.get(notificationId);
+        if (!notificationData) return;
+
+        const notification = notificationData.element;
+        
+        // Clear timer if exists
+        if (notificationData.timer) {
+            clearTimeout(notificationData.timer);
+        }
+
+        // Animate out
         DOMUtils.removeClass(notification, 'show');
         
+        // Remove from DOM after animation
         setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
             }
-            
-            // Remove from notifications array
-            const index = this.notifications.indexOf(notification);
-            if (index > -1) {
-                this.notifications.splice(index, 1);
-            }
+            this.notifications.delete(notificationId);
         }, 300);
     }
 
     /**
-     * Clear all notifications
+     * Hide all notifications
      */
-    clearAllNotifications() {
-        this.notifications.forEach(notification => {
-            this.removeNotification(notification);
+    hideAll() {
+        this.notifications.forEach((notificationData, id) => {
+            this.hide(id);
         });
     }
 
     /**
-     * Add notification styles
+     * Limit number of notifications
      */
-    addNotificationStyles() {
-        const notificationStyles = `
-            .notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 1rem 1.5rem;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                z-index: 3000;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-            }
-            .notification-success {
-                background-color: #10b981;
-            }
-            .notification-error {
-                background-color: #ef4444;
-            }
-            .notification-info {
-                background-color: #2563eb;
-            }
-            .notification.show {
-                transform: translateX(0);
-            }
-        `;
-
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = notificationStyles;
-        styleSheet.id = 'notification-styles';
-        document.head.appendChild(styleSheet);
+    limitNotifications() {
+        if (this.notifications.size > this.maxNotifications) {
+            const oldestId = this.notifications.keys().next().value;
+            this.hide(oldestId);
+        }
     }
 
     /**
-     * Destroy manager and cleanup
+     * Generate unique notification ID
+     * @returns {string} Notification ID
+     */
+    generateNotificationId() {
+        return `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    /**
+     * Show success notification
+     * @param {string} message - Success message
+     * @param {Object} options - Notification options
+     */
+    success(message, options = {}) {
+        return this.show(message, 'success', options);
+    }
+
+    /**
+     * Show error notification
+     * @param {string} message - Error message
+     * @param {Object} options - Notification options
+     */
+    error(message, options = {}) {
+        return this.show(message, 'error', options);
+    }
+
+    /**
+     * Show warning notification
+     * @param {string} message - Warning message
+     * @param {Object} options - Notification options
+     */
+    warning(message, options = {}) {
+        return this.show(message, 'warning', options);
+    }
+
+    /**
+     * Show info notification
+     * @param {string} message - Info message
+     * @param {Object} options - Notification options
+     */
+    info(message, options = {}) {
+        return this.show(message, 'info', options);
+    }
+
+    /**
+     * Get notification count
+     * @returns {number} Notification count
+     */
+    getNotificationCount() {
+        return this.notifications.size;
+    }
+
+    /**
+     * Get all notifications
+     * @returns {Map} All notifications
+     */
+    getAllNotifications() {
+        return new Map(this.notifications);
+    }
+
+    /**
+     * Update notification message
+     * @param {string} notificationId - Notification ID
+     * @param {string} newMessage - New message
+     */
+    updateNotification(notificationId, newMessage) {
+        const notificationData = this.notifications.get(notificationId);
+        if (!notificationData) return;
+
+        const content = DOMUtils.getElement('.notification-content', notificationData.element);
+        if (content) {
+            content.textContent = newMessage;
+        }
+    }
+
+    /**
+     * Destroy notification manager
      */
     destroy() {
-        this.clearAllNotifications();
+        this.cleanupFunctions.forEach(cleanup => cleanup());
+        this.cleanupFunctions = [];
         
-        const styleSheet = document.getElementById('notification-styles');
-        if (styleSheet && document.head.contains(styleSheet)) {
-            document.head.removeChild(styleSheet);
+        this.hideAll();
+        this.notifications.clear();
+        this.notificationQueue = [];
+        
+        // Remove notification container
+        const container = DOMUtils.getElement('.notification-container');
+        if (container) {
+            container.remove();
         }
         
-        this.isInitialized = false;
+        console.log('Notification manager destroyed');
     }
 }
