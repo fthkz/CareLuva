@@ -15,7 +15,6 @@ class DOMUtils {
         }
         return element;
     }
-
     /**
      * Get all elements by selector
      * @param {string} selector - CSS selector
