@@ -1,5 +1,18 @@
 /* Modern Trust Section - Cutting Edge Healthcare UI */
 
+/* Score fill variations */
+.score-fill-95 {
+    width: 95%;
+}
+
+.score-fill-90 {
+    width: 90%;
+}
+
+.score-fill-88 {
+    width: 88%;
+}
+
 /* Trust Container */
 .trust {
     padding: var(--space-24) 0;

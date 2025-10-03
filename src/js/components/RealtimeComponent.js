@@ -190,8 +190,10 @@ class RealtimeComponent {
         const chartElement = chart.element;
         const data = chart.data;
         
-        // Clear existing chart content
-        chartElement.innerHTML = '';
+        // Clear existing chart content safely
+        while (chartElement.firstChild) {
+            chartElement.removeChild(chartElement.firstChild);
+        }
         
         // Create chart line
         const line = document.createElement('div');
@@ -239,13 +241,26 @@ class RealtimeComponent {
         
         const activityItem = document.createElement('div');
         activityItem.className = 'realtime-activity-item';
-        activityItem.innerHTML = `
-            <div class="realtime-activity-icon">
-                <i class="${randomActivity.icon}"></i>
-            </div>
-            <div class="realtime-activity-text">${randomActivity.text}</div>
-            <div class="realtime-activity-time">${randomActivity.time}</div>
-        `;
+        
+        // Create activity structure safely
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'realtime-activity-icon';
+        const icon = document.createElement('i');
+        icon.className = randomActivity.icon;
+        icon.setAttribute('aria-hidden', 'true');
+        iconDiv.appendChild(icon);
+        
+        const textDiv = document.createElement('div');
+        textDiv.className = 'realtime-activity-text';
+        textDiv.textContent = randomActivity.text;
+        
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'realtime-activity-time';
+        timeDiv.textContent = randomActivity.time;
+        
+        activityItem.appendChild(iconDiv);
+        activityItem.appendChild(textDiv);
+        activityItem.appendChild(timeDiv);
         
         // Add to top of container
         container.insertBefore(activityItem, container.firstChild);
@@ -275,13 +290,26 @@ class RealtimeComponent {
         initialActivities.forEach(activity => {
             const activityItem = document.createElement('div');
             activityItem.className = 'realtime-activity-item';
-            activityItem.innerHTML = `
-                <div class="realtime-activity-icon">
-                    <i class="${activity.icon}"></i>
-                </div>
-                <div class="realtime-activity-text">${activity.text}</div>
-                <div class="realtime-activity-time">${activity.time}</div>
-            `;
+            
+            // Create activity structure safely
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'realtime-activity-icon';
+            const icon = document.createElement('i');
+            icon.className = activity.icon;
+            icon.setAttribute('aria-hidden', 'true');
+            iconDiv.appendChild(icon);
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'realtime-activity-text';
+            textDiv.textContent = activity.text;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'realtime-activity-time';
+            timeDiv.textContent = activity.time;
+            
+            activityItem.appendChild(iconDiv);
+            activityItem.appendChild(textDiv);
+            activityItem.appendChild(timeDiv);
             container.appendChild(activityItem);
         });
     }
@@ -317,24 +345,40 @@ class RealtimeComponent {
             info: 'fas fa-info-circle'
         };
         
-        notification.innerHTML = `
-            <div class="live-notification-header">
-                <div class="live-notification-icon">
-                    <i class="${iconMap[type] || iconMap.info}"></i>
-                </div>
-                <div class="live-notification-title">${title}</div>
-                <button class="live-notification-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="live-notification-message">${message}</div>
-        `;
+        // Create notification structure safely
+        const header = document.createElement('div');
+        header.className = 'live-notification-header';
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'live-notification-icon';
+        const icon = document.createElement('i');
+        icon.className = iconMap[type] || iconMap.info;
+        icon.setAttribute('aria-hidden', 'true');
+        iconDiv.appendChild(icon);
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'live-notification-title';
+        titleDiv.textContent = title;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'live-notification-close';
+        const closeIcon = document.createElement('i');
+        closeIcon.className = 'fas fa-times';
+        closeIcon.setAttribute('aria-hidden', 'true');
+        closeBtn.appendChild(closeIcon);
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'live-notification-message';
+        messageDiv.textContent = message;
+        
+        header.appendChild(iconDiv);
+        header.appendChild(titleDiv);
+        header.appendChild(closeBtn);
+        notification.appendChild(header);
+        notification.appendChild(messageDiv);
         
         // Add close functionality
-        const closeBtn = DOMUtils.getElement('.live-notification-close', notification);
-        if (closeBtn) {
-            DOMUtils.addEventListener(closeBtn, 'click', () => this.removeNotification(notification));
-        }
+        DOMUtils.addEventListener(closeBtn, 'click', () => this.removeNotification(notification));
         
         // Add to container
         this.notificationContainer.appendChild(notification);

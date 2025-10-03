@@ -217,7 +217,15 @@ class AIMatchingComponent {
         
         if (this.matchButton) {
             this.matchButton.disabled = true;
-            this.matchButton.innerHTML = '<i class="fas fa-cog fa-spin"></i> Processing...';
+            // Clear button content safely
+            while (this.matchButton.firstChild) {
+                this.matchButton.removeChild(this.matchButton.firstChild);
+            }
+            const spinner = document.createElement('i');
+            spinner.className = 'fas fa-cog fa-spin';
+            spinner.setAttribute('aria-hidden', 'true');
+            this.matchButton.appendChild(spinner);
+            this.matchButton.appendChild(document.createTextNode(' Processing...'));
         }
 
         // Show processing steps
@@ -236,7 +244,15 @@ class AIMatchingComponent {
         
         if (this.matchButton) {
             this.matchButton.disabled = false;
-            this.matchButton.innerHTML = '<i class="fas fa-brain"></i> Find My Match';
+            // Clear button content safely
+            while (this.matchButton.firstChild) {
+                this.matchButton.removeChild(this.matchButton.firstChild);
+            }
+            const brainIcon = document.createElement('i');
+            brainIcon.className = 'fas fa-brain';
+            brainIcon.setAttribute('aria-hidden', 'true');
+            this.matchButton.appendChild(brainIcon);
+            this.matchButton.appendChild(document.createTextNode(' Find My Match'));
         }
     }
 
@@ -329,17 +345,29 @@ class AIMatchingComponent {
     displayResults(matches) {
         if (!this.resultsElement) return;
 
-        // Clear previous results
-        this.resultsElement.innerHTML = '';
+        // Clear previous results safely
+        while (this.resultsElement.firstChild) {
+            this.resultsElement.removeChild(this.resultsElement.firstChild);
+        }
 
         if (matches.length === 0) {
-            this.resultsElement.innerHTML = `
-                <div class="no-results">
-                    <i class="fas fa-search"></i>
-                    <h3>No matches found</h3>
-                    <p>Try adjusting your search criteria or contact our support team for assistance.</p>
-                </div>
-            `;
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results';
+            
+            const searchIcon = document.createElement('i');
+            searchIcon.className = 'fas fa-search';
+            searchIcon.setAttribute('aria-hidden', 'true');
+            
+            const heading = document.createElement('h3');
+            heading.textContent = 'No matches found';
+            
+            const paragraph = document.createElement('p');
+            paragraph.textContent = 'Try adjusting your search criteria or contact our support team for assistance.';
+            
+            noResultsDiv.appendChild(searchIcon);
+            noResultsDiv.appendChild(heading);
+            noResultsDiv.appendChild(paragraph);
+            this.resultsElement.appendChild(noResultsDiv);
         } else {
             matches.forEach((match, index) => {
                 const resultCard = this.createResultCard(match, index);
@@ -368,35 +396,69 @@ class AIMatchingComponent {
     createResultCard(match, index) {
         const card = document.createElement('div');
         card.className = 'result-card';
-        card.innerHTML = `
-            <div class="result-header">
-                <div class="result-icon">
-                    <i class="fas fa-hospital"></i>
-                </div>
-                <div class="result-title">${match.name}</div>
-                <div class="result-score">${match.compatibilityScore.toFixed(1)}</div>
-            </div>
-            <div class="result-description">${match.description}</div>
-            <div class="result-features">
-                ${match.features.map(feature => `<span class="result-feature">${feature}</span>`).join('')}
-            </div>
-            <div class="result-actions">
-                <button class="btn btn-primary btn-sm">View Details</button>
-                <button class="btn btn-outline btn-sm">Contact Clinic</button>
-            </div>
-        `;
+        
+        // Create result header
+        const header = document.createElement('div');
+        header.className = 'result-header';
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'result-icon';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-hospital';
+        icon.setAttribute('aria-hidden', 'true');
+        iconDiv.appendChild(icon);
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'result-title';
+        titleDiv.textContent = match.name;
+        
+        const scoreDiv = document.createElement('div');
+        scoreDiv.className = 'result-score';
+        scoreDiv.textContent = match.compatibilityScore.toFixed(1);
+        
+        header.appendChild(iconDiv);
+        header.appendChild(titleDiv);
+        header.appendChild(scoreDiv);
+        
+        // Create description
+        const descriptionDiv = document.createElement('div');
+        descriptionDiv.className = 'result-description';
+        descriptionDiv.textContent = match.description;
+        
+        // Create features
+        const featuresDiv = document.createElement('div');
+        featuresDiv.className = 'result-features';
+        match.features.forEach(feature => {
+            const featureSpan = document.createElement('span');
+            featureSpan.className = 'result-feature';
+            featureSpan.textContent = feature;
+            featuresDiv.appendChild(featureSpan);
+        });
+        
+        // Create actions
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'result-actions';
+        
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'btn btn-primary btn-sm';
+        viewBtn.textContent = 'View Details';
+        
+        const contactBtn = document.createElement('button');
+        contactBtn.className = 'btn btn-outline btn-sm';
+        contactBtn.textContent = 'Contact Clinic';
+        
+        actionsDiv.appendChild(viewBtn);
+        actionsDiv.appendChild(contactBtn);
+        
+        // Assemble card
+        card.appendChild(header);
+        card.appendChild(descriptionDiv);
+        card.appendChild(featuresDiv);
+        card.appendChild(actionsDiv);
 
         // Add click handlers
-        const viewDetailsBtn = DOMUtils.getElement('.btn-primary', card);
-        const contactBtn = DOMUtils.getElement('.btn-outline', card);
-
-        if (viewDetailsBtn) {
-            DOMUtils.addEventListener(viewDetailsBtn, 'click', () => this.viewClinicDetails(match));
-        }
-
-        if (contactBtn) {
-            DOMUtils.addEventListener(contactBtn, 'click', () => this.contactClinic(match));
-        }
+        DOMUtils.addEventListener(viewBtn, 'click', () => this.viewClinicDetails(match));
+        DOMUtils.addEventListener(contactBtn, 'click', () => this.contactClinic(match));
 
         return card;
     }

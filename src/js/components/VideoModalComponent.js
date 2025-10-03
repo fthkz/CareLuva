@@ -47,19 +47,37 @@ class VideoModalComponent {
     createModal() {
         const modal = document.createElement('div');
         modal.className = 'video-modal';
-        modal.innerHTML = `
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <button class="modal-close">&times;</button>
-                    <div class="video-container">
-                        <div class="video-placeholder-large">
-                            <i class="fas fa-play"></i>
-                            <p>Video testimonial would play here</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        // Create modal structure safely
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        const content = document.createElement('div');
+        content.className = 'modal-content';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'modal-close';
+        closeBtn.textContent = '×';
+        
+        const videoContainer = document.createElement('div');
+        videoContainer.className = 'video-container';
+        
+        const placeholder = document.createElement('div');
+        placeholder.className = 'video-placeholder-large';
+        
+        const playIcon = document.createElement('i');
+        playIcon.className = 'fas fa-play';
+        playIcon.setAttribute('aria-hidden', 'true');
+        
+        const description = document.createElement('p');
+        description.textContent = 'Video testimonial would play here';
+        
+        placeholder.appendChild(playIcon);
+        placeholder.appendChild(description);
+        videoContainer.appendChild(placeholder);
+        content.appendChild(closeBtn);
+        content.appendChild(videoContainer);
+        overlay.appendChild(content);
+        modal.appendChild(overlay);
 
         document.body.appendChild(modal);
         this.currentModal = modal;
