@@ -75,6 +75,16 @@ class AppCoordinator {
         const videoModalComponent = new VideoModalComponent();
         videoModalComponent.init();
         this.components.set('videoModal', videoModalComponent);
+
+        // AI Matching Component
+        const aiMatchingComponent = new AIMatchingComponent();
+        aiMatchingComponent.init();
+        this.components.set('aiMatching', aiMatchingComponent);
+
+        // Real-time Component
+        const realtimeComponent = new RealtimeComponent();
+        realtimeComponent.init();
+        this.components.set('realtime', realtimeComponent);
     }
 
     /**

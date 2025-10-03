@@ -35,38 +35,16 @@ class ButtonManager {
      * @param {Event} event - Click event
      */
     handleButtonClick(event) {
-        AnimationUtils.createRippleEffect(event.target, event);
+        // Simple click handling without fancy effects
+        console.log('Button clicked:', event.target.textContent);
     }
 
     /**
-     * Add ripple effect styles
+     * Add simple button styles
      */
     addRippleStyles() {
-        const rippleStyles = `
-            button, .btn-primary, .btn-secondary, .btn-outline {
-                position: relative;
-                overflow: hidden;
-            }
-            .ripple {
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.3);
-                transform: scale(0);
-                animation: ripple-animation 0.6s linear;
-                pointer-events: none;
-            }
-            @keyframes ripple-animation {
-                to {
-                    transform: scale(4);
-                    opacity: 0;
-                }
-            }
-        `;
-
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = rippleStyles;
-        styleSheet.id = 'ripple-styles';
-        document.head.appendChild(styleSheet);
+        // Removed fancy ripple effects for simplicity
+        console.log('Button styles initialized');
     }
 
     /**
@@ -102,11 +80,6 @@ class ButtonManager {
         this.buttons.forEach(button => {
             DOMUtils.removeEventListener(button, 'click', this.handleButtonClick);
         });
-
-        const styleSheet = document.getElementById('ripple-styles');
-        if (styleSheet && document.head.contains(styleSheet)) {
-            document.head.removeChild(styleSheet);
-        }
 
         this.isInitialized = false;
     }
