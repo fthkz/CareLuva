@@ -28,7 +28,7 @@ class NavigationComponent {
         this.setupSmoothScrolling();
         
         this.isInitialized = true;
-        console.log('Navigation component initialized');
+        // Navigation component initialized
     }
 
     /**

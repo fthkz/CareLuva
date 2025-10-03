@@ -21,7 +21,7 @@ class HeroComponent {
         this.setupCounterAnimation();
         
         this.isInitialized = true;
-        console.log('Hero component initialized');
+        // Hero component initialized
     }
 
     /**

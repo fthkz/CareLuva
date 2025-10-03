@@ -21,7 +21,7 @@ class AppCoordinator {
         this.setupEventListeners();
         
         this.isInitialized = true;
-        console.log('App Coordinator initialized');
+        // App Coordinator initialized
     }
 
     /**
@@ -111,7 +111,7 @@ class AppCoordinator {
                 this.handleStateChange(data);
                 break;
             case 'initialized':
-                console.log('App ViewModel initialized');
+                // App ViewModel initialized
                 break;
         }
     }

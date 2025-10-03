@@ -18,7 +18,7 @@ class AppViewModel {
     init() {
         this.state.isInitialized = true;
         this.notifyObservers('initialized');
-        console.log('App ViewModel initialized');
+        // App ViewModel initialized
     }
 
     /**
@@ -91,7 +91,7 @@ class AppViewModel {
             try {
                 callback(event, data);
             } catch (error) {
-                console.error('Observer callback error:', error);
+                // Observer callback error handled
             }
         });
     }

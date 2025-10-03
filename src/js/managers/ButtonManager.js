@@ -18,7 +18,7 @@ class ButtonManager {
         this.addRippleStyles();
         
         this.isInitialized = true;
-        console.log('Button manager initialized');
+        // Button manager initialized
     }
 
     /**
@@ -36,7 +36,7 @@ class ButtonManager {
      */
     handleButtonClick(event) {
         // Simple click handling without fancy effects
-        console.log('Button clicked:', event.target.textContent);
+        // Button clicked
     }
 
     /**
@@ -44,7 +44,7 @@ class ButtonManager {
      */
     addRippleStyles() {
         // Removed fancy ripple effects for simplicity
-        console.log('Button styles initialized');
+        // Button styles initialized
     }
 
     /**

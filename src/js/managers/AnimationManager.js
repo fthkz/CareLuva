@@ -18,7 +18,7 @@ class AnimationManager {
         this.setupAnimations();
         
         this.isInitialized = true;
-        console.log('Animation manager initialized');
+        // Animation manager initialized
     }
 
     /**

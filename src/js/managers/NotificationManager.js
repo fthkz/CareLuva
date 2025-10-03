@@ -15,7 +15,7 @@ class NotificationManager {
 
         this.addNotificationStyles();
         this.isInitialized = true;
-        console.log('Notification manager initialized');
+        // Notification manager initialized
     }
 
     /**

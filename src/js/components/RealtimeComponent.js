@@ -46,9 +46,9 @@ class RealtimeComponent {
             this.startRealTimeUpdates();
             
             this.isInitialized = true;
-            console.log('Real-time component initialized');
+            // Real-time component initialized
         } catch (error) {
-            console.error('Failed to initialize real-time component:', error);
+            // Failed to initialize real-time component
             throw error;
         }
     }
@@ -430,6 +430,6 @@ class RealtimeComponent {
         }
         
         this.isInitialized = false;
-        console.log('Real-time component destroyed');
+        // Real-time component destroyed
     }
 }

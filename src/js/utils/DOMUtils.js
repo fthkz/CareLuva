@@ -11,7 +11,7 @@ class DOMUtils {
     static getElement(selector, parent = document) {
         const element = parent.querySelector(selector);
         if (!element) {
-            console.warn(`Element not found: ${selector}`);
+            // Element not found
         }
         return element;
     }
@@ -35,7 +35,7 @@ class DOMUtils {
      */
     static addEventListener(element, event, handler, options = {}) {
         if (!element) {
-            console.warn('Cannot add event listener to null element');
+            // Cannot add event listener to null element
             return;
         }
         element.addEventListener(event, handler, options);

@@ -70,7 +70,7 @@ class AIMatchingComponent {
         this.setupFormValidation();
         
         this.isInitialized = true;
-        console.log('AI Matching component initialized');
+        // AI Matching component initialized
     }
 
     /**
@@ -125,7 +125,7 @@ class AIMatchingComponent {
             this.displayResults(matches);
             
         } catch (error) {
-            console.error('AI Matching error:', error);
+            // AI Matching error handled
             this.showNotification('An error occurred during matching. Please try again.', 'error');
         } finally {
             this.stopProcessing();
@@ -425,7 +425,7 @@ class AIMatchingComponent {
         if (window.app && window.app.notificationManager) {
             window.app.notificationManager.show(message, type);
         } else {
-            console.log(`[${type.toUpperCase()}] ${message}`);
+            // Log message handled
         }
     }
 
@@ -438,6 +438,6 @@ class AIMatchingComponent {
         }
 
         this.isInitialized = false;
-        console.log('AI Matching component destroyed');
+        // AI Matching component destroyed
     }
 }

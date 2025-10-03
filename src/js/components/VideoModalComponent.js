@@ -18,7 +18,7 @@ class VideoModalComponent {
         this.setupEventListeners();
         
         this.isInitialized = true;
-        console.log('Video modal component initialized');
+        // Video modal component initialized
     }
 
     /**

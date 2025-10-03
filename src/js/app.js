@@ -32,9 +32,9 @@ class CareLuvaApp {
             this.coordinator.init();
 
             this.isInitialized = true;
-            console.log('CareLuva application initialized successfully!');
+            // CareLuva application initialized successfully!
         } catch (error) {
-            console.error('Failed to initialize CareLuva application:', error);
+            // Failed to initialize CareLuva application
         }
     }
 

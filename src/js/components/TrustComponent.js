@@ -21,7 +21,7 @@ class TrustComponent {
         this.setupScoreAnimation();
         
         this.isInitialized = true;
-        console.log('Trust component initialized');
+        // Trust component initialized
     }
 
     /**
