@@ -11,12 +11,17 @@ let appCoordinator = null;
  */
 document.addEventListener('DOMContentLoaded', function() {
     try {
+        // Prevent re-initialization
+        if (appCoordinator) {
+            console.warn('CareLuva application already initialized');
+            return;
+        }
+
         // Initialize the application coordinator
         appCoordinator = new AppCoordinator();
-        appCoordinator.init();
-        
+        appCoordinator.init();        
         console.log('CareLuva application initialized successfully!');
-        
+        console.log('AppCoordinator components:', Array.from(appCoordinator.components.keys()));        
         // Emit application ready event
         EventUtils.createCustomEvent('app:ready', {
             timestamp: Date.now(),
@@ -60,17 +65,33 @@ window.addEventListener('error', function(event) {
 });
 
 /**
- * Handle unhandled promise rejections
+ * Show error notification to user
  */
-window.addEventListener('unhandledrejection', function(event) {
-    console.error('Unhandled promise rejection:', event.reason);
-    
+function showErrorNotification(errorMessage, errorDetails) {
+    console.error(errorMessage, errorDetails);
+
     if (appCoordinator) {
         const notificationManager = appCoordinator.getNotificationManager();
         if (notificationManager) {
             notificationManager.error('An unexpected error occurred. Please try again.');
         }
     }
+}
+
+/**
+ * Handle application errors
+ */
+window.addEventListener('error', function(event) {
+    event.preventDefault();
+    showErrorNotification('Application error:', event.error);
+});
+
+/**
+ * Handle unhandled promise rejections
+ */
+window.addEventListener('unhandledrejection', function(event) {
+    event.preventDefault();
+    showErrorNotification('Unhandled promise rejection:', event.reason);
 });
 
 /**

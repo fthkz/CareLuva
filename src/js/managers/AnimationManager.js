@@ -11,12 +11,24 @@ class AnimationManager {
     /**
      * Initialize animation manager
      */
-    init() {
-        this.setupGlobalAnimations();
-        this.setupPerformanceOptimizations();
-        console.log('Animation manager initialized');
+    constructor() {
+        this.animations = new Map();
+        this.isAnimationsEnabled = true;
+        this.cleanupFunctions = [];
+        this.isInitialized = false;
     }
 
+    init() {
+        if (this.isInitialized) {
+            console.warn('Animation manager already initialized');
+            return;
+        }
+        
+        this.setupGlobalAnimations();
+        this.setupPerformanceOptimizations();
+        this.isInitialized = true;
+        console.log('Animation manager initialized');
+    }
     /**
      * Setup global animations
      */
@@ -161,22 +173,41 @@ class AnimationManager {
         const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         const memory = navigator.deviceMemory;
         
-        return (
-            (connection && connection.effectiveType === 'slow-2g') ||
-            (memory && memory <= 2) ||
-            window.innerWidth < 768
-        );
-    }
-
-    /**
-     * Register animation
-     * @param {string} name - Animation name
-     * @param {Function} animationFunction - Animation function
-     */
     registerAnimation(name, animationFunction) {
+        if (typeof animationFunction !== 'function') {
+            console.error(`Animation "${name}" must be a function`);
+            return;
+        }
+
+        if (this.animations.has(name)) {
+            console.warn(`Animation "${name}" is being overwritten`);
+        }
+    playAnimation(name, options = {}) {
+        if (!this.isAnimationsEnabled) return;
+        
+        const animation = this.animations.get(name);
+        if (animation) {
+            try {
+                animation(options);
+            } catch (error) {
+                console.error(`Error playing animation "${name}":`, error);
+            }
+        } else {
+            console.warn(`Animation "${name}" not found`);
+        }
+    }     */
+    registerAnimation(name, animationFunction) {
+        if (typeof animationFunction !== 'function') {
+            console.error(`Animation "${name}" must be a function`);
+            return;
+        }
+
+        if (this.animations.has(name)) {
+            console.warn(`Animation "${name}" is being overwritten`);
+        }
+
         this.animations.set(name, animationFunction);
     }
-
     /**
      * Play animation
      * @param {string} name - Animation name
@@ -250,16 +281,19 @@ class AnimationManager {
             case 'fadeOut':
                 AnimationUtils.fadeOut(element, options.duration, options.callback);
                 break;
-            case 'slideDown':
-                AnimationUtils.slideDown(element, options.duration, options.callback);
-                break;
-            case 'slideUp':
-                AnimationUtils.slideUp(element, options.duration, options.callback);
-                break;
-            case 'counter':
-                AnimationUtils.animateCounter(
-                    element, 
-                    options.start, 
+    destroy() {
+        this.cleanupFunctions.forEach(cleanup => cleanup());
+        this.cleanupFunctions = [];
+        
+        this.animations.clear();
+        IntersectionObserverUtil.removeObserver('global-animations');
+        
+        this.isAnimationsEnabled = true;
+        this.isInitialized = false;
+        document.body.classList.remove('animations-disabled', 'animations-paused');
+        
+        console.log('Animation manager destroyed');
+    }                    options.start, 
                     options.end, 
                     options.duration, 
                     options.isDecimal

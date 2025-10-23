@@ -4,12 +4,10 @@
 class NotificationManager {
     constructor() {
         this.notifications = new Map();
-        this.notificationQueue = [];
         this.maxNotifications = 5;
         this.defaultDuration = 5000;
         this.cleanupFunctions = [];
     }
-
     /**
      * Initialize notification manager
      */
@@ -22,6 +20,8 @@ class NotificationManager {
     /**
      * Setup notification container
      */
+// src/js/managers/NotificationManager.js
+
     setupNotificationContainer() {
         let container = DOMUtils.getElement('.notification-container');
         
@@ -30,13 +30,27 @@ class NotificationManager {
                 className: 'notification-container'
             });
             
-            // Add container styles
-            this.addContainerStyles();
+            // Add container styles only if not already added
+            if (!document.querySelector('style[data-notification-styles]')) {
+                this.addContainerStyles();
+            }
             
             document.body.appendChild(container);
         }
     }
 
+    addContainerStyles() {
+        const containerStyles = `
+            /* your notification container CSS here */
+        `;
+        // Mark the style tag to prevent duplicate injections
+        const styleSheet = DOMUtils.createElement(
+            'style',
+            { 'data-notification-styles': 'true' },
+            containerStyles
+        );
+        document.head.appendChild(styleSheet);
+    }
     /**
      * Add notification container styles
      */
@@ -122,12 +136,15 @@ class NotificationManager {
     setupGlobalHandlers() {
         // Listen for custom notification events
         const cleanup = EventUtils.listenForCustomEvent('notification:show', (event) => {
+            if (!event.detail || !event.detail.message) {
+                console.warn('Invalid notification event data:', event.detail);
+                return;
+            }
             this.show(event.detail.message, event.detail.type, event.detail.options);
         });
         
         this.cleanupFunctions.push(cleanup);
     }
-
     /**
      * Show notification
      * @param {string} message - Notification message
@@ -349,9 +366,6 @@ class NotificationManager {
 
     /**
      * Update notification message
-     * @param {string} notificationId - Notification ID
-     * @param {string} newMessage - New message
-     */
     updateNotification(notificationId, newMessage) {
         const notificationData = this.notifications.get(notificationId);
         if (!notificationData) return;
@@ -359,6 +373,9 @@ class NotificationManager {
         const content = DOMUtils.getElement('.notification-content', notificationData.element);
         if (content) {
             content.textContent = newMessage;
+            notificationData.message = newMessage;
+        }
+    }            content.textContent = newMessage;
         }
     }
 

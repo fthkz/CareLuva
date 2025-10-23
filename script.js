@@ -1,6 +1,39 @@
 // CareLuva Landing Page JavaScript - Simplified Version
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for components to be initialized
+    setTimeout(() => {
+        // Provider Registration Button Handler
+        const providerRegistrationBtn = document.querySelector('[data-action="open-provider-registration"]');
+        if (providerRegistrationBtn) {
+            console.log('Provider registration button found, adding event listener');
+            providerRegistrationBtn.addEventListener('click', function() {
+                console.log('Provider registration button clicked');
+                // Always use direct event dispatch for reliability
+                const event = new CustomEvent('provider:openRegistration', {});
+                document.dispatchEvent(event);
+                console.log('Registration event dispatched');
+            });
+        } else {
+            console.log('Provider registration button not found');
+        }
+
+        // Provider Login Button Handler
+        const providerLoginBtn = document.querySelector('[data-action="open-provider-login"]');
+        if (providerLoginBtn) {
+            console.log('Provider login button found, adding event listener');
+            providerLoginBtn.addEventListener('click', function() {
+                console.log('Provider login button clicked');
+                // Always use direct event dispatch for reliability
+                const event = new CustomEvent('provider:openLogin', {});
+                document.dispatchEvent(event);
+                console.log('Login event dispatched');
+            });
+        } else {
+            console.log('Provider login button not found');
+        }
+    }, 100);
+
     // Mobile Navigation Toggle
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
@@ -64,26 +97,29 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
 
-    // Trust Score Animation
-    const scoreBars = document.querySelectorAll('.score-fill');
-    const trustSection = document.querySelector('.trust');
-    
-    const trustObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                scoreBars.forEach((bar, index) => {
-                    setTimeout(() => {
-                        bar.style.width = bar.style.width;
-                    }, index * 200);
-                });
-            }
-        });
-    }, { threshold: 0.5 });
+// Trust Score Animation
+const scoreBars = document.querySelectorAll('.score-fill');
+const trustSection = document.querySelector('.trust');
 
-    if (trustSection) {
-        trustObserver.observe(trustSection);
-    }
+const trustObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            scoreBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    const targetWidth = bar.style.width;
+                    bar.style.width = '0%';
+                    // Force reflow
+                    bar.offsetHeight;
+                    bar.style.width = targetWidth;
+                }, index * 200);
+            });
+        }
+    });
+}, { threshold: 0.5 });
 
+if (trustSection) {
+    trustObserver.observe(trustSection);
+}
     // Counter Animation for Hero Stats
     const statNumbers = document.querySelectorAll('.stat-number');
     const heroSection = document.querySelector('.hero');

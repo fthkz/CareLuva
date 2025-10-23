@@ -50,9 +50,22 @@ class ButtonManager {
      * @returns {string} Button ID
      */
     generateButtonId(button) {
-        return button.id || `btn-${Math.random().toString(36).substr(2, 9)}`;
-    }
+        if (button.id) {
+            return button.id;
+        }
 
+        // Check if button already has a generated ID stored
+        for (const [id, btn] of this.buttons.entries()) {
+            if (btn === button) {
+                return id;
+            }
+        }
+
+        // Generate new ID and store on element for consistency
+        const newId = `btn-${Math.random().toString(36).substr(2, 9)}`;
+        button.setAttribute('data-button-id', newId);
+        return newId;
+    }
     /**
      * Setup button event handlers
      * @param {Element} button - Button element
@@ -120,11 +133,11 @@ class ButtonManager {
         });
 
         // Call custom click handler if defined
-        const clickHandler = button.dataset.clickHandler;
-        if (clickHandler && window[clickHandler]) {
-            window[clickHandler](button, buttonId, event);
-        }
-    }
+// Call custom click handler if defined
+const clickHandler = button.dataset.clickHandler;
+if (clickHandler && typeof window[clickHandler] === 'function') {
+    window[clickHandler](button, buttonId, event);
+}    }
 
     /**
      * Handle button hover
@@ -223,6 +236,11 @@ class ButtonManager {
         const state = this.buttonStates.get(buttonId);
         
         if (button && state) {
+            // Store original disabled state before loading
+            if (loading && !state.hasOwnProperty('wasDisabledBeforeLoading')) {
+                state.wasDisabledBeforeLoading = state.isDisabled;
+            }
+            
             state.isLoading = loading;
             
             if (loading) {
@@ -237,7 +255,10 @@ class ButtonManager {
                 button.appendChild(spinner);
             } else {
                 DOMUtils.removeClass(button, 'loading');
-                this.setButtonDisabled(buttonId, false);
+                // Restore original disabled state
+                const wasDisabled = state.wasDisabledBeforeLoading || false;
+                this.setButtonDisabled(buttonId, wasDisabled);
+                delete state.wasDisabledBeforeLoading;
                 
                 // Remove loading spinner
                 const spinner = DOMUtils.getElement('.button-spinner', button);
@@ -247,7 +268,6 @@ class ButtonManager {
             }
         }
     }
-
     /**
      * Set button active state
      * @param {string} buttonId - Button ID

@@ -47,6 +47,11 @@ class AppCoordinator {
         const notificationManager = new NotificationManager();
         notificationManager.init();
         this.managers.set('notification', notificationManager);
+
+        // Initialize authentication manager
+        const authManager = new AuthManager();
+        authManager.init();
+        this.managers.set('auth', authManager);
     }
 
     /**
@@ -77,6 +82,28 @@ class AppCoordinator {
         const testimonialsComponent = new TestimonialsComponent();
         testimonialsComponent.init();
         this.components.set('testimonials', testimonialsComponent);
+
+        // Initialize provider registration component
+        const providerRegistrationComponent = new ProviderRegistrationComponent();
+        providerRegistrationComponent.init();
+        this.components.set('providerRegistration', providerRegistrationComponent);
+        console.log('ProviderRegistrationComponent initialized');
+
+        // Initialize verification workflow component
+        const verificationWorkflowComponent = new VerificationWorkflowComponent();
+        verificationWorkflowComponent.init();
+        this.components.set('verificationWorkflow', verificationWorkflowComponent);
+
+        // Initialize provider dashboard component
+        const providerDashboardComponent = new ProviderDashboardComponent();
+        providerDashboardComponent.init();
+        this.components.set('providerDashboard', providerDashboardComponent);
+
+        // Initialize provider login component
+        const providerLoginComponent = new ProviderLoginComponent();
+        providerLoginComponent.init();
+        this.components.set('providerLogin', providerLoginComponent);
+        console.log('ProviderLoginComponent initialized');
     }
 
     /**
@@ -175,6 +202,22 @@ class AppCoordinator {
             this.handleNavigationChange(event.detail);
         });
         this.cleanupFunctions.push(navigationCleanup);
+
+        // Handle provider authentication events
+        const providerAuthCleanup = EventUtils.listenForCustomEvent('provider:registrationSuccess', (event) => {
+            this.handleProviderRegistrationSuccess(event.detail);
+        });
+        this.cleanupFunctions.push(providerAuthCleanup);
+
+        const providerLoginCleanup = EventUtils.listenForCustomEvent('provider:loginSuccess', (event) => {
+            this.handleProviderLoginSuccess(event.detail);
+        });
+        this.cleanupFunctions.push(providerLoginCleanup);
+
+        const providerErrorCleanup = EventUtils.listenForCustomEvent('provider:registrationError', (event) => {
+            this.handleProviderError(event.detail);
+        });
+        this.cleanupFunctions.push(providerErrorCleanup);
     }
 
     /**
@@ -230,17 +273,18 @@ class AppCoordinator {
      * Setup error handling
      */
     setupErrorHandling() {
-        window.addEventListener('error', (event) => {
+        const errorCleanup = EventUtils.addEventListenerWithCleanup(window, 'error', (event) => {
             console.error('Global error:', event.error);
             this.getNotificationManager().error('An unexpected error occurred. Please try again.');
         });
+        this.cleanupFunctions.push(errorCleanup);
 
-        window.addEventListener('unhandledrejection', (event) => {
+        const rejectionCleanup = EventUtils.addEventListenerWithCleanup(window, 'unhandledrejection', (event) => {
             console.error('Unhandled promise rejection:', event.reason);
             this.getNotificationManager().error('An unexpected error occurred. Please try again.');
         });
+        this.cleanupFunctions.push(rejectionCleanup);
     }
-
     /**
      * Handle form submission
      * @param {Object} data - Form data
@@ -355,6 +399,83 @@ class AppCoordinator {
     }
 
     /**
+     * Handle provider registration success
+     * @param {Object} detail - Registration success detail
+     */
+    handleProviderRegistrationSuccess(detail) {
+        const { user } = detail;
+        
+        // Update app view model
+        const appViewModel = this.getViewModel('app');
+        if (appViewModel) {
+            appViewModel.setProviderUser(user);
+            appViewModel.setProviderVerificationStatus('pending');
+        }
+
+        // Show success notification
+        this.getNotificationManager().success(
+            `Welcome to CareLuva, ${user.clinicName}! Your account has been created successfully. Please check your email for verification instructions.`
+        );
+
+        // Close registration modal
+        const providerRegistrationComponent = this.getComponent('providerRegistration');
+        if (providerRegistrationComponent) {
+            providerRegistrationComponent.closeRegistrationModal();
+        }
+
+        // Show verification workflow after a short delay
+        const timeoutId = setTimeout(() => {
+            EventUtils.createCustomEvent('verification:openModal', {});
+        }, 1000);
+        this.cleanupFunctions.push(() => clearTimeout(timeoutId));
+        console.log('Provider registration successful:', user.email);
+    }
+
+    /**
+     * Handle provider login success
+     * @param {Object} detail - Login success detail
+     */
+    handleProviderLoginSuccess(detail) {
+        const { user } = detail;
+        
+        // Update app view model
+        const appViewModel = this.getViewModel('app');
+        if (appViewModel) {
+            appViewModel.setProviderUser(user);
+            appViewModel.setProviderVerificationStatus(user.verificationStatus || 'pending');
+        }
+
+        // Show success notification
+        this.getNotificationManager().success(`Welcome back, ${user.clinicName}!`);
+
+        // Open provider dashboard after a short delay
+        setTimeout(() => {
+            EventUtils.createCustomEvent('provider:openDashboard', {});
+        }, 1000);
+
+        console.log('Provider login successful:', user.email);
+    }
+
+    /**
+     * Handle provider authentication error
+     * @param {Object} detail - Error detail
+     */
+    handleProviderError(detail) {
+        const { error } = detail;
+        
+        // Update app view model
+        const appViewModel = this.getViewModel('app');
+        if (appViewModel) {
+            appViewModel.setProviderError(error);
+        }
+
+        // Show error notification
+        this.getNotificationManager().error(error || 'An error occurred during authentication. Please try again.');
+
+        console.error('Provider authentication error:', error);
+    }
+
+    /**
      * Get component by name
      * @param {string} name - Component name
      * @returns {Object} Component instance
@@ -403,6 +524,14 @@ class AppCoordinator {
      */
     getNotificationManager() {
         return this.getManager('notification');
+    }
+
+    /**
+     * Get authentication manager
+     * @returns {AuthManager} Authentication manager
+     */
+    getAuthManager() {
+        return this.getManager('auth');
     }
 
     /**

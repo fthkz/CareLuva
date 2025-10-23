@@ -13,6 +13,9 @@ class TestimonialsComponent {
      * Initialize testimonials component
      */
     init() {
+        // Cleanup previous initialization
+        this.destroy();
+
         this.testimonialsSection = DOMUtils.getElement('.testimonials');
         this.testimonialCards = DOMUtils.getElements('.testimonial-card');
         this.videoPlaceholders = DOMUtils.getElements('.video-placeholder');
@@ -28,7 +31,6 @@ class TestimonialsComponent {
 
         console.log('Testimonials component initialized');
     }
-
     /**
      * Setup animations for testimonial cards
      */
@@ -194,8 +196,6 @@ class TestimonialsComponent {
 
     /**
      * Setup modal event handlers
-     * @param {Element} modal - Modal element
-     */
     setupModalHandlers(modal) {
         const closeModal = () => {
             document.body.removeChild(modal);
@@ -207,6 +207,7 @@ class TestimonialsComponent {
 
         const closeButton = DOMUtils.getElement('.modal-close', modal);
         const overlay = DOMUtils.getElement('.modal-overlay', modal);
+        const modalContent = DOMUtils.getElement('.modal-content', modal);
 
         if (closeButton) {
             const cleanup = EventUtils.addEventListenerWithCleanup(closeButton, 'click', closeModal);
@@ -214,13 +215,26 @@ class TestimonialsComponent {
         }
 
         if (overlay) {
-            const cleanup = EventUtils.addEventListenerWithCleanup(overlay, 'click', closeModal);
+            const handleOverlayClick = (e) => {
+                if (e.target === overlay) {
+                    closeModal();
+                }
+            };
+            const cleanup = EventUtils.addEventListenerWithCleanup(overlay, 'click', handleOverlayClick);
+            this.cleanupFunctions.push(cleanup);
+        }
+
+        // Prevent clicks inside modal content from closing the modal
+        if (modalContent) {
+            const stopPropagation = (e) => e.stopPropagation();
+            const cleanup = EventUtils.addEventListenerWithCleanup(modalContent, 'click', stopPropagation);
             this.cleanupFunctions.push(cleanup);
         }
 
         // Close on escape key
         const escapeCleanup = EventUtils.handleEscapeKey(closeModal);
         this.cleanupFunctions.push(escapeCleanup);
+    }        this.cleanupFunctions.push(escapeCleanup);
     }
 
     /**

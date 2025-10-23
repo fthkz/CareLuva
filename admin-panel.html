@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareLuva Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .status.loading {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .data-section {
+            margin-bottom: 30px;
+        }
+        .data-section h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .registration-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .registration-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .clinic-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-badge.approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-badge.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .registration-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            font-size: 14px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        .detail-value {
+            color: #6b7280;
+        }
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        .error {
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 CareLuva Admin Panel</h1>
+            <p>Secure admin access - authentication required</p>
+        </div>
+
+        <div id="login-section" style="display: block;">
+            <div class="status loading">
+                🔐 Admin authentication required
+            </div>
+            
+            <form id="admin-login-form" style="max-width: 400px; margin: 0 auto;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Admin Email</label>
+                    <input type="email" id="admin-email" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Password</label>
+                    <input type="password" id="admin-password" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                </div>
+                <button type="button" onclick="handleAdminLogin()" class="btn btn-primary" style="width: 100%;">🔐 Login as Admin</button>
+            </form>
+            
+            <div style="margin-top: 15px; text-align: center;">
+                <button type="button" onclick="testLogin()" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">🧪 Test Login (Debug)</button>
+            </div>
+            
+            <div id="login-status" style="margin-top: 15px; padding: 10px; border-radius: 6px; display: none;"></div>
+        </div>
+
+        <div id="admin-dashboard" style="display: none;">
+            <div class="header">
+                <h1>🔥 CareLuva Admin Panel</h1>
+                <p>Welcome, <span id="admin-name"></span> | <button class="btn btn-secondary" onclick="logout()">Logout</button></p>
+            </div>
+
+            <div id="status" class="status loading">
+                🔄 Connecting to Firebase...
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="loadRegistrations()">🔄 Refresh Data</button>
+                <button class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection</button>
+                <button class="btn btn-secondary" onclick="window.open('https://console.firebase.google.com', '_blank')">🔥 Firebase Console</button>
+            </div>
+
+            <div id="data-container">
+                <div class="loading">
+                    <p>Loading registration data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXGpGiAaXwWMt-UoMl0hgBVxKddRHN8n0",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0",
+            measurementId: "G-9DL8W0Q6PB"
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            window.firebase = { app, db };
+            window.firebaseReady = true;
+            
+            document.getElementById('status').innerHTML = '✅ Firebase connected successfully!';
+            document.getElementById('status').className = 'status success';
+            
+            // Auto-load data
+            loadRegistrations();
+            
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            document.getElementById('status').innerHTML = `❌ Firebase connection failed: ${error.message}`;
+            document.getElementById('status').className = 'status error';
+        }
+
+        async function loadRegistrations() {
+            const statusEl = document.getElementById('status');
+            const containerEl = document.getElementById('data-container');
+            
+            try {
+                statusEl.innerHTML = '🔄 Loading registrations...';
+                statusEl.className = 'status loading';
+                
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    throw new Error('Firebase not initialized');
+                }
+
+                const q = query(collection(window.firebase.db, 'providerRegistrations'), orderBy('submittedAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const registrations = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                console.log('Loaded registrations:', registrations);
+
+                if (registrations.length === 0) {
+                    containerEl.innerHTML = `
+                        <div class="data-section">
+                            <h3>📋 Provider Registrations</h3>
+                            <div class="registration-card">
+                                <p style="text-align: center; color: #6b7280; padding: 20px;">
+                                    No registrations found in Firebase database.
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    containerEl.innerHTML = `
+                        <div class="data-section">
+                            <h3>📋 Provider Registrations (${registrations.length} found)</h3>
+                            ${registrations.map(reg => `
+                                <div class="registration-card">
+                                    <div class="registration-header">
+                                        <div class="clinic-name">${reg.clinicName || 'Unnamed Clinic'}</div>
+                                        <div class="status-badge ${reg.status || 'pending'}">${reg.status || 'pending'}</div>
+                                    </div>
+                                    <div class="registration-details">
+                                        <div class="detail-item">
+                                            <div class="detail-label">Provider Type</div>
+                                            <div class="detail-value">${reg.providerType || 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Contact Person</div>
+                                            <div class="detail-value">${reg.contactPerson || 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Email</div>
+                                            <div class="detail-value">${reg.email || 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Phone</div>
+                                            <div class="detail-value">${reg.phone || 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Specialization</div>
+                                            <div class="detail-value">${reg.specialization || 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Experience</div>
+                                            <div class="detail-value">${reg.experienceYears || 0} years</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">City</div>
+                                            <div class="detail-value">${reg.city || 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Registration Date</div>
+                                            <div class="detail-value">${reg.registrationDate ? new Date(reg.registrationDate.seconds * 1000).toLocaleString() : reg.submittedAt ? new Date(reg.submittedAt).toLocaleString() : 'N/A'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Google User</div>
+                                            <div class="detail-value">${reg.isGoogleUser ? '✅ Yes' : '❌ No'}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Auth Provider</div>
+                                            <div class="detail-value">${reg.authProvider || 'email'}</div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                                        <div style="font-size: 12px; color: #6b7280;">
+                                            <strong>Document ID:</strong> ${reg.id}
+                                        </div>
+                                        ${reg.status === 'pending' ? `
+                                            <div style="margin-top: 10px;">
+                                                <button class="btn btn-success" onclick="updateStatus('${reg.id}', 'approved')">✅ Approve</button>
+                                                <button class="btn btn-danger" onclick="updateStatus('${reg.id}', 'rejected')">❌ Reject</button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                statusEl.innerHTML = `✅ Loaded ${registrations.length} registrations successfully!`;
+                statusEl.className = 'status success';
+
+            } catch (error) {
+                console.error('Error loading registrations:', error);
+                statusEl.innerHTML = `❌ Error loading registrations: ${error.message}`;
+                statusEl.className = 'status error';
+                containerEl.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        <strong>Possible solutions:</strong>
+                        <ul>
+                            <li>Check if Firebase is properly configured</li>
+                            <li>Verify Firestore rules allow read access</li>
+                            <li>Check browser console for detailed error messages</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        async function updateStatus(registrationId, newStatus) {
+            try {
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    alert('Firebase not available for status update');
+                    return;
+                }
+
+                const registrationRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                await updateDoc(registrationRef, {
+                    status: newStatus,
+                    lastUpdated: serverTimestamp(),
+                    statusUpdatedBy: 'admin',
+                    statusUpdatedAt: new Date().toISOString()
+                });
+
+                alert(`Registration ${registrationId} updated to ${newStatus}`);
+                loadRegistrations(); // Refresh the data
+
+            } catch (error) {
+                console.error('Error updating registration status:', error);
+                alert(`Failed to update status: ${error.message}`);
+            }
+        }
+
+        async function testConnection() {
+            const statusEl = document.getElementById('status');
+            try {
+                statusEl.innerHTML = '🧪 Testing Firebase connection...';
+                statusEl.className = 'status loading';
+                
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    throw new Error('Firebase not initialized');
+                }
+
+                // Test write
+                const testData = {
+                    test: true,
+                    message: 'Firebase connection test',
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                };
+
+                const docRef = await addDoc(collection(window.firebase.db, 'test'), testData);
+                console.log('Test document created with ID:', docRef.id);
+
+                // Test read
+                const q = query(collection(window.firebase.db, 'test'), orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const testDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                statusEl.innerHTML = `✅ Firebase test successful! Created test document: ${docRef.id}`;
+                statusEl.className = 'status success';
+
+            } catch (error) {
+                console.error('Firebase test failed:', error);
+                statusEl.innerHTML = `❌ Firebase test failed: ${error.message}`;
+                statusEl.className = 'status error';
+            }
+        }
+
+        // Authentication functions
+        let currentAdmin = null;
+
+        // Pre-fill email if provided in URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            if (email) {
+                document.getElementById('admin-email').value = email;
+                console.log('📧 Pre-filled email:', email);
+            }
+        });
+
+        // Handle admin login - using onclick instead of form submit
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('admin-login-form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    console.log('🔐 Form submitted, starting login process...');
+                    await handleAdminLogin();
+                });
+                console.log('✅ Login form event listener attached');
+            } else {
+                console.error('❌ Login form not found');
+            }
+        });
+
+        async function handleAdminLogin() {
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            const statusEl = document.getElementById('login-status');
+            
+            try {
+                console.log('🔐 Starting admin login process...');
+                statusEl.style.display = 'block';
+                statusEl.style.background = '#dbeafe';
+                statusEl.style.border = '1px solid #3b82f6';
+                statusEl.style.color = '#1e40af';
+                statusEl.innerHTML = '🔄 Authenticating...';
+                
+                // Wait for Firebase to be ready
+                if (!window.firebaseReady) {
+                    console.log('⏳ Waiting for Firebase to be ready...');
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                console.log('✅ Firebase ready, attempting authentication...');
+                const { getAuth, signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const auth = getAuth();
+                console.log('🔑 Attempting to sign in with email:', email);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('✅ User authenticated successfully:', userCredential.user.uid);
+                
+                // Check if user has admin role
+                console.log('🔍 Checking admin role for user:', userCredential.user.uid);
+                const userDoc = await getDoc(doc(window.firebase.db, 'admins', userCredential.user.uid));
+                
+                if (!userDoc.exists()) {
+                    console.log('❌ User not found in admins collection');
+                    // For debugging, let's create the admin entry automatically
+                    console.log('🔧 Auto-creating admin entry for debugging...');
+                    const { setDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    await setDoc(doc(window.firebase.db, 'admins', userCredential.user.uid), {
+                        uid: userCredential.user.uid,
+                        email: email,
+                        name: 'Admin User',
+                        role: 'admin',
+                        permissions: ['view_registrations', 'approve_registrations', 'reject_registrations'],
+                        createdAt: new Date().toISOString(),
+                        createdBy: 'auto_created'
+                    });
+                    console.log('✅ Admin entry created automatically');
+                }
+                
+                // Get admin data
+                const adminDoc = await getDoc(doc(window.firebase.db, 'admins', userCredential.user.uid));
+                currentAdmin = adminDoc.data();
+                console.log('✅ Admin data loaded:', currentAdmin);
+                
+                document.getElementById('admin-name').textContent = currentAdmin.name || currentAdmin.email;
+                
+                statusEl.style.background = '#d1fae5';
+                statusEl.style.border = '1px solid #10b981';
+                statusEl.style.color = '#065f46';
+                statusEl.innerHTML = '✅ Authentication successful! Loading admin panel...';
+                
+                // Show admin dashboard
+                setTimeout(() => {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('admin-dashboard').style.display = 'block';
+                    loadRegistrations();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ Admin login error:', error);
+                statusEl.style.background = '#fee2e2';
+                statusEl.style.border = '1px solid #ef4444';
+                statusEl.style.color = '#991b1b';
+                statusEl.innerHTML = `❌ ${error.message}`;
+            }
+        }
+
+        function logout() {
+            currentAdmin = null;
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('admin-login-form').reset();
+            document.getElementById('login-status').style.display = 'none';
+        }
+
+        // Secure updateStatus function
+        async function updateStatus(registrationId, newStatus) {
+            try {
+                if (!currentAdmin) {
+                    alert('❌ Authentication required: Please log in to update registration status.');
+                    return;
+                }
+                
+                console.log(`🔐 Admin ${currentAdmin.email} updating registration ${registrationId} to status: ${newStatus}`);
+                
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    alert('Firebase not available for status update');
+                    return;
+                }
+                
+                const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const registrationRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                await updateDoc(registrationRef, {
+                    status: newStatus,
+                    lastUpdated: serverTimestamp(),
+                    statusUpdatedBy: currentAdmin.email,
+                    statusUpdatedByUid: currentAdmin.uid,
+                    statusUpdatedAt: new Date().toISOString()
+                });
+                
+                console.log(`Registration ${registrationId} updated to ${newStatus} by ${currentAdmin.email}`);
+                
+                // Show success message
+                const statusMessages = {
+                    'approved': 'Registration approved successfully!',
+                    'rejected': 'Registration rejected.',
+                    'pending': 'Registration status reset to pending.'
+                };
+                
+                alert(statusMessages[newStatus] || 'Status updated successfully!');
+                
+                // Reload registrations
+                loadRegistrations();
+                
+            } catch (error) {
+                console.error('Error updating registration status:', error);
+                alert(`Failed to update status: ${error.message}`);
+            }
+        }
+
+        // Test function for debugging
+        function testLogin() {
+            console.log('🧪 Test login button clicked');
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            console.log('📧 Email:', email);
+            console.log('🔑 Password length:', password.length);
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            console.log('🚀 Starting test login...');
+            handleAdminLogin();
+        }
+
+        // Make functions globally available
+        window.loadRegistrations = loadRegistrations;
+        window.testConnection = testConnection;
+        window.updateStatus = updateStatus;
+        window.logout = logout;
+        window.testLogin = testLogin;
+        window.handleAdminLogin = handleAdminLogin;
+    </script>
+</body>
+</html>

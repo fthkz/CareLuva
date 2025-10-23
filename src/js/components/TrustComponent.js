@@ -7,7 +7,6 @@ class TrustComponent {
         this.scoreBars = [];
         this.cleanupFunctions = [];
     }
-
     /**
      * Initialize trust component
      */
@@ -32,7 +31,7 @@ class TrustComponent {
 
         const animateScoreBars = () => {
             this.scoreBars.forEach((bar, index) => {
-                const width = bar.style.width;
+                const width = window.getComputedStyle(bar).width;
                 bar.style.width = '0%';
                 
                 setTimeout(() => {
@@ -40,7 +39,6 @@ class TrustComponent {
                 }, index * 200);
             });
         };
-
         const observer = IntersectionObserverUtil.observeForCounterAnimation(
             this.trustSection,
             animateScoreBars
@@ -137,18 +135,23 @@ class TrustComponent {
      * @param {string} icon - Icon class
      */
     addTrustListItem(text, icon = 'fas fa-check') {
+    addTrustListItem(text, icon = 'fas fa-check') {
         const trustList = DOMUtils.getElement('.trust-list');
         if (!trustList) return;
 
-        const listItem = DOMUtils.createElement('li', {}, `<i class="${icon}"></i> ${text}`);
-        DOMUtils.appendChild(trustList, listItem);
-    }
+    addTrustBadge(text, icon = 'fas fa-award') {
+        const trustBadges = DOMUtils.getElement('.trust-badges');
+        if (!trustBadges) return;
 
-    /**
-     * Remove trust list item
-     * @param {number} index - Item index to remove
-     */
-    removeTrustListItem(index) {
+        const badge = DOMUtils.createElement('div', { className: 'badge' });
+        const iconElement = DOMUtils.createElement('i', { className: icon });
+        const textSpan = DOMUtils.createElement('span');
+        textSpan.textContent = text;
+        DOMUtils.appendChild(badge, iconElement);
+        DOMUtils.appendChild(badge, textSpan);
+
+        DOMUtils.appendChild(trustBadges, badge);
+    }    removeTrustListItem(index) {
         const trustList = DOMUtils.getElement('.trust-list');
         if (!trustList) return;
 

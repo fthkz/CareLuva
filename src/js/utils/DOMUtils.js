@@ -126,8 +126,6 @@ class DOMUtils {
         Object.entries(attributes).forEach(([key, value]) => {
             if (key === 'className') {
                 element.className = value;
-            } else if (key === 'innerHTML') {
-                element.innerHTML = value;
             } else {
                 element.setAttribute(key, value);
             }
@@ -139,7 +137,6 @@ class DOMUtils {
         
         return element;
     }
-
     /**
      * Append child to parent
      * @param {Element} parent - Parent element

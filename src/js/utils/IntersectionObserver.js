@@ -165,5 +165,7 @@ class IntersectionObserverUtil {
     }
 }
 
-// Create global instance
-window.IntersectionObserverUtil = new IntersectionObserverUtil();
+// Create global instance (if not already exists)
+if (typeof window.IntersectionObserverUtil === 'undefined') {
+    window.IntersectionObserverUtil = new IntersectionObserverUtil();
+}

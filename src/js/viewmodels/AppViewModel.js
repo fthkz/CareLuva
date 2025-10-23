@@ -17,19 +17,33 @@ class AppViewModel {
                 features: [],
                 trust: null,
                 testimonials: []
+            },
+            providerAuth: {
+                isAuthenticated: false,
+                currentUser: null,
+                verificationStatus: 'pending',
+                isLoading: false,
+                error: null
             }
         };
         this.observers = new Map();
         this.cleanupFunctions = [];
+        this.isInitialized = false;
     }
 
     /**
      * Initialize app view model
      */
     init() {
+        if (this.isInitialized) {
+            console.warn('App view model already initialized');
+            return;
+        }
+
         this.loadInitialData();
         this.setupStateObservers();
         this.setupDataBindings();
+        this.isInitialized = true;
         console.log('App view model initialized');
     }
 
@@ -178,32 +192,70 @@ class AppViewModel {
         this.observeState('isLoading', (isLoading) => {
             this.handleLoadingStateChange(isLoading);
         });
-    }
 
-    /**
-     * Setup data bindings
-     */
-    setupDataBindings() {
-        // Bind page data to components
+        // Observe page data changes
         this.observeState('pageData', (pageData) => {
             this.updateComponentsWithData(pageData);
         });
     }
 
     /**
-     * Observe state changes
-     * @param {string} path - State path
-     * @param {Function} callback - Callback function
+     * Setup data bindings
      */
-    observeState(path, callback) {
-        if (!this.observers.has(path)) {
-            this.observers.set(path, []);
-        }
-        this.observers.get(path).push(callback);
+    setupDataBindings() {
+        // Setup data bindings between view model and components
+        // This would typically bind data to UI components
+        console.log('Data bindings setup');
     }
 
     /**
-     * Update state
+     * Valid state paths for validation
+     */
+    static get VALID_STATE_PATHS() {
+        return new Set([
+            'currentSection',
+            'isMenuOpen',
+            'isLoading',
+            'userPreferences',
+            'userPreferences.animationsEnabled',
+            'userPreferences.theme',
+            'userPreferences.language',
+            'pageData',
+            'pageData.hero',
+            'pageData.features',
+            'pageData.trust',
+            'pageData.testimonials',
+            'providerAuth',
+            'providerAuth.isAuthenticated',
+            'providerAuth.currentUser',
+            'providerAuth.verificationStatus',
+            'providerAuth.isLoading',
+            'providerAuth.error'
+        ]);
+    }
+
+    /**
+     * Set state value by path
+     * @param {string} path - State path
+     * @param {*} value - Value to set
+     */
+    setStateValue(path, value) {
+        if (!AppViewModel.VALID_STATE_PATHS.has(path)) {
+            console.error(`Invalid state path: ${path}`);
+            return;
+        }
+        const keys = path.split('.');
+        const lastKey = keys.pop();
+        const target = keys.reduce((obj, key) => {
+            if (typeof obj[key] !== 'object' || obj[key] === null) {
+                obj[key] = {};
+            }
+            return obj[key];
+        }, this.state);
+        target[lastKey] = value;
+    }
+    /**
+     * Update state and notify observers
      * @param {string} path - State path
      * @param {*} value - New value
      */
@@ -223,18 +275,15 @@ class AppViewModel {
     }
 
     /**
-     * Set state value by path
+     * Observe state changes
      * @param {string} path - State path
-     * @param {*} value - New value
+     * @param {Function} callback - Callback function
      */
-    setStateValue(path, value) {
-        const keys = path.split('.');
-        const lastKey = keys.pop();
-        const target = keys.reduce((obj, key) => {
-            if (!obj[key]) obj[key] = {};
-            return obj[key];
-        }, this.state);
-        target[lastKey] = value;
+    observeState(path, callback) {
+        if (!this.observers.has(path)) {
+            this.observers.set(path, []);
+        }
+        this.observers.get(path).push(callback);
     }
 
     /**
@@ -360,6 +409,80 @@ class AppViewModel {
     }
 
     /**
+     * Get provider authentication state
+     * @returns {Object} Provider auth state
+     */
+    getProviderAuthState() {
+        return { ...this.state.providerAuth };
+    }
+
+    /**
+     * Set provider authentication state
+     * @param {Object} authState - Authentication state
+     */
+    setProviderAuthState(authState) {
+        this.updateState('providerAuth', { ...this.state.providerAuth, ...authState });
+    }
+
+    /**
+     * Set provider user
+     * @param {Object} user - Provider user data
+     */
+    setProviderUser(user) {
+        this.updateState('providerAuth', {
+            ...this.state.providerAuth,
+            currentUser: user,
+            isAuthenticated: !!user
+        });
+    }
+    /**
+     * Set provider verification status
+     * @param {string} status - Verification status
+     */
+    setProviderVerificationStatus(status) {
+        this.updateState('providerAuth.verificationStatus', status);
+    }
+
+    /**
+     * Set provider loading state
+     * @param {boolean} isLoading - Loading state
+     */
+    setProviderLoading(isLoading) {
+        this.updateState('providerAuth.isLoading', isLoading);
+    }
+
+    /**
+     * Set provider error
+     * @param {string} error - Error message
+     */
+    setProviderError(error) {
+        this.updateState('providerAuth.error', error);
+    }
+
+    /**
+     * Clear provider error
+     */
+    clearProviderError() {
+        this.updateState('providerAuth.error', null);
+    }
+
+    /**
+     * Check if provider is authenticated
+     * @returns {boolean} Is authenticated
+     */
+    isProviderAuthenticated() {
+        return this.state.providerAuth.isAuthenticated;
+    }
+
+    /**
+     * Get current provider user
+     * @returns {Object|null} Current provider user
+     */
+    getCurrentProviderUser() {
+        return this.state.providerAuth.currentUser;
+    }
+
+    /**
      * Destroy app view model
      */
     destroy() {
@@ -368,6 +491,7 @@ class AppViewModel {
         
         this.observers.clear();
         this.state = null;
+        this.isInitialized = false;
         
         console.log('App view model destroyed');
     }

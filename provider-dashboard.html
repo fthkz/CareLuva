@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Dashboard - CareLuva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .welcome {
+            color: #6b7280;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            font-size: 1.125rem;
+            color: #6b7280;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .status-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .feature-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .coming-soon {
+            background: #f9fafb;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;">🏥 CareLuva</a>
+        </div>
+        <div class="user-info">
+            <span class="welcome">Welcome, Provider!</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Provider Dashboard</h1>
+            <p>Manage your clinic profile and connect with patients</p>
+        </div>
+
+        <div class="status-card">
+            <div class="status-badge status-pending" id="status-badge">
+                Registration Pending
+            </div>
+            <h2>Welcome to CareLuva!</h2>
+            <p>Your provider registration has been submitted successfully. Our team will review your application and get back to you within 2-3 business days.</p>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="checkStatus()">Check Status</button>
+                <button class="btn btn-secondary" onclick="editProfile()">Edit Profile</button>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>Patient Management</h3>
+                <p>View and manage your patient appointments and consultations.</p>
+                <button class="btn btn-secondary coming-soon">Coming Soon</button>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Analytics & Reports</h3>
+                <p>Track your clinic's performance and patient satisfaction metrics.</p>
+                <button class="btn btn-secondary coming-soon">Coming Soon</button>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Billing & Payments</h3>
+                <p>Manage your billing, payments, and financial reports.</p>
+                <button class="btn btn-secondary coming-soon">Coming Soon</button>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3>Settings</h3>
+                <p>Update your clinic information, availability, and preferences.</p>
+                <button class="btn btn-secondary coming-soon">Coming Soon</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXGpGiAaXwWMt-UoMl0hgBVxKddRHN8n0",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0",
+            measurementId: "G-9DL8W0Q6PB"
+        };
+
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            // Make available globally
+            window.firebase = { app, db };
+            window.firebaseReady = true;
+
+            console.log('✅ Firebase initialized successfully!');
+            
+            // Dispatch custom event to notify other scripts
+            window.dispatchEvent(new CustomEvent('firebaseReady'));
+            
+        } catch (error) {
+            console.error('❌ Firebase initialization failed:', error);
+            window.firebaseReady = false;
+            window.dispatchEvent(new CustomEvent('firebaseError', { detail: error }));
+        }
+    </script>
+
+    <script>
+        // Load registration data from Firebase or localStorage
+        async function loadRegistrationData() {
+            try {
+                // First try to load from Firebase
+                const registrationId = localStorage.getItem('providerRegistrationId');
+                
+                if (registrationId && window.firebaseReady) {
+                    await loadFromFirebase(registrationId);
+                } else {
+                    // Fallback to localStorage
+                    loadFromLocalStorage();
+                }
+            } catch (error) {
+                console.error('Error loading registration data:', error);
+                // Fallback to localStorage
+                loadFromLocalStorage();
+            }
+        }
+        
+        async function loadFromFirebase(registrationId) {
+            try {
+                // Wait for Firebase to be ready
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                // Import Firebase functions
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Get document from Firestore
+                const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    console.log('✅ Loaded data from Firebase:', data);
+                    updateDashboard(data);
+                    
+                    // Update localStorage with latest data
+                    localStorage.setItem('providerRegistration', JSON.stringify(data));
+                } else {
+                    console.log('No document found in Firebase, falling back to localStorage');
+                    loadFromLocalStorage();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading from Firebase:', error);
+                loadFromLocalStorage();
+            }
+        }
+        
+        function loadFromLocalStorage() {
+            const registrationData = localStorage.getItem('providerRegistration');
+            if (registrationData) {
+                try {
+                    const data = JSON.parse(registrationData);
+                    console.log('📱 Loaded data from localStorage:', data);
+                    updateDashboard(data);
+                } catch (error) {
+                    console.error('Error parsing localStorage data:', error);
+                }
+            } else {
+                console.log('No registration data found');
+            }
+        }
+        
+        function updateDashboard(data) {
+            // Update welcome message with clinic name
+            const welcomeElement = document.querySelector('.welcome');
+            if (data.clinicName) {
+                welcomeElement.textContent = `Welcome, ${data.clinicName}!`;
+            }
+            
+            // Update status based on registration data
+            const statusBadge = document.getElementById('status-badge');
+            if (data.status) {
+                statusBadge.textContent = data.status;
+                statusBadge.className = `status-badge status-${data.status.toLowerCase()}`;
+            }
+            
+            // Show Google user indicator if applicable
+            if (data.isGoogleUser) {
+                showGoogleUserIndicator(data);
+            }
+            
+            // Show local storage indicator if data was saved locally
+            if (data.savedLocally) {
+                showLocalStorageIndicator(data);
+            }
+        }
+        
+        function showLocalStorageIndicator(data) {
+            // Add local storage indicator to the dashboard
+            const statusCard = document.querySelector('.status-card');
+            if (statusCard && data.savedLocally) {
+                const localIndicator = document.createElement('div');
+                localIndicator.style.cssText = `
+                    background: #fef3c7;
+                    border: 1px solid #f59e0b;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+                
+                localIndicator.innerHTML = `
+                    <div style="color: #f59e0b; font-size: 20px;">💾</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Data Saved Locally</div>
+                        <div style="font-size: 12px; color: #6b7280;">Your registration was saved locally due to Firebase connection issues</div>
+                    </div>
+                    <button onclick="syncToFirebase()" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Sync Now</button>
+                `;
+                
+                statusCard.insertBefore(localIndicator, statusCard.querySelector('.action-buttons'));
+            }
+        }
+        
+        async function syncToFirebase() {
+            try {
+                const localData = localStorage.getItem('providerRegistration');
+                if (!localData) {
+                    alert('No local data found to sync');
+                    return;
+                }
+                
+                const data = JSON.parse(localData);
+                
+                // Remove local storage flags and password fields
+                delete data.savedLocally;
+                delete data.firebaseError;
+                delete data.retryAttempted;
+                delete data.password;
+                delete data.confirmPassword;
+                
+                // Try to save to Firebase
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not available');
+                }
+                
+                const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), data);
+                
+                // Update localStorage with Firebase document ID
+                localStorage.setItem('providerRegistrationId', docRef.id);
+                localStorage.setItem('providerRegistration', JSON.stringify({
+                    ...data,
+                    id: docRef.id,
+                    syncedToFirebase: true
+                }));
+                
+                alert('✅ Data successfully synced to Firebase!');
+                
+                // Reload the page to update the UI
+                window.location.reload();
+                
+            } catch (error) {
+                console.error('Sync failed:', error);
+                alert(`❌ Sync failed: ${error.message}\n\nPlease check your internet connection and try again.`);
+            }
+        }
+        
+        function showGoogleUserIndicator(data) {
+            // Add Google user indicator to the dashboard
+            const statusCard = document.querySelector('.status-card');
+            if (statusCard && data.isGoogleUser) {
+                const googleIndicator = document.createElement('div');
+                googleIndicator.style.cssText = `
+                    background: #dbeafe;
+                    border: 1px solid #3b82f6;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+                
+                googleIndicator.innerHTML = `
+                    <div style="color: #3b82f6; font-size: 20px;">🔐</div>
+                    <div>
+                        <div style="font-weight: 600; color: #1f2937; font-size: 14px;">Signed in with Google</div>
+                        <div style="font-size: 12px; color: #6b7280;">Secure authentication via Google</div>
+                    </div>
+                `;
+                
+                statusCard.insertBefore(googleIndicator, statusCard.querySelector('.action-buttons'));
+            }
+        }
+        
+        async function checkStatus() {
+            try {
+                // Show loading state
+                const statusButton = document.querySelector('button[onclick="checkStatus()"]');
+                const originalText = statusButton.textContent;
+                statusButton.textContent = 'Checking...';
+                statusButton.disabled = true;
+                
+                // Get current registration data
+                const registrationId = localStorage.getItem('providerRegistrationId');
+                let registrationData = null;
+                
+                if (registrationId && window.firebaseReady) {
+                    // Load from Firebase
+                    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        registrationData = docSnap.data();
+                    }
+                } else {
+                    // Fallback to localStorage
+                    const localData = localStorage.getItem('providerRegistration');
+                    if (localData) {
+                        registrationData = JSON.parse(localData);
+                    }
+                }
+                
+                if (!registrationData) {
+                    throw new Error('No registration data found');
+                }
+                
+                // Show detailed status modal
+                showStatusModal(registrationData);
+                
+            } catch (error) {
+                console.error('Error checking status:', error);
+                alert('❌ Error loading status: ' + error.message);
+            } finally {
+                // Reset button state
+                const statusButton = document.querySelector('button[onclick="checkStatus()"]');
+                statusButton.textContent = 'Check Status';
+                statusButton.disabled = false;
+            }
+        }
+        
+        function showStatusModal(data) {
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            `;
+            
+            const status = data.status || 'pending';
+            const statusColors = {
+                pending: { bg: '#fef3c7', color: '#92400e', icon: '⏳' },
+                approved: { bg: '#d1fae5', color: '#065f46', icon: '✅' },
+                rejected: { bg: '#fee2e2', color: '#991b1b', icon: '❌' }
+            };
+            
+            const statusInfo = statusColors[status] || statusColors.pending;
+            
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Registration Status</h2>
+                    <button onclick="this.closest('.modal-overlay').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;">&times;</button>
+                </div>
+                
+                <div style="background: ${statusInfo.bg}; color: ${statusInfo.color}; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">${statusInfo.icon}</span>
+                    <div>
+                        <div style="font-weight: 600; font-size: 1.125rem;">Status: ${status.charAt(0).toUpperCase() + status.slice(1)}</div>
+                        <div style="font-size: 0.875rem; opacity: 0.8;">
+                            ${status === 'pending' ? 'Your application is under review' : 
+                              status === 'approved' ? 'Congratulations! Your application has been approved' : 
+                              'Your application requires attention'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; color: #1f2937;">Application Details</h3>
+                    <div style="display: grid; gap: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+                            <span style="color: #6b7280;">Clinic Name:</span>
+                            <span style="font-weight: 500;">${data.clinicName || 'Not provided'}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+                            <span style="color: #6b7280;">Email:</span>
+                            <span style="font-weight: 500;">${data.email || 'Not provided'}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+                            <span style="color: #6b7280;">Specialization:</span>
+                            <span style="font-weight: 500;">${data.specialization || 'Not provided'}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+                            <span style="color: #6b7280;">Submitted:</span>
+                            <span style="font-weight: 500;">${data.submittedAt ? new Date(data.submittedAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</span>
+                        </div>
+                        ${data.reviewedAt ? `
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+                            <span style="color: #6b7280;">Reviewed:</span>
+                            <span style="font-weight: 500;">${new Date(data.reviewedAt.seconds * 1000).toLocaleDateString()}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                ${status === 'pending' ? `
+                <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="color: #0ea5e9;">ℹ️</span>
+                        <span style="font-weight: 600; color: #0c4a6e;">Review Timeline</span>
+                    </div>
+                    <div style="color: #0c4a6e; font-size: 0.875rem;">
+                        Our team typically reviews applications within 2-3 business days. You will receive an email notification once your application has been reviewed.
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${status === 'rejected' ? `
+                <div style="background: #fef2f2; border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="color: #ef4444;">⚠️</span>
+                        <span style="font-weight: 600; color: #991b1b;">Next Steps</span>
+                    </div>
+                    <div style="color: #991b1b; font-size: 0.875rem;">
+                        Please review the feedback provided and resubmit your application with the necessary corrections.
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button onclick="this.closest('.modal-overlay').remove()" style="background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Close</button>
+                    ${status === 'approved' ? `
+                    <button onclick="window.location.href='provider-dashboard.html'" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Continue to Dashboard</button>
+                    ` : ''}
+                </div>
+            `;
+            
+            modal.className = 'modal-overlay';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        async function editProfile() {
+            try {
+                // Check if registration is approved
+                const registrationId = localStorage.getItem('providerRegistrationId');
+                let registrationData = null;
+                
+                if (registrationId && window.firebaseReady) {
+                    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        registrationData = docSnap.data();
+                    }
+                } else {
+                    const localData = localStorage.getItem('providerRegistration');
+                    if (localData) {
+                        registrationData = JSON.parse(localData);
+                    }
+                }
+                
+                if (!registrationData) {
+                    alert('❌ No registration data found. Please complete your registration first.');
+                    return;
+                }
+                
+                const status = registrationData.status || 'pending';
+                
+                if (status === 'pending') {
+                    alert('⏳ Your registration is still under review. Profile editing will be available once your application is approved.');
+                    return;
+                }
+                
+                if (status === 'rejected') {
+                    alert('❌ Your application was rejected. Please resubmit your registration with the necessary corrections.');
+                    return;
+                }
+                
+                // Show edit profile modal
+                showEditProfileModal(registrationData);
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('❌ Error loading profile: ' + error.message);
+            }
+        }
+        
+        function showEditProfileModal(data) {
+            // Helper function to check specialization match
+            function isSpecializationMatch(specialization, target) {
+                if (!specialization || !target) return false;
+                return specialization.toLowerCase().trim() === target.toLowerCase().trim();
+            }
+            
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                max-width: 700px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Edit Profile</h2>
+                    <button onclick="this.closest('.modal-overlay').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;">&times;</button>
+                </div>
+                
+                <form id="editProfileForm" style="display: grid; gap: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Clinic Name *</label>
+                            <input type="text" id="clinicName" value="${data.clinicName || ''}" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Email *</label>
+                            <input type="email" id="email" value="${data.email || ''}" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Phone Number</label>
+                            <input type="tel" id="phone" value="${data.phone || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Specialization *</label>
+                            <select id="specialization" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;">
+                                <option value="">Select Specialization</option>
+                                <option value="General Practice" ${isSpecializationMatch(data.specialization, 'General Practice') ? 'selected' : ''}>General Practice</option>
+                                <option value="Cardiology" ${isSpecializationMatch(data.specialization, 'Cardiology') ? 'selected' : ''}>Cardiology</option>
+                                <option value="Dermatology" ${isSpecializationMatch(data.specialization, 'Dermatology') ? 'selected' : ''}>Dermatology</option>
+                                <option value="Pediatrics" ${isSpecializationMatch(data.specialization, 'Pediatrics') ? 'selected' : ''}>Pediatrics</option>
+                                <option value="Orthopedics" ${isSpecializationMatch(data.specialization, 'Orthopedics') ? 'selected' : ''}>Orthopedics</option>
+                                <option value="Dentistry" ${isSpecializationMatch(data.specialization, 'Dentistry') ? 'selected' : ''}>Dentistry</option>
+                                <option value="Other" ${isSpecializationMatch(data.specialization, 'Other') ? 'selected' : ''}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Clinic Address</label>
+                        <textarea id="address" rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; resize: vertical;">${data.address || ''}</textarea>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Languages Spoken</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
+                            ${['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Other'].map(lang => `
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                    <input type="checkbox" value="${lang}" ${data.languages && data.languages.includes(lang) ? 'checked' : ''} style="margin: 0;">
+                                    <span>${lang}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Bio/Description</label>
+                        <textarea id="bio" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; resize: vertical;" placeholder="Tell patients about your practice, experience, and approach to care...">${data.bio || ''}</textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                        <button type="button" onclick="this.closest('.modal-overlay').remove()" style="background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">Save Changes</button>
+                    </div>
+                </form>
+            `;
+            
+            modal.className = 'modal-overlay';
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Handle form submission
+            document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveProfileChanges(modal);
+            });
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        async function saveProfileChanges(modal) {
+            try {
+                const form = document.getElementById('editProfileForm');
+                const formData = new FormData(form);
+                
+                // Collect form data
+                const updatedData = {
+                    clinicName: document.getElementById('clinicName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    specialization: document.getElementById('specialization').value,
+                    address: document.getElementById('address').value,
+                    bio: document.getElementById('bio').value,
+                    languages: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value),
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Validate required fields
+                if (!updatedData.clinicName || !updatedData.email || !updatedData.specialization) {
+                    alert('❌ Please fill in all required fields.');
+                    return;
+                }
+                
+                // Show loading state
+                const submitButton = form.querySelector('button[type="submit"]');
+                const originalText = submitButton.textContent;
+                submitButton.textContent = 'Saving...';
+                submitButton.disabled = true;
+                
+                // Get registration ID
+                const registrationId = localStorage.getItem('providerRegistrationId');
+                
+                if (registrationId && window.firebaseReady) {
+                    // Update in Firebase
+                    const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                    
+                    await updateDoc(docRef, updatedData);
+                    
+                    // Update localStorage
+                    const existingData = JSON.parse(localStorage.getItem('providerRegistration') || '{}');
+                    const mergedData = { ...existingData, ...updatedData };
+                    localStorage.setItem('providerRegistration', JSON.stringify(mergedData));
+                    
+                    console.log('✅ Profile updated in Firebase');
+                } else {
+                    // Update localStorage only
+                    const existingData = JSON.parse(localStorage.getItem('providerRegistration') || '{}');
+                    const mergedData = { ...existingData, ...updatedData };
+                    localStorage.setItem('providerRegistration', JSON.stringify(mergedData));
+                    
+                    console.log('📱 Profile updated locally');
+                }
+                
+                // Show success message
+                alert('✅ Profile updated successfully!');
+                
+                // Close modal and reload dashboard
+                modal.remove();
+                window.location.reload();
+                
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('❌ Error saving profile: ' + error.message);
+            } finally {
+                // Reset button state
+                const submitButton = document.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.textContent = 'Save Changes';
+                    submitButton.disabled = false;
+                }
+            }
+        }
+        
+        function logout() {
+            // Clear any stored data
+            localStorage.removeItem('providerRegistration');
+            localStorage.removeItem('providerSession');
+            
+            // Redirect to main page
+            window.location.href = 'index.html';
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRegistrationData();
+        });
+    </script>
+</body>
+</html>

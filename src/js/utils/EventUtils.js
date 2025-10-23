@@ -95,7 +95,16 @@ class EventUtils {
             
             try {
                 const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
+                const data = {};
+                for (const [key, value] of formData.entries()) {
+                    if (data[key]) {
+                        data[key] = Array.isArray(data[key])
+                            ? [...data[key], value]
+                            : [data[key], value];
+                    } else {
+                        data[key] = value;
+                    }
+                }
                 onSubmit(data, form);
             } catch (error) {
                 console.error('Form submission error:', error);
@@ -107,7 +116,6 @@ class EventUtils {
 
         return EventUtils.addEventListenerWithCleanup(form, 'submit', handleSubmit);
     }
-
     /**
      * Handle click outside element
      * @param {Element} element - Target element
@@ -123,9 +131,16 @@ class EventUtils {
             }
         };
 
-        return EventUtils.addEventListenerWithCleanup(document, 'click', handleClick);
+        // Defer to next tick to avoid capturing the initiating click
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('click', handleClick);
+        }, 0);
+        
+        return () => {
+            clearTimeout(timeoutId);
+            document.removeEventListener('click', handleClick);
+        };
     }
-
     /**
      * Handle escape key press
      * @param {Function} callback - Callback function
@@ -140,22 +155,61 @@ class EventUtils {
 
         return EventUtils.addEventListenerWithCleanup(document, 'keydown', handleKeydown);
     }
+    static debounce(func, wait, immediate = false) {
+        let timeout;
+        const executedFunction = function(...args) {
+            const later = () => {
+                timeout = null;
+                if (!immediate) func.apply(this, args);
+            };
+            const callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(this, args);
+        };
+        executedFunction.cancel = () => clearTimeout(timeout);
+        return executedFunction;
+    }
 
-    /**
-     * Handle window resize with debouncing
-     * @param {Function} callback - Callback function
-     * @param {number} delay - Debounce delay in milliseconds
+    static handleWindowResize(callback, delay = 250) {
+        const debouncedCallback = EventUtils.debounce(callback, delay);
+        const cleanup = EventUtils.addEventListenerWithCleanup(window, 'resize', debouncedCallback);
+        return () => {
+            debouncedCallback.cancel();
+            cleanup();
+        };
+    }     * @param {number} delay - Debounce delay in milliseconds
      * @returns {Function} Cleanup function
      */
     static handleWindowResize(callback, delay = 250) {
         const debouncedCallback = EventUtils.debounce(callback, delay);
         return EventUtils.addEventListenerWithCleanup(window, 'resize', debouncedCallback);
     }
+static throttle(func, limit) {
+    let inThrottle;
+    let timeoutId;
+    const executedFunction = function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            timeoutId = setTimeout(() => inThrottle = false, limit);
+        }
+    };
+    executedFunction.cancel = () => {
+        clearTimeout(timeoutId);
+        inThrottle = false;
+    };
+    return executedFunction;
+}
 
-    /**
-     * Handle scroll with throttling
-     * @param {Function} callback - Callback function
-     * @param {number} limit - Throttle limit in milliseconds
+static handleScroll(callback, limit = 16) {
+    const throttledCallback = EventUtils.throttle(callback, limit);
+    const cleanup = EventUtils.addEventListenerWithCleanup(window, 'scroll', throttledCallback);
+    return () => {
+        throttledCallback.cancel();
+        cleanup();
+    };
+}     * @param {number} limit - Throttle limit in milliseconds
      * @returns {Function} Cleanup function
      */
     static handleScroll(callback, limit = 16) {
