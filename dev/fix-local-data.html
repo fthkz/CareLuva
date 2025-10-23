@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Local Data - CareLuva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .fix-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .fix-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .fix-button:hover {
+            background: #059669;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="fix-container">
+        <h1>🔧 Fix Local Data</h1>
+        <p>This tool fixes local storage data that might have undefined values causing Firebase errors.</p>
+        
+        <button class="fix-button" onclick="fixLocalData()">Fix Local Data</button>
+        <div id="fix-result" class="result" style="display: none;"></div>
+        
+        <div style="margin-top: 20px;">
+            <h3>What this tool does:</h3>
+            <ul>
+                <li>Removes undefined values from local storage data</li>
+                <li>Removes password fields (not needed for Firebase)</li>
+                <li>Cleans up any corrupted data</li>
+                <li>Prepares data for Firebase sync</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function showResult(message, type = 'info') {
+            const element = document.getElementById('fix-result');
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.textContent = message;
+        }
+        
+        function fixLocalData() {
+            try {
+                const registrationData = localStorage.getItem('providerRegistration');
+                
+                if (!registrationData) {
+                    showResult('No local registration data found to fix.', 'info');
+                    return;
+                }
+                
+                const data = JSON.parse(registrationData);
+                const originalData = { ...data };
+                
+                // Remove undefined values
+                Object.keys(data).forEach(key => {
+                    if (data[key] === undefined) {
+                        delete data[key];
+                    }
+                });
+                
+                // Remove password fields
+                delete data.password;
+                delete data.confirmPassword;
+                
+                // Clean up error flags
+                delete data.firebaseError;
+                delete data.retryAttempted;
+                
+                // Ensure required fields
+                if (!data.status) {
+                    data.status = 'pending';
+                }
+                
+                if (!data.submittedAt) {
+                    data.submittedAt = new Date().toISOString();
+                }
+                
+                if (!data.updatedAt) {
+                    data.updatedAt = new Date().toISOString();
+                }
+                
+                // Save cleaned data
+                localStorage.setItem('providerRegistration', JSON.stringify(data));
+                
+                const changes = [];
+                if (originalData.password !== undefined) changes.push('Removed password field');
+                if (originalData.confirmPassword !== undefined) changes.push('Removed confirmPassword field');
+                if (originalData.firebaseError) changes.push('Removed firebaseError flag');
+                if (originalData.retryAttempted) changes.push('Removed retryAttempted flag');
+                
+                const message = changes.length > 0 
+                    ? `✅ Local data fixed successfully!\n\nChanges made:\n${changes.join('\n')}\n\nData is now ready for Firebase sync.`
+                    : '✅ Local data was already clean - no changes needed.';
+                
+                showResult(message, 'success');
+                
+            } catch (error) {
+                showResult(`❌ Error fixing local data: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Fix local data tool loaded');
+        });
+    </script>
+</body>
+</html>
+
+
+

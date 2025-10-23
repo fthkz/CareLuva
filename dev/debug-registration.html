@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .status.loading {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .debug-section h3 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Registration Debug Tool</h1>
+        
+        <div id="status" class="status loading">
+            🔄 Initializing...
+        </div>
+
+        <div class="debug-section">
+            <h3>🧪 Test Firebase Connection</h3>
+            <button class="btn btn-primary" onclick="testFirebase()">Test Firebase</button>
+            <button class="btn btn-success" onclick="createTestRegistration()">Create Test Registration</button>
+            <div id="firebase-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>📊 Check Local Storage</h3>
+            <button class="btn btn-primary" onclick="checkLocalStorage()">Check Local Storage</button>
+            <div id="localstorage-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>🔥 Check Firebase Data</h3>
+            <button class="btn btn-primary" onclick="checkFirebaseData()">Check Firebase Data</button>
+            <div id="firebase-data-result"></div>
+        </div>
+
+        <div class="debug-section">
+            <h3>🔗 Quick Links</h3>
+            <button class="btn btn-primary" onclick="window.open('complete-registration.html', '_blank')">Registration Form</button>
+            <button class="btn btn-success" onclick="window.open('admin-panel.html', '_blank')">Admin Panel</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXGpGiAaXwWMt-UoMl0hgBVxKddRHN8n0",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0",
+            measurementId: "G-9DL8W0Q6PB"
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            window.firebase = { app, db };
+            window.firebaseReady = true;
+            
+            document.getElementById('status').innerHTML = '✅ Firebase connected successfully!';
+            document.getElementById('status').className = 'status success';
+            
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            document.getElementById('status').innerHTML = `❌ Firebase connection failed: ${error.message}`;
+            document.getElementById('status').className = 'status error';
+        }
+
+        async function testFirebase() {
+            const resultEl = document.getElementById('firebase-result');
+            try {
+                resultEl.innerHTML = '<p>🔄 Testing Firebase connection...</p>';
+                
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    throw new Error('Firebase not initialized');
+                }
+
+                // Test write
+                const testData = {
+                    test: true,
+                    message: 'Firebase connection test',
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                };
+
+                const docRef = await addDoc(collection(window.firebase.db, 'test'), testData);
+                console.log('Test document created with ID:', docRef.id);
+
+                resultEl.innerHTML = `
+                    <div class="status success">
+                        ✅ Firebase test successful!<br>
+                        Test document created with ID: ${docRef.id}
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Firebase test failed:', error);
+                resultEl.innerHTML = `
+                    <div class="status error">
+                        ❌ Firebase test failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function createTestRegistration() {
+            const resultEl = document.getElementById('firebase-result');
+            try {
+                resultEl.innerHTML = '<p>🔄 Creating test registration...</p>';
+                
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    throw new Error('Firebase not initialized');
+                }
+
+                const testRegistration = {
+                    providerType: 'clinic',
+                    clinicName: 'Test Clinic',
+                    contactPerson: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+90 555 123 4567',
+                    address: 'Test Address',
+                    city: 'Istanbul',
+                    country: 'Turkey',
+                    specialization: 'dentistry',
+                    experienceYears: 5,
+                    languages: 'Turkish, English',
+                    status: 'pending',
+                    submittedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isGoogleUser: false,
+                    authProvider: 'email',
+                    password: 'TestPassword123!'  // Keep password for login testing
+                };
+
+                // Don't remove password - we need it for login testing
+
+                const docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), testRegistration);
+                console.log('Test registration created with ID:', docRef.id);
+
+                resultEl.innerHTML = `
+                    <div class="status success">
+                        ✅ Test registration created successfully!<br>
+                        Registration ID: ${docRef.id}<br>
+                        Email: test@example.com<br>
+                        Password: TestPassword123!
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Test registration failed:', error);
+                resultEl.innerHTML = `
+                    <div class="status error">
+                        ❌ Test registration failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function checkLocalStorage() {
+            const resultEl = document.getElementById('localstorage-result');
+            const data = {
+                providerRegistration: localStorage.getItem('providerRegistration'),
+                providerRegistrationId: localStorage.getItem('providerRegistrationId')
+            };
+            
+            resultEl.innerHTML = `
+                <h4>Local Storage Data:</h4>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function checkFirebaseData() {
+            const resultEl = document.getElementById('firebase-data-result');
+            try {
+                resultEl.innerHTML = '<p>🔄 Loading Firebase data...</p>';
+                
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    throw new Error('Firebase not initialized');
+                }
+
+                const q = query(collection(window.firebase.db, 'providerRegistrations'), orderBy('submittedAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const registrations = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                resultEl.innerHTML = `
+                    <h4>Firebase Registrations (${registrations.length} found):</h4>
+                    <pre>${JSON.stringify(registrations, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                console.error('Error loading Firebase data:', error);
+                resultEl.innerHTML = `
+                    <div class="status error">
+                        ❌ Error loading Firebase data: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all local data?')) {
+                localStorage.removeItem('providerRegistration');
+                localStorage.removeItem('providerRegistrationId');
+                alert('Local data cleared!');
+                checkLocalStorage();
+            }
+        }
+
+        // Make functions globally available
+        window.testFirebase = testFirebase;
+        window.createTestRegistration = createTestRegistration;
+        window.checkLocalStorage = checkLocalStorage;
+        window.checkFirebaseData = checkFirebaseData;
+        window.clearAllData = clearAllData;
+    </script>
+</body>
+</html>

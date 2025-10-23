@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Integration Test - CareLuva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔥 Firebase Integration Test</h1>
+        <p>This page tests the Firebase Firestore integration for CareLuva provider registrations.</p>
+        
+        <div class="test-section">
+            <h3>1. Firebase Connection Test</h3>
+            <button class="test-button" onclick="testFirebaseConnection()">Test Connection</button>
+            <div id="connection-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Write Test Data</h3>
+            <button class="test-button" onclick="writeTestData()">Write Test Registration</button>
+            <div id="write-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Read Test Data</h3>
+            <button class="test-button" onclick="readTestData()">Read All Registrations</button>
+            <div id="read-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Update Test Data</h3>
+            <button class="test-button" onclick="updateTestData()">Update Status</button>
+            <div id="update-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. Navigation Test</h3>
+            <button class="test-button" onclick="window.location.href='complete-registration.html'">Go to Registration Form</button>
+            <button class="test-button" onclick="window.location.href='provider-dashboard.html'">Go to Provider Dashboard</button>
+            <button class="test-button" onclick="window.location.href='index.html?admin=true'">Go to Admin Panel</button>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXGpGiAaXwWMt-UoMl0hgBVxKddRHN8n0",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0",
+            measurementId: "G-9DL8W0Q6PB"
+        };
+
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            // Make available globally
+            window.firebase = { app, db };
+            window.firebaseReady = true;
+
+            console.log('✅ Firebase initialized successfully!');
+            
+            // Dispatch custom event to notify other scripts
+            window.dispatchEvent(new CustomEvent('firebaseReady'));
+            
+        } catch (error) {
+            console.error('❌ Firebase initialization failed:', error);
+            window.firebaseReady = false;
+            window.dispatchEvent(new CustomEvent('firebaseError', { detail: error }));
+        }
+    </script>
+
+    <script>
+        let testDocId = null;
+        
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.textContent = message;
+        }
+        
+        async function testFirebaseConnection() {
+            try {
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                showResult('connection-result', '✅ Firebase connection successful!\nProject ID: careluva-5635e\nDatabase: Firestore', 'success');
+                
+            } catch (error) {
+                showResult('connection-result', `❌ Firebase connection failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function writeTestData() {
+            try {
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                const testData = {
+                    providerType: 'clinic',
+                    clinicName: 'Test Clinic',
+                    contactPerson: 'Dr. Test User',
+                    email: 'test@example.com',
+                    phone: '+90 555 123 4567',
+                    city: 'Istanbul',
+                    address: 'Test Address 123',
+                    country: 'Turkey',
+                    medicalLicense: 'TEST123456',
+                    specialization: 'general-practice',
+                    experienceYears: '5',
+                    website: 'https://testclinic.com',
+                    languages: ['Turkish', 'English'],
+                    status: 'pending',
+                    submittedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isTestData: true,
+                    authProvider: 'email'
+                };
+                
+                // Ensure no undefined values
+                Object.keys(testData).forEach(key => {
+                    if (testData[key] === undefined) {
+                        delete testData[key];
+                    }
+                });
+                
+                const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), testData);
+                testDocId = docRef.id;
+                
+                showResult('write-result', `✅ Test data written successfully!\nDocument ID: ${docRef.id}`, 'success');
+                
+            } catch (error) {
+                showResult('write-result', `❌ Write failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function readTestData() {
+            try {
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                const { collection, getDocs, orderBy, query } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const q = query(collection(window.firebase.db, 'providerRegistrations'), orderBy('submittedAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                const registrations = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                const resultText = `✅ Read successful!\nFound ${registrations.length} registrations:\n\n` +
+                    registrations.map(reg => 
+                        `ID: ${reg.id}\nClinic: ${reg.clinicName}\nStatus: ${reg.status}\nEmail: ${reg.email}\nSubmitted: ${reg.submittedAt}\n---`
+                    ).join('\n');
+                
+                showResult('read-result', resultText, 'success');
+                
+            } catch (error) {
+                showResult('read-result', `❌ Read failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function updateTestData() {
+            try {
+                if (!testDocId) {
+                    showResult('update-result', '❌ No test document ID available. Please write test data first.', 'error');
+                    return;
+                }
+                
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const docRef = doc(window.firebase.db, 'providerRegistrations', testDocId);
+                await updateDoc(docRef, {
+                    status: 'approved',
+                    updatedAt: new Date().toISOString(),
+                    statusUpdatedBy: 'test'
+                });
+                
+                showResult('update-result', `✅ Update successful!\nDocument ${testDocId} status changed to 'approved'`, 'success');
+                
+            } catch (error) {
+                showResult('update-result', `❌ Update failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Firebase integration test page loaded');
+        });
+    </script>
+</body>
+</html>

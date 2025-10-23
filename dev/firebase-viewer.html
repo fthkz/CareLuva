@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareLuva Admin Panel</title>
+    <title>Firebase Data Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -168,54 +168,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 CareLuva Admin Panel</h1>
-            <p>Secure admin access - authentication required</p>
+            <h1>🔥 Firebase Data Viewer</h1>
+            <p>View and manage provider registrations from Firebase Firestore</p>
         </div>
 
-        <div id="login-section" style="display: block;">
-            <div class="status loading">
-                🔐 Admin authentication required
-            </div>
-            
-            <form id="admin-login-form" style="max-width: 400px; margin: 0 auto;">
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Admin Email</label>
-                    <input type="email" id="admin-email" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Password</label>
-                    <input type="password" id="admin-password" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                </div>
-                <button type="button" onclick="handleAdminLogin()" class="btn btn-primary" style="width: 100%;">🔐 Login as Admin</button>
-            </form>
-            
-            <div style="margin-top: 15px; text-align: center;">
-                <button type="button" onclick="testLogin()" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">🧪 Test Login (Debug)</button>
-            </div>
-            
-            <div id="login-status" style="margin-top: 15px; padding: 10px; border-radius: 6px; display: none;"></div>
+        <div id="status" class="status loading">
+            🔄 Connecting to Firebase...
         </div>
 
-        <div id="admin-dashboard" style="display: none;">
-            <div class="header">
-                <h1>🔥 CareLuva Admin Panel</h1>
-                <p>Welcome, <span id="admin-name"></span> | <button class="btn btn-secondary" onclick="logout()">Logout</button></p>
-            </div>
+        <div class="actions">
+            <button class="btn btn-primary" onclick="loadRegistrations()">🔄 Refresh Data</button>
+            <button class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection</button>
+            <button class="btn btn-secondary" onclick="window.open('http://localhost:8080/index.html?admin=true', '_blank')">📊 Admin Panel</button>
+        </div>
 
-            <div id="status" class="status loading">
-                🔄 Connecting to Firebase...
-            </div>
-
-            <div class="actions">
-                <button class="btn btn-primary" onclick="loadRegistrations()">🔄 Refresh Data</button>
-                <button class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection</button>
-                <button class="btn btn-secondary" onclick="window.open('https://console.firebase.google.com', '_blank')">🔥 Firebase Console</button>
-            </div>
-
-            <div id="data-container">
-                <div class="loading">
-                    <p>Loading registration data...</p>
-                </div>
+        <div id="data-container">
+            <div class="loading">
+                <p>Loading registration data...</p>
             </div>
         </div>
     </div>
@@ -223,7 +192,7 @@
     <!-- Firebase Configuration -->
     <script type="module">
         const firebaseConfig = {
-            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A", // Replace with your actual new API key
+            apiKey: "AIzaSyCXGpGiAaXwWMt-UoMl0hgBVxKddRHN8n0",
             authDomain: "careluva-5635e.firebaseapp.com",
             projectId: "careluva-5635e",
             storageBucket: "careluva-5635e.firebasestorage.app",
@@ -234,7 +203,6 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
         try {
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
@@ -265,7 +233,7 @@
                     throw new Error('Firebase not initialized');
                 }
 
-                const q = query(collection(window.firebase.db, 'providerRegistrations'), orderBy('submittedAt', 'desc'));
+                const q = query(collection(window.firebase.db, 'providerRegistrations'), orderBy('registrationDate', 'desc'));
                 const querySnapshot = await getDocs(q);
                 const registrations = querySnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -401,7 +369,6 @@
         }
 
         async function testConnection() {
-            const statusEl = document.getElementById('status');
             try {
                 statusEl.innerHTML = '🧪 Testing Firebase connection...';
                 statusEl.className = 'status loading';
@@ -436,195 +403,13 @@
             }
         }
 
-        // Authentication functions
-        let currentAdmin = null;
-
-        // Pre-fill email if provided in URL
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const email = urlParams.get('email');
-            if (email) {
-                document.getElementById('admin-email').value = email;
-                console.log('📧 Pre-filled email:', email);
-            }
-        });
-
-        // Handle admin login - using onclick instead of form submit
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('admin-login-form');
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    console.log('🔐 Form submitted, starting login process...');
-                    await handleAdminLogin();
-                });
-                console.log('✅ Login form event listener attached');
-            } else {
-                console.error('❌ Login form not found');
-            }
-        });
-
-        async function handleAdminLogin() {
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            const statusEl = document.getElementById('login-status');
-            
-            try {
-                console.log('🔐 Starting admin login process...');
-                statusEl.style.display = 'block';
-                statusEl.style.background = '#dbeafe';
-                statusEl.style.border = '1px solid #3b82f6';
-                statusEl.style.color = '#1e40af';
-                statusEl.innerHTML = '🔄 Authenticating...';
-                
-                // Wait for Firebase to be ready
-                if (!window.firebaseReady) {
-                    console.log('⏳ Waiting for Firebase to be ready...');
-                    await new Promise((resolve) => {
-                        window.addEventListener('firebaseReady', resolve, { once: true });
-                    });
-                }
-                
-                if (!window.firebase || !window.firebase.db) {
-                    throw new Error('Firebase not initialized');
-                }
-                
-                console.log('✅ Firebase ready, attempting authentication...');
-                const { getAuth, signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
-                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
-                
-                const auth = getAuth();
-                console.log('🔑 Attempting to sign in with email:', email);
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log('✅ User authenticated successfully:', userCredential.user.uid);
-                
-                // Check if user has admin role
-                console.log('🔍 Checking admin role for user:', userCredential.user.uid);
-                const userDoc = await getDoc(doc(window.firebase.db, 'admins', userCredential.user.uid));
-                
-                if (!userDoc.exists()) {
-                    console.log('❌ User not found in admins collection');
-                    // For debugging, let's create the admin entry automatically
-                    console.log('🔧 Auto-creating admin entry for debugging...');
-                    const { setDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
-                    await setDoc(doc(window.firebase.db, 'admins', userCredential.user.uid), {
-                        uid: userCredential.user.uid,
-                        email: email,
-                        name: 'Admin User',
-                        role: 'admin',
-                        permissions: ['view_registrations', 'approve_registrations', 'reject_registrations'],
-                        createdAt: new Date().toISOString(),
-                        createdBy: 'auto_created'
-                    });
-                    console.log('✅ Admin entry created automatically');
-                }
-                
-                // Get admin data
-                const adminDoc = await getDoc(doc(window.firebase.db, 'admins', userCredential.user.uid));
-                currentAdmin = adminDoc.data();
-                console.log('✅ Admin data loaded:', currentAdmin);
-                
-                document.getElementById('admin-name').textContent = currentAdmin.name || currentAdmin.email;
-                
-                statusEl.style.background = '#d1fae5';
-                statusEl.style.border = '1px solid #10b981';
-                statusEl.style.color = '#065f46';
-                statusEl.innerHTML = '✅ Authentication successful! Loading admin panel...';
-                
-                // Show admin dashboard
-                setTimeout(() => {
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-dashboard').style.display = 'block';
-                    loadRegistrations();
-                }, 1000);
-                
-            } catch (error) {
-                console.error('❌ Admin login error:', error);
-                statusEl.style.background = '#fee2e2';
-                statusEl.style.border = '1px solid #ef4444';
-                statusEl.style.color = '#991b1b';
-                statusEl.innerHTML = `❌ ${error.message}`;
-            }
-        }
-
-        function logout() {
-            currentAdmin = null;
-            document.getElementById('login-section').style.display = 'block';
-            document.getElementById('admin-dashboard').style.display = 'none';
-            document.getElementById('admin-login-form').reset();
-            document.getElementById('login-status').style.display = 'none';
-        }
-
-        // Secure updateStatus function
-        async function updateStatus(registrationId, newStatus) {
-            try {
-                if (!currentAdmin) {
-                    alert('❌ Authentication required: Please log in to update registration status.');
-                    return;
-                }
-                
-                console.log(`🔐 Admin ${currentAdmin.email} updating registration ${registrationId} to status: ${newStatus}`);
-                
-                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
-                    alert('Firebase not available for status update');
-                    return;
-                }
-                
-                const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
-                
-                const registrationRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
-                await updateDoc(registrationRef, {
-                    status: newStatus,
-                    lastUpdated: serverTimestamp(),
-                    statusUpdatedBy: currentAdmin.email,
-                    statusUpdatedByUid: currentAdmin.uid,
-                    statusUpdatedAt: new Date().toISOString()
-                });
-                
-                console.log(`Registration ${registrationId} updated to ${newStatus} by ${currentAdmin.email}`);
-                
-                // Show success message
-                const statusMessages = {
-                    'approved': 'Registration approved successfully!',
-                    'rejected': 'Registration rejected.',
-                    'pending': 'Registration status reset to pending.'
-                };
-                
-                alert(statusMessages[newStatus] || 'Status updated successfully!');
-                
-                // Reload registrations
-                loadRegistrations();
-                
-            } catch (error) {
-                console.error('Error updating registration status:', error);
-                alert(`Failed to update status: ${error.message}`);
-            }
-        }
-
-        // Test function for debugging
-        function testLogin() {
-            console.log('🧪 Test login button clicked');
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            console.log('📧 Email:', email);
-            console.log('🔑 Password length:', password.length);
-            
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
-            }
-            
-            console.log('🚀 Starting test login...');
-            handleAdminLogin();
-        }
-
         // Make functions globally available
         window.loadRegistrations = loadRegistrations;
         window.testConnection = testConnection;
         window.updateStatus = updateStatus;
-        window.logout = logout;
-        window.testLogin = testLogin;
-        window.handleAdminLogin = handleAdminLogin;
     </script>
 </body>
 </html>
+
+
+

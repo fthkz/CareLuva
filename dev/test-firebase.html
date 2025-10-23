@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test - CareLuva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Connection Test</h1>
+        <p>This page tests the Firebase connection for CareLuva.</p>
+        
+        <div id="status-container">
+            <div class="status info">Initializing...</div>
+        </div>
+        
+        <div>
+            <button onclick="testFirebaseConnection()">Test Firebase Connection</button>
+            <button onclick="testRegistration()">Test Registration</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div class="log" id="log-container">
+            <div>Console logs will appear here...</div>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module" src="firebase-config.js"></script>
+    
+    <script>
+        let logContainer = document.getElementById('log-container');
+        let statusContainer = document.getElementById('status-container');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : type === 'warning' ? 'orange' : 'black';
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(message, type) {
+            statusContainer.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        function clearLog() {
+            logContainer.innerHTML = '<div>Console logs will appear here...</div>';
+        }
+        
+        // Wait for Firebase
+        let firebaseReady = false;
+        
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.firebase && window.firebase.db) {
+                    log('✅ Firebase is ready!', 'success');
+                    firebaseReady = true;
+                    updateStatus('Firebase is ready!', 'success');
+                    resolve();
+                    return;
+                }
+                
+                log('⏳ Waiting for Firebase to load...', 'warning');
+                updateStatus('Waiting for Firebase...', 'warning');
+                
+                const checkInterval = setInterval(() => {
+                    if (window.firebase && window.firebase.db) {
+                        log('✅ Firebase is ready!', 'success');
+                        firebaseReady = true;
+                        updateStatus('Firebase is ready!', 'success');
+                        clearInterval(checkInterval);
+                        resolve();
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    if (!firebaseReady) {
+                        log('⚠️ Firebase loading timeout', 'warning');
+                        updateStatus('Firebase timeout - continuing without Firebase', 'warning');
+                        clearInterval(checkInterval);
+                        resolve();
+                    }
+                }, 10000);
+            });
+        }
+        
+        async function testFirebaseConnection() {
+            log('🧪 Starting Firebase connection test...', 'info');
+            
+            try {
+                if (!firebaseReady) {
+                    log('❌ Firebase not ready', 'error');
+                    updateStatus('Firebase not ready', 'error');
+                    return;
+                }
+                
+                // Test write
+                log('📝 Testing Firestore write...', 'info');
+                const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const testData = {
+                    test: true,
+                    message: 'Firebase connection test',
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent,
+                    testTime: new Date().toISOString()
+                };
+                
+                const docRef = await addDoc(collection(window.firebase.db, 'test'), testData);
+                log(`✅ Test document created with ID: ${docRef.id}`, 'success');
+                
+                // Test read
+                log('📖 Testing Firestore read...', 'info');
+                const { getDocs, query, orderBy } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const q = query(collection(window.firebase.db, 'test'), orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const testDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                log(`✅ Read successful: ${testDocs.length} test documents found`, 'success');
+                log(`📄 Latest document: ${JSON.stringify(testDocs[0], null, 2)}`, 'info');
+                
+                updateStatus('Firebase test successful!', 'success');
+                
+            } catch (error) {
+                log(`❌ Firebase test failed: ${error.message}`, 'error');
+                updateStatus(`Firebase test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRegistration() {
+            log('🏥 Testing provider registration...', 'info');
+            
+            try {
+                if (!firebaseReady) {
+                    log('❌ Firebase not ready for registration test', 'error');
+                    return;
+                }
+                
+                const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const registrationData = {
+                    providerType: 'clinic',
+                    clinicName: 'Test Clinic',
+                    contactPerson: 'Test Doctor',
+                    email: 'test@example.com',
+                    phone: '+90 555 123 4567',
+                    address: 'Test Address',
+                    city: 'Istanbul',
+                    country: 'Turkey',
+                    medicalLicense: 'TEST123',
+                    specialization: 'general-medicine',
+                    experienceYears: 5,
+                    website: 'https://testclinic.com',
+                    languages: 'turkish, english',
+                    termsAccepted: true,
+                    marketingConsent: false,
+                    status: 'pending',
+                    registrationDate: serverTimestamp(),
+                    lastUpdated: serverTimestamp()
+                };
+                
+                const docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), registrationData);
+                log(`✅ Test registration created with ID: ${docRef.id}`, 'success');
+                
+                updateStatus('Registration test successful!', 'success');
+                
+            } catch (error) {
+                log(`❌ Registration test failed: ${error.message}`, 'error');
+                updateStatus(`Registration test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('🚀 Initializing Firebase test page...', 'info');
+            await waitForFirebase();
+        });
+    </script>
+</body>
+</html>
+
+
+
