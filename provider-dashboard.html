@@ -289,16 +289,8 @@
 
     <!-- Firebase Configuration -->
     <script type="module">
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A", // Replace with your actual new API key
-            authDomain: "careluva-5635e.firebaseapp.com",
-            projectId: "careluva-5635e",
-            storageBucket: "careluva-5635e.firebasestorage.app",
-            messagingSenderId: "819482287777",
-            appId: "1:819482287777:web:7587b10272cacc0e655ae0",
-            measurementId: "G-9DL8W0Q6PB"
-        };
+        // Import Firebase configuration from external file
+        import firebaseConfig from './firebase-config.js';
 
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";

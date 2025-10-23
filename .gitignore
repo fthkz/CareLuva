@@ -4,10 +4,10 @@
 .env.production
 .env.development
 config.js
-firebase-config.js
 
-# Firebase configuration with actual API keys
+# Firebase configuration with actual API keys - NEVER COMMIT
 firebase-config.js
+firebase-config.local.js
 
 # API Keys and sensitive data
 **/api-keys.js
