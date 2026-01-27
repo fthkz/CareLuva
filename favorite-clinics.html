@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite Clinics - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="verification-badges.js"></script>
+    <script src="trust-score-calculator.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .clinics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .clinic-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .clinic-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .clinic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .clinic-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .clinic-specialization {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .favorite-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #ef4444;
+            padding: 5px;
+        }
+        
+        .clinic-info {
+            margin: 15px 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .info-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .clinic-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .no-favorites {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .no-favorites i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+        
+        .no-favorites h3 {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .no-favorites p {
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-heart"></i> Favorite Clinics</h1>
+            <a href="patient-account.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Account</a>
+        </div>
+        
+        <div id="favoritesContainer">
+            <div class="no-favorites">
+                <i class="fas fa-heart"></i>
+                <h3>No Favorite Clinics Yet</h3>
+                <p>Start adding clinics to your favorites for quick access!</p>
+                <a href="find-clinics.html" class="btn btn-primary">Browse Clinics</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentPatientEmail = null;
+
+        // Check authentication
+        if (!window.authUtils) {
+            window.location.href = 'patient-auth.html';
+        } else {
+            const session = window.authUtils.getSession();
+            if (!session || !session.registrationData) {
+                window.location.href = 'patient-auth.html';
+            } else {
+                currentPatientEmail = session.registrationData.email;
+                loadFavorites();
+            }
+        }
+
+        // Load favorite clinics
+        async function loadFavorites() {
+            try {
+                const favoritesRef = doc(db, 'patientFavorites', currentPatientEmail);
+                const favoritesSnap = await getDoc(favoritesRef);
+                
+                if (!favoritesSnap.exists() || !favoritesSnap.data().clinicIds || favoritesSnap.data().clinicIds.length === 0) {
+                    document.getElementById('favoritesContainer').innerHTML = `
+                        <div class="no-favorites">
+                            <i class="fas fa-heart"></i>
+                            <h3>No Favorite Clinics Yet</h3>
+                            <p>Start adding clinics to your favorites for quick access!</p>
+                            <a href="find-clinics.html" class="btn btn-primary">Browse Clinics</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const clinicIds = favoritesSnap.data().clinicIds;
+                const clinics = [];
+
+                // Load clinic data for each favorite
+                for (const clinicId of clinicIds) {
+                    try {
+                        const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                        const clinicSnap = await getDoc(clinicRef);
+                        
+                        if (clinicSnap.exists()) {
+                            clinics.push({ id: clinicId, ...clinicSnap.data() });
+                        }
+                    } catch (error) {
+                        console.error(`Error loading clinic ${clinicId}:`, error);
+                    }
+                }
+
+                displayFavorites(clinics);
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+            }
+        }
+
+        // Display favorite clinics
+        function displayFavorites(clinics) {
+            const container = document.getElementById('favoritesContainer');
+            
+            if (clinics.length === 0) {
+                container.innerHTML = `
+                    <div class="no-favorites">
+                        <i class="fas fa-heart"></i>
+                        <h3>No Favorite Clinics Yet</h3>
+                        <p>Start adding clinics to your favorites for quick access!</p>
+                        <a href="find-clinics.html" class="btn btn-primary">Browse Clinics</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const badgeSystem = new VerificationBadges();
+            const trustCalculator = new TrustScoreCalculator();
+            
+            container.innerHTML = `
+                <div class="clinics-grid">
+                    ${clinics.map(clinic => {
+                        const badges = badgeSystem.calculateBadges(clinic);
+                        const badgesHTML = badgeSystem.generateBadgesHTML(badges, 'small', 'horizontal');
+                        
+                        // Calculate Trust Score
+                        const reviewData = {
+                            averageRating: clinic.averageRating || clinic.rating || 0,
+                            reviewCount: clinic.reviewCount || 0
+                        };
+                        const trustScore = trustCalculator.calculateTrustScore(clinic, reviewData);
+                        
+                        return `
+                            <div class="clinic-card" onclick="window.location.href='provider-directory.html?id=${clinic.id}'">
+                                <div class="clinic-header">
+                                    <div>
+                                        <div class="clinic-name">${clinic.clinicName || clinic.name || 'Clinic'}</div>
+                                        <div class="clinic-specialization">${clinic.specialization || 'General Medicine'}</div>
+                                    </div>
+                                    <button class="favorite-btn" onclick="event.stopPropagation(); removeFavorite('${clinic.id}')">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                                
+                                ${badges.length > 0 ? `
+                                    <div style="margin: 10px 0; padding: 10px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                                        ${badgesHTML}
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Trust Score -->
+                                <div style="margin: 10px 0; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid ${trustScore.color};">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="font-weight: 600; color: #1f2937; font-size: 0.875rem;">Trust Score:</div>
+                                        <div style="font-size: 1.125rem; font-weight: 700; color: ${trustScore.color};">
+                                            ${trustScore.score.toFixed(1)}/10
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #6b7280;">${trustScore.level}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="clinic-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>${clinic.address || clinic.city || 'Location not specified'}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-phone"></i>
+                                        <span>${clinic.phone || 'N/A'}</span>
+                                    </div>
+                                    ${clinic.rating > 0 ? `
+                                        <div class="info-item">
+                                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                                            <span>${clinic.rating.toFixed(1)} (${clinic.reviewCount || 0} reviews)</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <div class="clinic-actions">
+                                    <a href="provider-directory.html?id=${clinic.id}" class="btn btn-secondary" onclick="event.stopPropagation()">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
+                                    <a href="appointment-booking.html?clinic=${clinic.id}" class="btn btn-primary" onclick="event.stopPropagation()">
+                                        <i class="fas fa-calendar-check"></i> Book
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Remove from favorites
+        async function removeFavorite(clinicId) {
+            if (!confirm('Remove this clinic from your favorites?')) return;
+
+            try {
+                const favoritesRef = doc(db, 'patientFavorites', currentPatientEmail);
+                const favoritesSnap = await getDoc(favoritesRef);
+                
+                if (favoritesSnap.exists()) {
+                    const favoritesData = favoritesSnap.data();
+                    const clinicIds = (favoritesData.clinicIds || []).filter(id => id !== clinicId);
+                    
+                    await setDoc(favoritesRef, {
+                        patientEmail: currentPatientEmail,
+                        clinicIds: clinicIds,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                    
+                    loadFavorites();
+                }
+            } catch (error) {
+                console.error('Error removing favorite:', error);
+                alert('Error removing favorite. Please try again.');
+            }
+        }
+
+        window.removeFavorite = removeFavorite;
+    </script>
+</body>
+</html>
+

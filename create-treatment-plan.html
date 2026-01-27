@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Treatment Plan - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .appointment-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .appointment-number {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .appointment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .add-appointment-btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .summary-section {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .summary-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">CareLuva</div>
+        <a href="provider-dashboard.html" class="back-btn">Back to Dashboard</a>
+    </div>
+    
+    <div class="container">
+        <div class="form-card">
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; margin-bottom: 2rem;">Create Treatment Plan</h1>
+            
+            <form id="treatmentPlanForm">
+                <div class="form-section">
+                    <div class="section-title">Plan Information</div>
+                    
+                    <div class="form-group">
+                        <label for="planName">Treatment Plan Name</label>
+                        <input type="text" id="planName" placeholder="e.g., Hair Transplant Series" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="planDescription">Description</label>
+                        <textarea id="planDescription" placeholder="Describe the treatment plan..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="patientEmail">Patient Email</label>
+                        <input type="email" id="patientEmail" placeholder="patient@example.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="section-title">Appointments</div>
+                    <div id="appointmentsList"></div>
+                    <button type="button" class="btn btn-secondary add-appointment-btn" onclick="addAppointment()">Add Appointment</button>
+                </div>
+                
+                <div class="summary-section">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Appointments:</span>
+                        <span class="summary-value" id="totalAppointments">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">CareLuva Fee:</span>
+                        <span class="summary-value">₺50.00</span>
+                    </div>
+                    <div class="summary-item" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dbeafe;">
+                        <span class="summary-label" style="font-weight: 600;">Note:</span>
+                        <span class="summary-value" style="font-size: 0.875rem; color: #6b7280;">A single fee applies to the entire treatment plan, regardless of the number of appointments.</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Create Treatment Plan</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='provider-dashboard.html'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="treatment-plan-manager.js"></script>
+    <script src="service-catalog.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        const treatmentPlanManager = new TreatmentPlanManager();
+        treatmentPlanManager.initialize(db);
+
+        let appointmentCount = 0;
+        let clinicData = null;
+        let professionals = [];
+
+        // Load clinic data
+        async function loadClinicData() {
+            try {
+                const session = window.authUtils?.getSession();
+                if (!session) {
+                    alert('Please log in to create treatment plans.');
+                    window.location.href = 'provider-auth.html';
+                    return;
+                }
+
+                const email = session.registrationData?.email;
+                if (!email) return;
+
+                const clinicsRef = collection(db, 'providerRegistrations');
+                const emailQuery = query(clinicsRef, where('email', '==', email));
+                const snapshot = await getDocs(emailQuery);
+
+                if (!snapshot.empty) {
+                    clinicData = {
+                        id: snapshot.docs[0].id,
+                        ...snapshot.docs[0].data()
+                    };
+                    professionals = clinicData.professionals || [];
+                }
+            } catch (error) {
+                console.error('Error loading clinic data:', error);
+            }
+        }
+
+        // Add appointment
+        window.addAppointment = function() {
+            appointmentCount++;
+            const appointmentsList = document.getElementById('appointmentsList');
+            
+            const appointmentItem = document.createElement('div');
+            appointmentItem.className = 'appointment-item';
+            appointmentItem.id = `appointment-${appointmentCount}`;
+            appointmentItem.innerHTML = `
+                <div class="appointment-header">
+                    <span class="appointment-number">Appointment ${appointmentCount}</span>
+                    ${appointmentCount > 1 ? '<button type="button" class="remove-btn" onclick="removeAppointment(' + appointmentCount + ')">Remove</button>' : ''}
+                </div>
+                <div class="appointment-grid">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" class="appointment-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" class="appointment-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Service</label>
+                        <input type="text" class="appointment-service" placeholder="Service name" required>
+                    </div>
+                    ${professionals.length > 0 ? `
+                    <div class="form-group">
+                        <label>Professional</label>
+                        <select class="appointment-professional" required>
+                            <option value="">Select professional</option>
+                            ${professionals.map((prof, idx) => `
+                                <option value="${idx}">${prof.name} - ${prof.specialization || 'General'}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            appointmentsList.appendChild(appointmentItem);
+            updateSummary();
+        };
+
+        // Remove appointment
+        window.removeAppointment = function(num) {
+            const item = document.getElementById(`appointment-${num}`);
+            if (item) {
+                item.remove();
+                updateSummary();
+            }
+        };
+
+        // Update summary
+        function updateSummary() {
+            const appointments = document.querySelectorAll('.appointment-item');
+            document.getElementById('totalAppointments').textContent = appointments.length;
+        }
+
+        // Form submission
+        document.getElementById('treatmentPlanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!clinicData) {
+                alert('Clinic data not loaded. Please refresh the page.');
+                return;
+            }
+
+            const appointments = [];
+            const appointmentItems = document.querySelectorAll('.appointment-item');
+            
+            if (appointmentItems.length === 0) {
+                alert('Please add at least one appointment to the treatment plan.');
+                return;
+            }
+
+            for (const item of appointmentItems) {
+                const date = item.querySelector('.appointment-date').value;
+                const time = item.querySelector('.appointment-time').value;
+                const service = item.querySelector('.appointment-service').value;
+                const professionalIdx = item.querySelector('.appointment-professional')?.value;
+                
+                if (!date || !time || !service) {
+                    alert('Please fill in all fields for each appointment.');
+                    return;
+                }
+
+                const professional = professionalIdx !== undefined && professionals[professionalIdx] 
+                    ? professionals[professionalIdx] 
+                    : null;
+
+                appointments.push({
+                    date: date,
+                    time: time,
+                    service: service,
+                    professionalId: professionalIdx || null,
+                    professionalName: professional?.name || null,
+                    clinicId: clinicData.id,
+                    clinicName: clinicData.clinicName || clinicData.name,
+                    patientEmail: document.getElementById('patientEmail').value,
+                    patientId: null, // Will be resolved when creating appointments
+                    planName: document.getElementById('planName').value
+                });
+            }
+
+            try {
+                // Get patient data
+                const patientsRef = collection(db, 'patientUsers');
+                const patientQuery = query(patientsRef, where('email', '==', document.getElementById('patientEmail').value));
+                const patientSnap = await getDocs(patientQuery);
+                
+                if (patientSnap.empty) {
+                    alert('Patient not found. Please verify the email address.');
+                    return;
+                }
+
+                const patientData = patientSnap.docs[0].data();
+
+                const planData = {
+                    clinicId: clinicData.id,
+                    clinicName: clinicData.clinicName || clinicData.name,
+                    patientId: patientSnap.docs[0].id,
+                    patientEmail: document.getElementById('patientEmail').value,
+                    patientName: patientData.name,
+                    planName: document.getElementById('planName').value,
+                    description: document.getElementById('planDescription').value,
+                    appointments: appointments,
+                    careluvaFee: 50.00
+                };
+
+                const planId = await treatmentPlanManager.createTreatmentPlan(planData);
+                alert('Treatment plan created successfully!');
+                window.location.href = `provider-treatment-plans.html`;
+            } catch (error) {
+                console.error('Error creating treatment plan:', error);
+                alert('Error creating treatment plan: ' + error.message);
+            }
+        });
+
+        // Initialize
+        loadClinicData();
+        addAppointment(); // Add first appointment by default
+    </script>
+</body>
+</html>
+

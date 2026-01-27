@@ -13,9 +13,10 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8fafc;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             color: #1f2937;
             line-height: 1.6;
+            min-height: 100vh;
         }
         
         .header {
@@ -42,6 +43,20 @@
         
         .welcome {
             color: #6b7280;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.5;
+            display: inline-flex;
+            align-items: center;
+            height: 2rem;
+        }
+        
+        .welcome:hover {
+            background: #f3f4f6;
         }
         
         .logout-btn {
@@ -52,17 +67,218 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.875rem;
+            font-weight: 500;
             transition: background-color 0.2s;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.5;
         }
         
         .logout-btn:hover {
             background: #dc2626;
         }
         
+        /* Header status badge - consistent sizing with other header elements */
+        #header-status-badge {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 600;
+            margin-bottom: 0 !important;
+            margin-right: 0 !important;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.5;
+            border-radius: 6px !important;
+        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        /* Modern Card Layout */
+        .dashboard-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            color: #3b82f6;
+        }
+
+        /* Loading States and Skeleton Loaders */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: 1rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-title {
+            height: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            width: 60%;
+        }
+
+        .skeleton-button {
+            height: 2.5rem;
+            border-radius: 8px;
+            width: 120px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Mobile Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .dashboard-card {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard-header p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .dashboard-card {
+                padding: 1rem;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.75rem;
+            }
         }
         
         .dashboard-header {
@@ -92,6 +308,13 @@
             margin-bottom: 2rem;
         }
         
+        .welcome-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
         .status-badge {
             display: inline-block;
             padding: 0.5rem 1rem;
@@ -114,6 +337,54 @@
         .status-rejected {
             background: #fee2e2;
             color: #991b1b;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-in;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
         
         .status-card h2 {
@@ -228,59 +499,64 @@
     </style>
 </head>
 <body>
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    <!-- Verification Badges -->
+    <script src="verification-badges.js"></script>
     <header class="header">
         <div class="logo">
-            <a href="index.html" style="text-decoration: none; color: inherit;">🏥 CareLuva</a>
+            CareLuva
         </div>
         <div class="user-info">
-            <span class="welcome">Welcome, Provider!</span>
+            <a href="provider-account.html" class="welcome" id="userWelcome" style="text-decoration: none; color: inherit;">Welcome, Provider!</a>
+            <span id="header-status-badge" class="status-badge status-pending">Pending</span>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
 
     <div class="container">
-        <div class="dashboard-header">
-            <h1>Provider Dashboard</h1>
-            <p>Manage your clinic profile and connect with patients</p>
+        <!-- Welcome Message with Status -->
+        <div class="welcome-section fade-in" id="welcomeSection" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    <h1 id="welcomeMessage" style="font-size: 2rem; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem;">Welcome!</h1>
+                    <p id="statusMessage" style="color: #6b7280; font-size: 1rem;">Loading...</p>
+                </div>
+            </div>
+            <!-- Verification Badges -->
+            <div id="verificationBadgesContainer" style="margin-top: 1rem;"></div>
         </div>
 
-        <div class="status-card">
-            <div class="status-badge status-pending" id="status-badge">
-                Registration Pending
+        <!-- Analytics & Reports Section -->
+        <div class="dashboard-card fade-in" id="analyticsSection">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Analytics & Reports
+                    </div>
+                </div>
+            <div id="analyticsContent">
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 15px; color: #6b7280;">Loading analytics...</p>
             </div>
-            <h2>Welcome to CareLuva!</h2>
-            <p>Your provider registration has been submitted successfully. Our team will review your application and get back to you within 2-3 business days.</p>
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="checkStatus()">Check Status</button>
-                <button class="btn btn-secondary" onclick="editProfile()">Edit Profile</button>
-            </div>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">👥</div>
-                <h3>Patient Management</h3>
-                <p>View and manage your patient appointments and consultations.</p>
-                <button class="btn btn-secondary coming-soon">Coming Soon</button>
+                    </div>
             </div>
             
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Analytics & Reports</h3>
-                <p>Track your clinic's performance and patient satisfaction metrics.</p>
-                <button class="btn btn-secondary coming-soon">Coming Soon</button>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">💰</div>
-                <h3>Billing & Payments</h3>
-                <p>Manage your billing, payments, and financial reports.</p>
-                <button class="btn btn-secondary coming-soon">Coming Soon</button>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">⚙️</div>
-                <h3>Settings</h3>
+        <!-- Hidden features grid (kept for reference, not displayed) -->
+        <div class="features-grid" style="display: none;">
+            <div class="dashboard-card slide-in" style="animation-delay: 0.4s;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Settings
+                    </div>
+                </div>
                 <p>Update your clinic information, availability, and preferences.</p>
                 <button class="btn btn-secondary coming-soon">Coming Soon</button>
             </div>
@@ -321,9 +597,21 @@
         // Load registration data from Firebase or localStorage
         async function loadRegistrationData() {
             try {
-                // First try to load from Firebase
-                const registrationId = localStorage.getItem('providerRegistrationId');
+                // Get registration ID from session or localStorage
+                let registrationId = null;
                 
+                if (window.authUtils && window.authUtils.isAuthenticated()) {
+                    const sessionInfo = window.authUtils.getSession();
+                    if (sessionInfo && sessionInfo.session.uid) {
+                        registrationId = sessionInfo.session.uid;
+                    }
+                }
+                
+                if (!registrationId) {
+                    registrationId = localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+                }
+                
+                // First try to load from Firebase
                 if (registrationId && window.firebaseReady) {
                     await loadFromFirebase(registrationId);
                 } else {
@@ -350,20 +638,56 @@
                     throw new Error('Firebase not initialized');
                 }
                 
+                // Check authentication using improved session management (Firestore-only auth)
+                if (!window.authUtils || !window.authUtils.isAuthenticated()) {
+                    console.log('User not authenticated, using localStorage');
+                    loadFromLocalStorage();
+                    return;
+                }
+                
+                // Get session data to verify email
+                const sessionInfo = window.authUtils.getSession();
+                const sessionData = window.authUtils.getSessionData();
+                
+                if (!sessionInfo || !sessionInfo.session.uid || !sessionData) {
+                    console.log('Session data incomplete, using localStorage');
+                    loadFromLocalStorage();
+                    return;
+                }
+                
                 // Import Firebase functions
                 const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                // Get document from Firestore
-                const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                // Get document from Firestore using registration ID from session
+                const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId || sessionInfo.session.uid);
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    // Verify email matches (security rule requirement)
+                    if (data.email === sessionData.email) {
                     console.log('✅ Loaded data from Firebase:', data);
+                        console.log('✅ Current status:', data.status);
+                        
+                        // Store last known status for change detection
+                        if (typeof lastKnownStatus === 'undefined') {
+                            window.lastKnownStatus = (data.status?.toLowerCase() || 'pending');
+                        }
+                        
                     updateDashboard(data);
                     
-                    // Update localStorage with latest data
+                        // Update localStorage and session with latest data
                     localStorage.setItem('providerRegistration', JSON.stringify(data));
+                        if (window.authUtils) {
+                            // Update session data
+                            const safeData = { ...data };
+                            delete safeData.password;
+                            window.authUtils.saveSession(sessionInfo.session, safeData, sessionInfo.session.rememberMe);
+                        }
+                    } else {
+                        console.warn('Email mismatch, using localStorage. Firebase email:', data.email, 'Session email:', sessionData.email);
+                        loadFromLocalStorage();
+                    }
                 } else {
                     console.log('No document found in Firebase, falling back to localStorage');
                     loadFromLocalStorage();
@@ -371,37 +695,251 @@
                 
             } catch (error) {
                 console.error('❌ Error loading from Firebase:', error);
+                // If it's a permission error, try localStorage
+                if (error.message && error.message.includes('permission')) {
+                    console.log('Permission denied, using localStorage data');
+                }
                 loadFromLocalStorage();
             }
         }
         
         function loadFromLocalStorage() {
-            const registrationData = localStorage.getItem('providerRegistration');
-            if (registrationData) {
-                try {
-                    const data = JSON.parse(registrationData);
-                    console.log('📱 Loaded data from localStorage:', data);
-                    updateDashboard(data);
-                } catch (error) {
-                    console.error('Error parsing localStorage data:', error);
+            // Use improved session management if available
+            let registrationData = null;
+            
+            if (window.authUtils) {
+                // Check if session is valid
+                if (!window.authUtils.isAuthenticated()) {
+                    console.log('Session expired or invalid, redirecting to login...');
+                    window.location.href = 'provider-auth.html';
+                    return;
+                }
+                
+                // Get registration data from session
+                registrationData = window.authUtils.getSessionData();
+                
+                // Refresh session on page load (extend expiry)
+                const sessionInfo = window.authUtils.getSession();
+                if (sessionInfo) {
+                    window.authUtils.refreshSession(sessionInfo.session.rememberMe);
                 }
             } else {
-                console.log('No registration data found');
+                // Fallback: use direct localStorage access
+                const registrationDataStr = localStorage.getItem('providerRegistration');
+                if (registrationDataStr) {
+                    try {
+                        registrationData = JSON.parse(registrationDataStr);
+                    } catch (error) {
+                        console.error('Error parsing localStorage data:', error);
+                    }
+                }
+            }
+            
+            if (registrationData) {
+                console.log('📱 Loaded data from storage:', registrationData);
+                console.log('📱 Status from storage:', registrationData.status);
+                
+                // Store last known status
+                if (typeof lastKnownStatus === 'undefined') {
+                    window.lastKnownStatus = (registrationData.status?.toLowerCase() || 'pending');
+                }
+                
+                updateDashboard(registrationData);
+            } else {
+                console.log('No registration data found, redirecting to login...');
+                window.location.href = 'provider-auth.html';
             }
         }
         
-        function updateDashboard(data) {
-            // Update welcome message with clinic name
-            const welcomeElement = document.querySelector('.welcome');
-            if (data.clinicName) {
-                welcomeElement.textContent = `Welcome, ${data.clinicName}!`;
+        // Automatic status refresh
+        let statusRefreshInterval = null;
+        
+        async function refreshStatus() {
+            try {
+                // Stop refreshing if status is already approved
+                const currentStatus = window.lastKnownStatus || 'pending';
+                if (currentStatus === 'approved') {
+                    console.log('✅ Status is approved, stopping automatic refresh');
+                    if (statusRefreshInterval) {
+                        clearInterval(statusRefreshInterval);
+                        statusRefreshInterval = null;
+                    }
+                    return;
+                }
+                
+                // Get registration ID from session or localStorage
+                let registrationId = null;
+                
+                if (window.authUtils && window.authUtils.isAuthenticated()) {
+                    const sessionInfo = window.authUtils.getSession();
+                    if (sessionInfo && sessionInfo.session.uid) {
+                        registrationId = sessionInfo.session.uid;
+                    }
+                }
+                
+                if (!registrationId) {
+                    registrationId = localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+                }
+                
+                if (!registrationId || !window.firebaseReady || !window.firebase?.db) {
+                    return;
+                }
+                
+                // Load from Firestore
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const newStatus = data.status?.toLowerCase() || 'pending';
+                    const previousStatus = window.lastKnownStatus || 'pending';
+                    
+                    // Only update if status changed
+                    if (previousStatus !== newStatus) {
+                        console.log('🔄 Status changed from', previousStatus, 'to', newStatus);
+                        window.lastKnownStatus = newStatus;
+                        
+                        // Update localStorage and session
+                        localStorage.setItem('providerRegistration', JSON.stringify(data));
+                        if (window.authUtils) {
+                            const sessionInfo = window.authUtils.getSession();
+                            if (sessionInfo) {
+                                const safeData = { ...data };
+                                delete safeData.password;
+                                window.authUtils.saveSession(sessionInfo.session, safeData, sessionInfo.session.rememberMe);
+                            }
+                        }
+                        
+                        // Update dashboard (includes header badge and welcome message)
+                    updateDashboard(data);
+                        
+                        // Stop refreshing if status is now approved
+                        if (newStatus === 'approved') {
+                            console.log('✅ Status is now approved, stopping automatic refresh');
+                            if (statusRefreshInterval) {
+                                clearInterval(statusRefreshInterval);
+                                statusRefreshInterval = null;
+                            }
+                        }
+                    }
+                }
+                } catch (error) {
+                console.error('Error refreshing status:', error);
+            }
+        }
+        
+        // Start automatic status refresh (every 30 seconds)
+        function startStatusRefresh() {
+            // Check current status first
+            const currentStatus = window.lastKnownStatus || 'pending';
+            if (currentStatus === 'approved') {
+                console.log('✅ Status is already approved, skipping automatic refresh');
+                return;
             }
             
-            // Update status based on registration data
-            const statusBadge = document.getElementById('status-badge');
-            if (data.status) {
-                statusBadge.textContent = data.status;
-                statusBadge.className = `status-badge status-${data.status.toLowerCase()}`;
+            // Initial refresh after 5 seconds
+            setTimeout(refreshStatus, 5000);
+            
+            // Then refresh every 30 seconds
+            statusRefreshInterval = setInterval(refreshStatus, 30000);
+        }
+        
+        // Stop status refresh when page is hidden (only if not approved)
+        document.addEventListener('visibilitychange', function() {
+            const currentStatus = window.lastKnownStatus || 'pending';
+            if (currentStatus === 'approved') {
+                return; // Don't manage refresh for approved status
+            }
+            
+            if (document.hidden) {
+                if (statusRefreshInterval) {
+                    clearInterval(statusRefreshInterval);
+                    statusRefreshInterval = null;
+                }
+            } else {
+                // Resume refresh when page becomes visible (only if not approved)
+                if (!statusRefreshInterval && currentStatus !== 'approved') {
+                    refreshStatus();
+                    statusRefreshInterval = setInterval(refreshStatus, 30000);
+            }
+        }
+        });
+        
+        function updateDashboard(data) {
+            console.log('🔄 Updating dashboard with data:', data);
+            
+            // Update welcome message with clinic name in header
+            const welcomeElement = document.getElementById('userWelcome');
+            if (welcomeElement && data.clinicName) {
+                welcomeElement.textContent = data.clinicName;
+                welcomeElement.title = 'Click to manage account settings';
+            }
+            
+            // Update status badge in header
+            const headerStatusBadge = document.getElementById('header-status-badge');
+            if (headerStatusBadge && data.status) {
+                const status = data.status.toLowerCase();
+                headerStatusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                headerStatusBadge.className = `status-badge status-${status}`;
+            }
+            
+            // Update welcome section with name and status message
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            if (welcomeMessage && data.clinicName) {
+                welcomeMessage.textContent = `Welcome, ${data.clinicName}!`;
+            }
+            
+            // Display verification badges
+            if (window.VerificationBadges) {
+                const badgeSystem = new VerificationBadges();
+                const badgesContainer = document.getElementById('verificationBadgesContainer');
+                if (badgesContainer) {
+                    badgeSystem.renderBadges(data, badgesContainer, { size: 'medium', layout: 'horizontal' });
+                }
+            }
+            
+            if (statusMessage && data.status) {
+                const status = data.status.toLowerCase();
+                let message = '';
+                let showApprovalMessage = false;
+                
+                if (status === 'approved') {
+                    // Check if approval message should be shown (disappear after 1 day)
+                    const approvalShownKey = `approvalMessageShown_${data.email || 'unknown'}`;
+                    const approvalShownTime = localStorage.getItem(approvalShownKey);
+                    const now = Date.now();
+                    const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                    
+                    if (!approvalShownTime) {
+                        // First time seeing approved status, show message and store timestamp
+                        localStorage.setItem(approvalShownKey, now.toString());
+                        showApprovalMessage = true;
+                    } else {
+                        const timeSinceShown = now - parseInt(approvalShownTime);
+                        if (timeSinceShown < oneDay) {
+                            // Less than 1 day has passed, show message
+                            showApprovalMessage = true;
+                        } else {
+                            // More than 1 day has passed, hide message
+                            showApprovalMessage = false;
+                        }
+                    }
+                    
+                    if (showApprovalMessage) {
+                        message = 'Your clinic has been verified and is live on CareLuva! You can now receive patient appointments.';
+                    } else {
+                        message = 'Your account is verified and active.';
+                    }
+                } else if (status === 'rejected') {
+                    message = 'Your registration was not approved. Please contact support for more information.';
+                } else {
+                    message = 'Your provider registration is under review. Our team will review your application and get back to you within 2-3 business days.';
+                }
+                
+                statusMessage.textContent = message;
             }
             
             // Show Google user indicator if applicable
@@ -412,6 +950,231 @@
             // Show local storage indicator if data was saved locally
             if (data.savedLocally) {
                 showLocalStorageIndicator(data);
+            }
+            
+            // Load analytics on dashboard (async, don't block)
+            loadDashboardAnalytics().catch(error => {
+                console.error('Error loading dashboard analytics:', error);
+                const analyticsContent = document.getElementById('analyticsContent');
+                if (analyticsContent) {
+                    analyticsContent.innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444;"><p>Error loading analytics: ${error.message}</p><button onclick="loadDashboardAnalytics()" class="btn btn-primary" style="margin-top: 15px;">Retry</button></div>`;
+                }
+            });
+        }
+        
+        // Load analytics directly into dashboard (not modal)
+        async function loadDashboardAnalytics() {
+            const contentEl = document.getElementById('analyticsContent');
+            if (!contentEl) {
+                console.warn('Analytics content element not found');
+                return;
+            }
+            
+            try {
+                // Wait for Firebase to be ready
+                if (!window.firebaseReady) {
+                    await new Promise((resolve) => {
+                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    });
+                }
+                
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                // Wait a bit for auth-utils to be available
+                let retries = 0;
+                while (!window.authUtils && retries < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    retries++;
+                }
+                
+                if (!window.authUtils || !window.authUtils.isAuthenticated()) {
+                    contentEl.innerHTML = `<div style="text-align: center; padding: 40px;"><p>Please log in to view analytics.</p><a href="provider-auth.html" class="btn btn-primary" style="margin-top: 15px;">Log In</a></div>`;
+                    return;
+                }
+                
+                const sessionInfo = window.authUtils.getSession();
+                if (!sessionInfo || !sessionInfo.session.uid) {
+                    contentEl.innerHTML = `<div style="text-align: center; padding: 40px;"><p>Session expired. Please log in again.</p><a href="provider-auth.html" class="btn btn-primary" style="margin-top: 15px;">Log In</a></div>`;
+                    return;
+                }
+                
+                const clinicId = sessionInfo.session.uid;
+                const { collection, query, where, getDocs, orderBy } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Load appointments
+                const appointmentsRef = collection(window.firebase.db, 'appointments');
+                let appointments = [];
+                try {
+                    let appointmentsQuery = query(appointmentsRef, where('clinicId', '==', clinicId));
+                    // Try with orderBy first
+                    try {
+                        appointmentsQuery = query(appointmentsRef, where('clinicId', '==', clinicId), orderBy('createdAt', 'desc'));
+                    } catch (e) {
+                        console.warn('OrderBy not available, will sort manually:', e);
+                    }
+                    const snapshot = await getDocs(appointmentsQuery);
+                    appointments = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    // Sort manually if needed
+                    if (appointments.length > 0 && !appointmentsQuery._query?.orderBy) {
+                        appointments.sort((a, b) => {
+                            const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return dateB.getTime() - dateA.getTime();
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Error loading appointments:', error);
+                }
+                
+                // Load reviews
+                const reviewsRef = collection(window.firebase.db, 'reviews');
+                let reviews = [];
+                try {
+                    const reviewsQuery = query(reviewsRef, where('clinicId', '==', clinicId));
+                    const snapshot = await getDocs(reviewsQuery);
+                    reviews = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.warn('Error loading reviews:', error);
+                }
+                
+                // Calculate statistics
+                const totalAppointments = appointments.length;
+                const completedAppointments = appointments.filter(a => a.status === 'completed').length;
+                const cancelledAppointments = appointments.filter(a => a.status === 'cancelled').length;
+                const scheduledAppointments = appointments.filter(a => a.status === 'scheduled' || !a.status).length;
+                
+                const approvedReviews = reviews.filter(r => r.status === 'approved' || !r.status);
+                const totalReviews = approvedReviews.length;
+                const averageRating = approvedReviews.length > 0 
+                    ? (approvedReviews.reduce((sum, r) => sum + (r.overallRating || 0), 0) / approvedReviews.length).toFixed(1)
+                    : 0;
+                
+                // Calculate monthly stats
+                const now = new Date();
+                const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const thisMonthAppointments = appointments.filter(apt => {
+                    const aptDate = apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : null);
+                    return aptDate && aptDate >= thisMonth;
+                }).length;
+                
+                contentEl.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Total Appointments</div>
+                            <div style="font-size: 32px; font-weight: 700;">${totalAppointments}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">${thisMonthAppointments} this month</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Completed</div>
+                            <div style="font-size: 32px; font-weight: 700;">${completedAppointments}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">${totalAppointments > 0 ? Math.round((completedAppointments / totalAppointments) * 100) : 0}% completion rate</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Scheduled</div>
+                            <div style="font-size: 32px; font-weight: 700;">${scheduledAppointments}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">Upcoming appointments</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Average Rating</div>
+                            <div style="font-size: 32px; font-weight: 700;">${averageRating}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">From ${totalReviews} review${totalReviews !== 1 ? 's' : ''}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                            <h3 style="margin: 0 0 15px 0;">Appointment Status</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Completed</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0}%; height: 100%; background: #10b981;"></div>
+                                        </div>
+                                        <span style="font-weight: 600;">${completedAppointments}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Scheduled</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${totalAppointments > 0 ? (scheduledAppointments / totalAppointments) * 100 : 0}%; height: 100%; background: #3b82f6;"></div>
+                                        </div>
+                                        <span style="font-weight: 600;">${scheduledAppointments}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Cancelled</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${totalAppointments > 0 ? (cancelledAppointments / totalAppointments) * 100 : 0}%; height: 100%; background: #ef4444;"></div>
+                                        </div>
+                                        <span style="font-weight: 600;">${cancelledAppointments}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                            <h3 style="margin: 0 0 15px 0;">Recent Reviews</h3>
+                            ${totalReviews > 0 ? `
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    ${approvedReviews.slice(0, 3).map(review => `
+                                        <div style="padding: 12px; background: #f9fafb; border-radius: 6px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
+                                                <div style="font-weight: 600; font-size: 14px;">${review.patientName || 'Anonymous'}</div>
+                                                <div style="color: #f59e0b; font-size: 14px;">${'★'.repeat(Math.round(review.overallRating || 0))}${'☆'.repeat(5 - Math.round(review.overallRating || 0))}</div>
+                                            </div>
+                                            ${review.comment ? `<p style="margin: 0; font-size: 13px; color: #6b7280; line-height: 1.4;">${review.comment.substring(0, 100)}${review.comment.length > 100 ? '...' : ''}</p>` : ''}
+                                        </div>
+                                    `).join('')}
+                                    ${totalReviews > 3 ? `<p style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 5px;">+ ${totalReviews - 3} more reviews</p>` : ''}
+                                </div>
+                            ` : `
+                                <p style="text-align: center; color: #6b7280; padding: 20px;">No reviews yet</p>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0;">Quick Actions</h3>
+                            <a href="provider-analytics.html" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">View Full Report</a>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Total Appointments</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #667eea;">${totalAppointments}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Completion Rate</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #10b981;">
+                                    ${totalAppointments > 0 ? Math.round((completedAppointments / totalAppointments) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Average Rating</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #f59e0b;">${averageRating}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Monthly Appointments</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #8b5cf6;">
+                                    ${thisMonthAppointments}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading dashboard analytics:', error);
+                contentEl.innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444;"><p>Error loading analytics: ${error.message}</p><button onclick="loadDashboardAnalytics()" class="btn btn-primary" style="margin-top: 15px;">Retry</button></div>`;
             }
         }
         
@@ -531,29 +1294,63 @@
                 statusButton.textContent = 'Checking...';
                 statusButton.disabled = true;
                 
-                // Get current registration data
-                const registrationId = localStorage.getItem('providerRegistrationId');
+                // Get registration ID from session or localStorage
+                let registrationId = null;
                 let registrationData = null;
                 
-                if (registrationId && window.firebaseReady) {
-                    // Load from Firebase
+                if (window.authUtils && window.authUtils.isAuthenticated()) {
+                    const sessionInfo = window.authUtils.getSession();
+                    if (sessionInfo && sessionInfo.session.uid) {
+                        registrationId = sessionInfo.session.uid;
+                    }
+                }
+                
+                if (!registrationId) {
+                    registrationId = localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+                }
+                
+                // Try to load from Firebase
+                if (registrationId && window.firebaseReady && window.firebase?.db) {
+                    try {
                     const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                     const docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
                     const docSnap = await getDoc(docRef);
                     
                     if (docSnap.exists()) {
                         registrationData = docSnap.data();
-                    }
+                            console.log('✅ Loaded status from Firebase:', registrationData.status);
+                            
+                            // Update localStorage and session with latest data
+                            localStorage.setItem('providerRegistration', JSON.stringify(registrationData));
+                            if (window.authUtils) {
+                                const sessionInfo = window.authUtils.getSession();
+                                if (sessionInfo) {
+                                    const safeData = { ...registrationData };
+                                    delete safeData.password;
+                                    window.authUtils.saveSession(sessionInfo.session, safeData, sessionInfo.session.rememberMe);
+                                }
+                            }
+                            
+                            // Update dashboard with fresh data
+                            updateDashboard(registrationData);
                 } else {
-                    // Fallback to localStorage
-                    const localData = localStorage.getItem('providerRegistration');
+                            console.log('Document not found in Firebase');
+                        }
+                    } catch (firebaseError) {
+                        console.warn('Error loading from Firebase, using localStorage:', firebaseError);
+                    }
+                }
+                
+                // Fallback to localStorage if Firebase load failed
+                if (!registrationData) {
+                    const localData = localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
                     if (localData) {
                         registrationData = JSON.parse(localData);
                     }
                 }
                 
                 if (!registrationData) {
-                    throw new Error('No registration data found');
+                    throw new Error('No registration data found. Please complete your registration first.');
                 }
                 
                 // Show detailed status modal
@@ -565,8 +1362,10 @@
             } finally {
                 // Reset button state
                 const statusButton = document.querySelector('button[onclick="checkStatus()"]');
+                if (statusButton) {
                 statusButton.textContent = 'Check Status';
                 statusButton.disabled = false;
+                }
             }
         }
         
@@ -940,17 +1739,656 @@
         }
         
         function logout() {
-            // Clear any stored data
+            // Use improved session management if available
+            if (window.authUtils) {
+                window.authUtils.clearSession();
+            } else {
+                // Fallback: clear storage manually
             localStorage.removeItem('providerRegistration');
             localStorage.removeItem('providerSession');
+                sessionStorage.removeItem('providerRegistration');
+                sessionStorage.removeItem('providerSession');
+            }
             
-            // Redirect to main page
-            window.location.href = 'index.html';
+            // Redirect to provider login page
+            window.location.href = 'provider-auth.html';
+        }
+        
+        // Patient Management Feature
+        // Make function globally accessible
+        window.showPatientManagement = async function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">👥 Patient Management</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                    </div>
+                    <div id="patient-management-content">
+                        <div style="text-align: center; padding: 40px;">
+                            <div class="spinner"></div>
+                            <p>Loading patient data...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Close modal with escape key
+            const closeModal = function(e) {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.removeEventListener('keydown', closeModal);
+                }
+            };
+            document.addEventListener('keydown', closeModal);
+            
+            try {
+                await loadPatientData(modal);
+            } catch (error) {
+                console.error('Error loading patient data:', error);
+                const contentEl = document.getElementById('patient-management-content');
+                if (contentEl) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #ef4444;">
+                            <p>Error loading patient data: ${error.message}</p>
+                            <button onclick="window.showPatientManagement()" class="btn btn-primary" style="margin-top: 15px;">Retry</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        async function loadPatientData(modal) {
+            const contentEl = document.getElementById('patient-management-content');
+            
+            try {
+                if (!window.firebaseReady || !window.firebase?.db) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                const { collection, query, where, getDocs, orderBy } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Check authentication using improved session management
+                if (!window.authUtils || !window.authUtils.isAuthenticated()) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <p>Please log in to view patient data.</p>
+                            <button onclick="window.location.href='provider-auth.html'" class="btn btn-primary" style="margin-top: 15px;">Log In</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get session data using improved session management
+                const sessionInfo = window.authUtils.getSession();
+                const registration = window.authUtils.getSessionData() || {};
+                
+                if (!sessionInfo || !sessionInfo.session.uid) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <p>Session expired. Please log in again.</p>
+                            <button onclick="window.location.href='provider-auth.html'" class="btn btn-primary" style="margin-top: 15px;">Log In</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get clinicId (registration document ID) for querying appointments
+                const clinicId = sessionInfo.session.uid;
+                
+                // Load appointments for this provider using clinicId
+                const appointmentsRef = collection(window.firebase.db, 'appointments');
+                let appointmentsQuery;
+                try {
+                    appointmentsQuery = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId),
+                        orderBy('createdAt', 'desc')
+                    );
+                } catch (error) {
+                    // If index not ready, try without orderBy
+                    console.log('Index not ready, querying without orderBy...');
+                    appointmentsQuery = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId)
+                    );
+                }
+                
+                let appointments = [];
+                try {
+                    const snapshot = await getDocs(appointmentsQuery);
+                    appointments = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    // Sort manually if orderBy wasn't used
+                    if (!appointmentsQuery._query?.orderBy) {
+                        appointments.sort((a, b) => {
+                            const aDate = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const bDate = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return bDate.getTime() - aDate.getTime();
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Error loading appointments:', error);
+                    // Try without orderBy as fallback
+                    try {
+                        const simpleQuery = query(appointmentsRef, where('clinicId', '==', clinicId));
+                        const snapshot = await getDocs(simpleQuery);
+                        appointments = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        appointments.sort((a, b) => {
+                            const aDate = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const bDate = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return bDate.getTime() - aDate.getTime();
+                        });
+                    } catch (fallbackError) {
+                        console.error('Fallback query also failed:', fallbackError);
+                    }
+                }
+                
+                // Group appointments by patient
+                const patientsMap = new Map();
+                appointments.forEach(apt => {
+                    const patientId = apt.patientId || apt.patientEmail || 'unknown';
+                    if (!patientsMap.has(patientId)) {
+                        patientsMap.set(patientId, {
+                            id: patientId,
+                            name: apt.patientName || 'Unknown Patient',
+                            email: apt.patientEmail || apt.email || '',
+                            phone: apt.patientPhone || apt.phone || '',
+                            appointments: [],
+                            lastAppointment: null
+                        });
+                    }
+                    const patient = patientsMap.get(patientId);
+                    patient.appointments.push(apt);
+                    const aptDate = apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : new Date(0));
+                    if (!patient.lastAppointment || aptDate > patient.lastAppointment) {
+                        patient.lastAppointment = aptDate;
+                    }
+                });
+                
+                const patients = Array.from(patientsMap.values());
+                patients.sort((a, b) => (b.lastAppointment || new Date(0)) - (a.lastAppointment || new Date(0)));
+                
+                if (patients.length === 0) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-users" style="font-size: 48px; color: #9ca3af; margin-bottom: 15px;"></i>
+                            <h3>No Patients Yet</h3>
+                            <p style="color: #6b7280;">You don't have any patient appointments yet.</p>
+                            <button onclick="window.location.href='appointment-booking.html'" class="btn btn-primary" style="margin-top: 15px;">View Appointment Booking</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                contentEl.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0;">Total Patients: ${patients.length}</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="window.location.href='provider-appointments.html'" class="btn btn-primary">
+                                    <i class="fas fa-calendar"></i> View All Appointments
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: grid; gap: 15px;">
+                        ${patients.map(patient => `
+                            <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                    <div>
+                                        <h4 style="margin: 0 0 5px 0;">${patient.name}</h4>
+                                        ${patient.email ? `<p style="margin: 0; color: #6b7280; font-size: 14px;"><i class="fas fa-envelope"></i> ${patient.email}</p>` : ''}
+                                        ${patient.phone ? `<p style="margin: 0; color: #6b7280; font-size: 14px;"><i class="fas fa-phone"></i> ${patient.phone}</p>` : ''}
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+                                            ${patient.appointments.length} appointment${patient.appointments.length !== 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                                    <strong style="font-size: 14px; color: #374151;">Recent Appointments:</strong>
+                                    <div style="margin-top: 10px;">
+                                        ${patient.appointments.slice(0, 3).map(apt => {
+                                            const aptDate = apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : null);
+                                            const dateStr = aptDate ? aptDate.toLocaleDateString() : 'Date TBD';
+                                            const status = apt.status || 'scheduled';
+                                            return `
+                                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f9fafb; border-radius: 6px; margin-bottom: 8px;">
+                                                    <div>
+                                                        <span style="font-weight: 500;">${dateStr}</span>
+                                                        ${apt.time ? `<span style="color: #6b7280; margin-left: 10px;">${apt.time}</span>` : ''}
+                                                    </div>
+                                                    <span style="background: ${status === 'completed' ? '#d1fae5' : status === 'cancelled' ? '#fee2e2' : '#fef3c7'}; color: ${status === 'completed' ? '#065f46' : status === 'cancelled' ? '#991b1b' : '#92400e'}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: capitalize;">
+                                                        ${status}
+                                                    </span>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                        ${patient.appointments.length > 3 ? `<p style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 8px;">+ ${patient.appointments.length - 3} more</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // Analytics & Reports Feature
+        // Make function globally accessible
+        window.showAnalytics = async function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">📊 Analytics & Reports</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                    </div>
+                    <div id="analytics-content">
+                        <div style="text-align: center; padding: 40px;">
+                            <div class="spinner"></div>
+                            <p>Loading analytics...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Close modal with escape key
+            const closeModal = function(e) {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.removeEventListener('keydown', closeModal);
+                }
+            };
+            document.addEventListener('keydown', closeModal);
+            
+            try {
+                await loadAnalyticsData(modal);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                const contentEl = document.getElementById('analytics-content');
+                if (contentEl) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #ef4444;">
+                            <p>Error loading analytics: ${error.message}</p>
+                            <button onclick="window.showAnalytics()" class="btn btn-primary" style="margin-top: 15px;">Retry</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        async function loadAnalyticsData(modal) {
+            const contentEl = document.getElementById('analytics-content');
+            
+            try {
+                if (!window.firebaseReady || !window.firebase?.db) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                const { collection, query, where, getDocs, orderBy } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Check authentication using improved session management
+                if (!window.authUtils || !window.authUtils.isAuthenticated()) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <p>Please log in to view analytics.</p>
+                            <button onclick="window.location.href='provider-auth.html'" class="btn btn-primary" style="margin-top: 15px;">Log In</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get session data using improved session management
+                const sessionInfo = window.authUtils.getSession();
+                if (!sessionInfo || !sessionInfo.session.uid) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <p>Session expired. Please log in again.</p>
+                            <button onclick="window.location.href='provider-auth.html'" class="btn btn-primary" style="margin-top: 15px;">Log In</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get clinicId (registration document ID) for querying
+                const clinicId = sessionInfo.session.uid;
+                
+                // Load appointments
+                const appointmentsRef = collection(window.firebase.db, 'appointments');
+                let appointments = [];
+                try {
+                    let appointmentsQuery;
+                    try {
+                        appointmentsQuery = query(
+                            appointmentsRef,
+                            where('clinicId', '==', clinicId),
+                            orderBy('createdAt', 'desc')
+                        );
+                    } catch (error) {
+                        // If index not ready, try without orderBy
+                        appointmentsQuery = query(
+                            appointmentsRef,
+                            where('clinicId', '==', clinicId)
+                        );
+                    }
+                    const snapshot = await getDocs(appointmentsQuery);
+                    appointments = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    // Sort manually if needed
+                    if (appointments.length > 0 && !appointmentsQuery._query?.orderBy) {
+                        appointments.sort((a, b) => {
+                            const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return dateB.getTime() - dateA.getTime();
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Error loading appointments:', error);
+                }
+                
+                // Load reviews
+                const reviewsRef = collection(window.firebase.db, 'reviews');
+                let reviews = [];
+                try {
+                    const reviewsQuery = query(reviewsRef, where('clinicId', '==', clinicId));
+                    const snapshot = await getDocs(reviewsQuery);
+                    reviews = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.warn('Error loading reviews:', error);
+                }
+                
+                // Calculate statistics
+                const totalAppointments = appointments.length;
+                const completedAppointments = appointments.filter(a => a.status === 'completed').length;
+                const cancelledAppointments = appointments.filter(a => a.status === 'cancelled').length;
+                const scheduledAppointments = appointments.filter(a => a.status === 'scheduled' || !a.status).length;
+                
+                const approvedReviews = reviews.filter(r => r.status === 'approved' || !r.status);
+                const totalReviews = approvedReviews.length;
+                const averageRating = approvedReviews.length > 0 
+                    ? (approvedReviews.reduce((sum, r) => sum + (r.overallRating || 0), 0) / approvedReviews.length).toFixed(1)
+                    : 0;
+                
+                // Calculate monthly stats
+                const now = new Date();
+                const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const thisMonthAppointments = appointments.filter(apt => {
+                    const aptDate = apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : null);
+                    return aptDate && aptDate >= thisMonth;
+                }).length;
+                
+                contentEl.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Total Appointments</div>
+                            <div style="font-size: 32px; font-weight: 700;">${totalAppointments}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">${thisMonthAppointments} this month</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Completed</div>
+                            <div style="font-size: 32px; font-weight: 700;">${completedAppointments}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">${totalAppointments > 0 ? Math.round((completedAppointments / totalAppointments) * 100) : 0}% completion rate</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Scheduled</div>
+                            <div style="font-size: 32px; font-weight: 700;">${scheduledAppointments}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">Upcoming appointments</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Average Rating</div>
+                            <div style="font-size: 32px; font-weight: 700;">${averageRating}</div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">From ${totalReviews} review${totalReviews !== 1 ? 's' : ''}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                            <h3 style="margin: 0 0 15px 0;">Appointment Status</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Completed</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0}%; height: 100%; background: #10b981;"></div>
+                                        </div>
+                                        <span style="font-weight: 600;">${completedAppointments}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Scheduled</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${totalAppointments > 0 ? (scheduledAppointments / totalAppointments) * 100 : 0}%; height: 100%; background: #3b82f6;"></div>
+                                        </div>
+                                        <span style="font-weight: 600;">${scheduledAppointments}</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Cancelled</span>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 150px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                            <div style="width: ${totalAppointments > 0 ? (cancelledAppointments / totalAppointments) * 100 : 0}%; height: 100%; background: #ef4444;"></div>
+                                        </div>
+                                        <span style="font-weight: 600;">${cancelledAppointments}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                            <h3 style="margin: 0 0 15px 0;">Recent Reviews</h3>
+                            ${approvedReviews.length > 0 ? `
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    ${approvedReviews.slice(0, 5).map(review => `
+                                        <div style="padding: 10px; background: #f9fafb; border-radius: 6px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
+                                                <strong>${review.reviewerName || 'Anonymous'}</strong>
+                                                <span>${'★'.repeat(Math.floor(review.overallRating || 0))}${'☆'.repeat(5 - Math.floor(review.overallRating || 0))}</span>
+                                            </div>
+                                            <p style="margin: 0; font-size: 14px; color: #6b7280;">${(review.reviewText || '').substring(0, 100)}${(review.reviewText || '').length > 100 ? '...' : ''}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <p style="color: #6b7280; text-align: center; padding: 20px;">No reviews yet</p>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                        <h3 style="margin: 0 0 15px 0;">Performance Summary</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Completion Rate</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #10b981;">
+                                    ${totalAppointments > 0 ? Math.round((completedAppointments / totalAppointments) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Cancellation Rate</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #ef4444;">
+                                    ${totalAppointments > 0 ? Math.round((cancelledAppointments / totalAppointments) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Total Patients</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">
+                                    ${new Set(appointments.map(a => a.patientId || a.patientEmail)).size}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Monthly Appointments</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #8b5cf6;">
+                                    ${thisMonthAppointments}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // Simplified Verification Details (replaces mobile-app-like progress steps)
+        function showVerificationDetails() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            
+            // Get current registration status
+            let registration = {};
+            if (window.authUtils) {
+                registration = window.authUtils.getSessionData() || {};
+            } else {
+                try {
+                    registration = JSON.parse(localStorage.getItem('providerRegistration') || '{}');
+                } catch (e) {}
+            }
+            
+            const status = registration.status || 'pending';
+            const clinicName = registration.clinicName || 'Your Clinic';
+            const email = registration.email || '';
+            const submittedAt = registration.submittedAt ? new Date(registration.submittedAt).toLocaleDateString() : 'N/A';
+            
+            // Simple status messages
+            let statusInfo = {};
+            if (status === 'approved') {
+                statusInfo = {
+                    icon: '✅',
+                    title: 'Account Verified',
+                    message: 'Your clinic has been verified and is live on CareLuva. You can now receive patient appointments and manage your profile.',
+                    color: '#10b981',
+                    bgColor: '#d1fae5'
+                };
+            } else if (status === 'rejected') {
+                statusInfo = {
+                    icon: '❌',
+                    title: 'Registration Rejected',
+                    message: 'Your registration was not approved. Please contact support for more information or review your submission details.',
+                    color: '#ef4444',
+                    bgColor: '#fee2e2'
+                };
+            } else {
+                statusInfo = {
+                    icon: '⏳',
+                    title: 'Under Review',
+                    message: 'Your registration is currently being reviewed by our team. This process typically takes 2-3 business days. We\'ll notify you once a decision has been made.',
+                    color: '#f59e0b',
+                    bgColor: '#fef3c7'
+                };
+            }
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0; font-size: 1.5rem; color: #1f2937;">Account Status Details</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">&times;</button>
+                    </div>
+                    
+                    <div style="background: ${statusInfo.bgColor}; border: 1px solid ${statusInfo.color}; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: start; gap: 15px;">
+                            <div style="font-size: 32px;">${statusInfo.icon}</div>
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 8px 0; color: ${status === 'approved' ? '#065f46' : status === 'rejected' ? '#991b1b' : '#92400e'};">
+                                    ${statusInfo.title}
+                                </h3>
+                                <p style="margin: 0; color: ${status === 'approved' ? '#047857' : status === 'rejected' ? '#dc2626' : '#b45309'}; line-height: 1.6;">
+                                    ${statusInfo.message}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 15px 0; font-size: 1rem; color: #374151;">Registration Information</h3>
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; font-size: 14px;">
+                            <div style="color: #6b7280; font-weight: 500;">Clinic Name:</div>
+                            <div style="color: #1f2937;">${clinicName}</div>
+                            
+                            <div style="color: #6b7280; font-weight: 500;">Email:</div>
+                            <div style="color: #1f2937;">${email}</div>
+                            
+                            <div style="color: #6b7280; font-weight: 500;">Status:</div>
+                            <div style="color: #1f2937; text-transform: capitalize;">${status}</div>
+                            
+                            <div style="color: #6b7280; font-weight: 500;">Submitted:</div>
+                            <div style="color: #1f2937;">${submittedAt}</div>
+                        </div>
+                    </div>
+                    
+                    ${status === 'pending' ? `
+                        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 15px;">
+                            <p style="margin: 0; color: #0369a1; font-size: 14px; line-height: 1.6;">
+                                <strong>💡 What happens next?</strong><br>
+                                Our team is reviewing your registration documents and credentials. You'll receive an email notification once the review is complete. If you have any questions, please contact our support team.
+                            </p>
+                        </div>
+                    ` : status === 'rejected' ? `
+                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 15px;">
+                            <p style="margin: 0; color: #991b1b; font-size: 14px; line-height: 1.6;">
+                                <strong>Need help?</strong><br>
+                                If you believe this was an error or would like to appeal the decision, please contact our support team. You can also submit a new registration with updated information.
+                            </p>
+                        </div>
+                    ` : `
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px;">
+                            <p style="margin: 0; color: #065f46; font-size: 14px; line-height: 1.6;">
+                                <strong>🎉 Congratulations!</strong><br>
+                                Your clinic is now live on CareLuva. Start managing appointments, updating your profile, and connecting with patients.
+                            </p>
+                        </div>
+                    `}
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="this.closest('.modal').remove()" class="btn btn-secondary" style="padding: 10px 20px;">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             loadRegistrationData();
+            
+            // Start automatic status refresh after a short delay
+            setTimeout(startStatusRefresh, 2000);
         });
     </script>
 </body>

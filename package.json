@@ -1,0 +1,34 @@
+{
+  "name": "careluva",
+  "version": "1.0.0",
+  "description": "CareLuva - Healthcare Provider Platform",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:auth": "vitest run tests/unit/auth",
+    "test:firestore": "vitest run tests/unit/firestore",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run tests/e2e",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write \"**/*.{js,html,css,json,md}\""
+  },
+  "keywords": [
+    "healthcare",
+    "provider-platform",
+    "appointments",
+    "firebase"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vitest/ui": "^1.2.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "jsdom": "^24.0.0",
+    "vitest": "^1.2.0"
+  },
+  "dependencies": {}
+}
+

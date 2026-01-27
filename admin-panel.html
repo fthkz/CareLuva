@@ -168,13 +168,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 CareLuva Admin Panel</h1>
+            <h1>CareLuva Admin Panel</h1>
             <p>Secure admin access - authentication required</p>
         </div>
 
-        <div id="login-section" style="display: block;">
+        <div id="login-section" style="display: none;">
             <div class="status loading">
-                🔐 Admin authentication required
+                Admin authentication required
             </div>
             
             <form id="admin-login-form" style="max-width: 400px; margin: 0 auto;">
@@ -186,14 +186,20 @@
                     <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #374151;">Password</label>
                     <input type="password" id="admin-password" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                 </div>
-                <button type="button" onclick="handleAdminLogin()" class="btn btn-primary" style="width: 100%;">🔐 Login as Admin</button>
+                <button type="submit" id="admin-login-btn" class="btn btn-primary" style="width: 100%;">Login as Admin</button>
             </form>
             
             <div style="margin-top: 15px; text-align: center;">
-                <button type="button" onclick="testLogin()" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">🧪 Test Login (Debug)</button>
+                <button type="button" id="test-login-btn" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Test Login (Debug)</button>
             </div>
             
             <div id="login-status" style="margin-top: 15px; padding: 10px; border-radius: 6px; display: none;"></div>
+        </div>
+
+        <div id="auth-checking" style="text-align: center; padding: 40px;">
+            <div class="status loading">
+                🔄 Checking authentication...
+            </div>
         </div>
 
         <div id="admin-dashboard" style="display: none;">
@@ -207,9 +213,15 @@
             </div>
 
             <div class="actions">
-                <button class="btn btn-primary" onclick="loadRegistrations()">🔄 Refresh Data</button>
-                <button class="btn btn-secondary" onclick="testConnection()">🧪 Test Connection</button>
-                <button class="btn btn-secondary" onclick="window.open('https://console.firebase.google.com', '_blank')">🔥 Firebase Console</button>
+                <button class="btn btn-primary" onclick="loadRegistrations()">Refresh Data</button>
+                <button class="btn btn-primary" onclick="loadReviews()">Review Moderation</button>
+                <button class="btn btn-primary" onclick="window.location.href='admin-service-catalog.html'">Service Catalog</button>
+                <button class="btn btn-primary" onclick="window.location.href='admin-payment-verification.html'">Payment Verification</button>
+                <button class="btn btn-primary" onclick="window.location.href='admin-communication-monitor.html'">Communication Monitoring</button>
+                <button class="btn btn-primary" onclick="window.location.href='admin-verification-workflow.html'">Clinic Verification</button>
+                <button class="btn btn-secondary" onclick="showPasswordResetHelper()">Password Reset</button>
+                <button class="btn btn-secondary" onclick="testConnection()">Test Connection</button>
+                <button class="btn btn-secondary" onclick="window.open('https://console.firebase.google.com', '_blank')">Firebase Console</button>
             </div>
 
             <div id="data-container">
@@ -220,30 +232,129 @@
         </div>
     </div>
 
+    <!-- Review Moderation Script -->
+    <script src="admin-review-moderation.js"></script>
+    <!-- Clinic Verification System -->
+    <script src="clinic-verification-system.js"></script>
+
     <!-- Firebase Configuration -->
     <script type="module">
         // Import Firebase configuration from external file
         import firebaseConfig from './firebase-config.js';
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy, where, doc, updateDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
         try {
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
-            window.firebase = { app, db };
+            const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+            const auth = getAuth(app);
+            window.firebase = { app, db, auth };
             window.firebaseReady = true;
             
-            document.getElementById('status').innerHTML = '✅ Firebase connected successfully!';
-            document.getElementById('status').className = 'status success';
+            // Dispatch event for other scripts
+            window.dispatchEvent(new Event('firebaseReady'));
             
-            // Auto-load data
-            loadRegistrations();
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.innerHTML = '✅ Firebase connected successfully!';
+                statusEl.className = 'status success';
+            }
+            
+            console.log('Firebase initialized successfully');
+            
+            // Check for existing authentication
+            checkExistingAuth();
             
         } catch (error) {
             console.error('Firebase initialization failed:', error);
-            document.getElementById('status').innerHTML = `❌ Firebase connection failed: ${error.message}`;
-            document.getElementById('status').className = 'status error';
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.innerHTML = `Firebase connection failed: ${error.message}`;
+                statusEl.className = 'status error';
+            }
+        }
+        
+        // Check if user is already authenticated
+        async function checkExistingAuth() {
+            const authCheckingEl = document.getElementById('auth-checking');
+            const loginSection = document.getElementById('login-section');
+            const adminDashboard = document.getElementById('admin-dashboard');
+            
+            try {
+                if (!window.firebase || !window.firebase.auth) {
+                    // Firebase not ready yet, show login
+                    if (authCheckingEl) authCheckingEl.style.display = 'none';
+                    if (loginSection) loginSection.style.display = 'block';
+                    return;
+                }
+                
+                const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const auth = window.firebase.auth;
+                
+                // Wait for auth state to be determined (with timeout)
+                const user = await Promise.race([
+                    new Promise((resolve) => {
+                        const unsubscribe = onAuthStateChanged(auth, (user) => {
+                            unsubscribe();
+                            resolve(user);
+                        });
+                    }),
+                    new Promise((resolve) => setTimeout(() => resolve(null), 2000)) // 2 second timeout
+                ]);
+                
+                // Hide checking message
+                if (authCheckingEl) authCheckingEl.style.display = 'none';
+                
+                if (user) {
+                    console.log('✅ User already authenticated:', user.email);
+                    
+                    // Check if user has admin role
+                    const userDoc = await getDoc(doc(window.firebase.db, 'admins', user.uid));
+                    if (userDoc.exists()) {
+                        const adminData = userDoc.data();
+                        currentAdmin = adminData;
+                        
+                        // Show admin dashboard
+                        if (loginSection) loginSection.style.display = 'none';
+                        if (adminDashboard) adminDashboard.style.display = 'block';
+                        
+                        const adminNameEl = document.getElementById('admin-name');
+                        if (adminNameEl) {
+                            adminNameEl.textContent = adminData.name || adminData.email;
+                        }
+                        
+                        const statusEl = document.getElementById('status');
+                        if (statusEl) {
+                            statusEl.innerHTML = '✅ Authenticated as admin';
+                            statusEl.className = 'status success';
+                        }
+                        
+                        // Load data
+                        if (typeof loadRegistrations === 'function') {
+                            loadRegistrations();
+                        }
+                        
+                        console.log('✅ Auto-logged in as admin');
+                    } else {
+                        console.log('❌ User is not an admin');
+                        // Show login
+                        if (loginSection) loginSection.style.display = 'block';
+                    }
+                } else {
+                    console.log('ℹ️ No existing authentication found');
+                    // Show login
+                    if (loginSection) loginSection.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking existing auth:', error);
+                // Show login on error
+                if (authCheckingEl) authCheckingEl.style.display = 'none';
+                if (loginSection) loginSection.style.display = 'block';
+            }
         }
 
         async function loadRegistrations() {
@@ -251,7 +362,7 @@
             const containerEl = document.getElementById('data-container');
             
             try {
-                statusEl.innerHTML = '🔄 Loading registrations...';
+                statusEl.innerHTML = 'Loading registrations...';
                 statusEl.className = 'status loading';
                 
                 if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
@@ -270,7 +381,7 @@
                 if (registrations.length === 0) {
                     containerEl.innerHTML = `
                         <div class="data-section">
-                            <h3>📋 Provider Registrations</h3>
+                            <h3>Provider Registrations</h3>
                             <div class="registration-card">
                                 <p style="text-align: center; color: #6b7280; padding: 20px;">
                                     No registrations found in Firebase database.
@@ -281,7 +392,7 @@
                 } else {
                     containerEl.innerHTML = `
                         <div class="data-section">
-                            <h3>📋 Provider Registrations (${registrations.length} found)</h3>
+                            <h3>Provider Registrations (${registrations.length} found)</h3>
                             ${registrations.map(reg => `
                                 <div class="registration-card">
                                     <div class="registration-header">
@@ -311,7 +422,7 @@
                                         </div>
                                         <div class="detail-item">
                                             <div class="detail-label">Experience</div>
-                                            <div class="detail-value">${reg.experienceYears || 0} years</div>
+                                            <div class="detail-value">${reg.experienceYears ? (typeof reg.experienceYears === 'string' ? reg.experienceYears : String(reg.experienceYears)) + ' years' : '0 years'}</div>
                                         </div>
                                         <div class="detail-item">
                                             <div class="detail-label">City</div>
@@ -321,23 +432,164 @@
                                             <div class="detail-label">Registration Date</div>
                                             <div class="detail-value">${reg.registrationDate ? new Date(reg.registrationDate.seconds * 1000).toLocaleString() : reg.submittedAt ? new Date(reg.submittedAt).toLocaleString() : 'N/A'}</div>
                                         </div>
-                                        <div class="detail-item">
-                                            <div class="detail-label">Google User</div>
-                                            <div class="detail-value">${reg.isGoogleUser ? '✅ Yes' : '❌ No'}</div>
+                                    </div>
+                                    
+                                    <!-- Verification Criteria Section -->
+                                    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                                        <h4 style="margin-bottom: 15px; color: #1f2937; font-size: 16px;">Verification Criteria</h4>
+                                        
+                                        <!-- Certifications -->
+                                        <div style="margin-bottom: 15px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid ${reg.certifications && reg.certifications.length > 0 ? '#10b981' : '#ef4444'};">
+                                            <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">
+                                                Certifications ${reg.certifications && reg.certifications.length > 0 ? '<span style="color: #10b981;">Verified</span>' : '<span style="color: #ef4444;">Missing</span>'}
+                                            </div>
+                                            ${reg.certifications && Array.isArray(reg.certifications) && reg.certifications.length > 0 ? `
+                                                <ul style="margin: 8px 0 0 20px; padding: 0; list-style: disc;">
+                                                    ${reg.certifications.map(cert => `
+                                                        <li style="margin-bottom: 4px; color: #6b7280; font-size: 14px;">
+                                                            <strong>${cert.name || 'Unnamed'}</strong>
+                                                            ${cert.number ? ` (${cert.number})` : ''}
+                                                            ${cert.issueDate ? ` - Issued: ${new Date(cert.issueDate).toLocaleDateString()}` : ''}
+                                                        </li>
+                                                    `).join('')}
+                                                </ul>
+                                            ` : '<div style="color: #9ca3af; font-size: 14px;">No certifications provided</div>'}
                                         </div>
-                                        <div class="detail-item">
-                                            <div class="detail-label">Auth Provider</div>
-                                            <div class="detail-value">${reg.authProvider || 'email'}</div>
+                                        
+                                        <!-- Malpractice Insurance -->
+                                        <div style="margin-bottom: 15px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid ${reg.insuranceProvider && reg.insurancePolicyNumber ? '#10b981' : '#ef4444'};">
+                                            <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">
+                                                Malpractice Insurance ${reg.insuranceProvider && reg.insurancePolicyNumber ? '<span style="color: #10b981;">Verified</span>' : '<span style="color: #ef4444;">Missing</span>'}
+                                            </div>
+                                            ${reg.insuranceProvider ? `
+                                                <div style="font-size: 14px; color: #6b7280;">
+                                                    <div><strong>Provider:</strong> ${reg.insuranceProvider}</div>
+                                                    <div><strong>Policy #:</strong> ${reg.insurancePolicyNumber || 'N/A'}</div>
+                                                    ${reg.insuranceStartDate && reg.insuranceEndDate ? `
+                                                        <div><strong>Coverage:</strong> ${new Date(reg.insuranceStartDate).toLocaleDateString()} - ${new Date(reg.insuranceEndDate).toLocaleDateString()}</div>
+                                                        ${new Date(reg.insuranceEndDate) >= new Date() ? '<span style="color: #10b981;">Valid</span>' : '<span style="color: #ef4444;">Expired</span>'}
+                                                    ` : ''}
+                                                    ${reg.documents && reg.documents.insurance ? `
+                                                        <div style="margin-top: 8px;">
+                                                            <a href="${reg.documents.insurance.url}" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 13px;">
+                                                                View Insurance Certificate
+                                                            </a>
+                                                        </div>
+                                                    ` : '<div style="color: #9ca3af; font-size: 13px; margin-top: 4px;">Certificate not uploaded</div>'}
+                                                </div>
+                                            ` : '<div style="color: #9ca3af; font-size: 14px;">No insurance information provided</div>'}
                                         </div>
+                                        
+                                        <!-- Experience Validation -->
+                                        ${(() => {
+                                            const expYears = reg.experienceYears;
+                                            const expStr = expYears ? String(expYears) : '';
+                                            const meetsRequirement = expStr === '3-5' || expStr === '6-10' || expStr === '11-15' || expStr === '16-20' || expStr === '20+' || (typeof expYears === 'number' && expYears >= 3);
+                                            return `
+                                                <div style="margin-bottom: 15px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid ${meetsRequirement ? '#10b981' : '#ef4444'};">
+                                                    <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">
+                                                        Experience Requirement ${meetsRequirement ? '<span style="color: #10b981;">Verified</span>' : '<span style="color: #ef4444;">Not Met</span>'}
+                                                    </div>
+                                                    <div style="font-size: 14px; color: #6b7280;">
+                                                        <div><strong>Years of Experience:</strong> ${expYears || 'Not provided'}</div>
+                                                        <div style="margin-top: 4px; font-size: 13px; color: ${meetsRequirement ? '#10b981' : '#ef4444'};">
+                                                            ${meetsRequirement ? 'Meets minimum 3 years requirement' : 'Does not meet minimum 3 years requirement'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        })()}
+                                        
+                                        <!-- Documents -->
+                                        <div style="margin-bottom: 15px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid ${reg.documents && (reg.documents.license || reg.documents.insurance) ? '#10b981' : '#f59e0b'};">
+                                            <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">
+                                                Documents ${reg.documents && (reg.documents.license || reg.documents.insurance) ? '<span style="color: #10b981;">Uploaded</span>' : '<span style="color: #f59e0b;">Pending</span>'}
+                                            </div>
+                                            <div style="font-size: 14px; color: #6b7280;">
+                                                ${reg.documents ? `
+                                                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                                                        ${reg.documents.license ? `
+                                                            <div>
+                                                                <a href="${reg.documents.license.url}" target="_blank" style="color: #3b82f6; text-decoration: none;">
+                                                                    Medical License Document
+                                                                </a>
+                                                                <span style="color: #10b981; margin-left: 8px;">Uploaded</span>
+                                                            </div>
+                                                        ` : '<div style="color: #ef4444;">Medical License: Not uploaded</div>'}
+                                                        ${reg.documents.insurance ? `
+                                                            <div>
+                                                                <a href="${reg.documents.insurance.url}" target="_blank" style="color: #3b82f6; text-decoration: none;">
+                                                                    Insurance Certificate
+                                                                </a>
+                                                                <span style="color: #10b981; margin-left: 8px;">Uploaded</span>
+                                                            </div>
+                                                        ` : '<div style="color: #ef4444;">Insurance Certificate: Not uploaded</div>'}
+                                                        ${reg.documents.businessLicense ? `
+                                                            <div>
+                                                                <a href="${reg.documents.businessLicense.url}" target="_blank" style="color: #3b82f6; text-decoration: none;">
+                                                                    Business License (Optional)
+                                                                </a>
+                                                                <span style="color: #10b981; margin-left: 8px;">Uploaded</span>
+                                                            </div>
+                                                        ` : ''}
+                                                        ${reg.documents.medicalDocuments && reg.documents.medicalDocuments.length > 0 ? `
+                                                            <div>
+                                                                <span style="color: #6b7280;">Additional Medical Documents (${reg.documents.medicalDocuments.length})</span>
+                                                                ${reg.documents.medicalDocuments.map((doc, idx) => `
+                                                                    <div style="margin-left: 20px; margin-top: 4px;">
+                                                                        <a href="${doc.url}" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 13px;">
+                                                                            Document ${idx + 1}
+                                                                        </a>
+                                                                    </div>
+                                                                `).join('')}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                ` : '<div style="color: #9ca3af;">No documents uploaded</div>'}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Verification Summary -->
+                                        ${(() => {
+                                            const expYears = reg.experienceYears;
+                                            const expStr = expYears ? String(expYears) : '';
+                                            const meetsExpRequirement = expStr === '3-5' || expStr === '6-10' || expStr === '11-15' || expStr === '16-20' || expStr === '20+' || (typeof expYears === 'number' && expYears >= 3);
+                                            const hasCertifications = reg.certifications && Array.isArray(reg.certifications) && reg.certifications.length > 0;
+                                            const hasInsurance = reg.insuranceProvider && reg.insurancePolicyNumber;
+                                            const hasDocuments = reg.documents && reg.documents.license && reg.documents.insurance;
+                                            const allCriteriaMet = hasCertifications && hasInsurance && meetsExpRequirement && hasDocuments;
+                                            return `
+                                                <div style="padding: 12px; background: ${allCriteriaMet ? '#d1fae5' : '#fef3c7'}; border-radius: 8px; border: 1px solid ${allCriteriaMet ? '#10b981' : '#f59e0b'};">
+                                                    <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">
+                                                        Verification Status Summary
+                                                    </div>
+                                                    <div style="font-size: 14px; color: #6b7280;">
+                                                        ${allCriteriaMet ? 
+                                    '<div style="color: #10b981; font-weight: 500;">All verification criteria met - Ready for approval</div>' :
+                                    '<div style="color: #f59e0b; font-weight: 500;">Some verification criteria missing - Review required</div>'
+                                                        }
+                                                    </div>
+                                                </div>
+                                            `;
+                                        })()}
                                     </div>
                                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
                                         <div style="font-size: 12px; color: #6b7280;">
                                             <strong>Document ID:</strong> ${reg.id}
                                         </div>
                                         ${reg.status === 'pending' ? `
+                                            <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                                <button class="btn btn-success" onclick="openVerificationWorkflow('${reg.id}')">
+                                                    <i class="fas fa-check-circle"></i> Review & Approve
+                                                </button>
+                                                <button class="btn btn-danger" onclick="updateStatus('${reg.id}', 'rejected')">Reject</button>
+                                            </div>
+                                        ` : ''}
+                                        ${reg.status === 'approved' ? `
                                             <div style="margin-top: 10px;">
-                                                <button class="btn btn-success" onclick="updateStatus('${reg.id}', 'approved')">✅ Approve</button>
-                                                <button class="btn btn-danger" onclick="updateStatus('${reg.id}', 'rejected')">❌ Reject</button>
+                                                <button class="btn btn-secondary" onclick="checkBadgeStatus('${reg.id}')">
+                                                    <i class="fas fa-shield-alt"></i> Check Badge Status
+                                                </button>
                                             </div>
                                         ` : ''}
                                     </div>
@@ -352,7 +604,7 @@
 
             } catch (error) {
                 console.error('Error loading registrations:', error);
-                statusEl.innerHTML = `❌ Error loading registrations: ${error.message}`;
+                statusEl.innerHTML = `Error loading registrations: ${error.message}`;
                 statusEl.className = 'status error';
                 containerEl.innerHTML = `
                     <div class="error">
@@ -369,29 +621,6 @@
             }
         }
 
-        async function updateStatus(registrationId, newStatus) {
-            try {
-                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
-                    alert('Firebase not available for status update');
-                    return;
-                }
-
-                const registrationRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
-                await updateDoc(registrationRef, {
-                    status: newStatus,
-                    lastUpdated: serverTimestamp(),
-                    statusUpdatedBy: 'admin',
-                    statusUpdatedAt: new Date().toISOString()
-                });
-
-                alert(`Registration ${registrationId} updated to ${newStatus}`);
-                loadRegistrations(); // Refresh the data
-
-            } catch (error) {
-                console.error('Error updating registration status:', error);
-                alert(`Failed to update status: ${error.message}`);
-            }
-        }
 
         async function testConnection() {
             const statusEl = document.getElementById('status');
@@ -403,28 +632,59 @@
                     throw new Error('Firebase not initialized');
                 }
 
-                // Test write
-                const testData = {
-                    test: true,
-                    message: 'Firebase connection test',
-                    timestamp: serverTimestamp(),
-                    userAgent: navigator.userAgent
-                };
+                // Test 1: Check if admin can read providerRegistrations (admin-only read)
+                console.log('🧪 Test 1: Reading providerRegistrations (admin access)...');
+                const { collection, query, orderBy, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const registrationsQuery = query(collection(window.firebase.db, 'providerRegistrations'), orderBy('submittedAt', 'desc'));
+                const registrationsSnapshot = await getDocs(registrationsQuery);
+                console.log(`✅ Test 1 passed: Can read ${registrationsSnapshot.size} registrations`);
 
-                const docRef = await addDoc(collection(window.firebase.db, 'test'), testData);
-                console.log('Test document created with ID:', docRef.id);
+                // Test 2: Check if admin document exists
+                console.log('🧪 Test 2: Checking admin access...');
+                if (!currentAdmin) {
+                    // Try to get current user from auth
+                    const { getAuth } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                    const auth = window.firebase.auth;
+                    const user = auth?.currentUser;
+                    if (user) {
+                        const adminDoc = await getDoc(doc(window.firebase.db, 'admins', user.uid));
+                        if (adminDoc.exists()) {
+                            console.log('✅ Test 2 passed: Admin document exists');
+                        } else {
+                            throw new Error('Admin document not found in admins collection');
+                        }
+                    } else {
+                        throw new Error('User not authenticated');
+                    }
+                } else {
+                    console.log('✅ Test 2 passed: Admin authenticated');
+                }
 
-                // Test read
-                const q = query(collection(window.firebase.db, 'test'), orderBy('timestamp', 'desc'));
-                const querySnapshot = await getDocs(q);
-                const testDocs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Test 3: Check Firebase Auth
+                console.log('🧪 Test 3: Checking Firebase Auth...');
+                const { getAuth } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                const auth = window.firebase.auth || getAuth();
+                if (auth && auth.currentUser) {
+                    console.log('✅ Test 3 passed: User authenticated');
+                } else {
+                    console.warn('⚠️ Test 3: No authenticated user (this is OK if testing before login)');
+                }
 
-                statusEl.innerHTML = `✅ Firebase test successful! Created test document: ${docRef.id}`;
+                statusEl.innerHTML = `Firebase test successful!<br>
+                    • Can read provider registrations: Yes<br>
+                    • Admin access verified: Yes<br>
+                    • Firebase Auth: ${auth?.currentUser ? 'Authenticated' : 'Not authenticated'}<br>
+                    • Found ${registrationsSnapshot.size} provider registrations`;
                 statusEl.className = 'status success';
 
             } catch (error) {
                 console.error('Firebase test failed:', error);
-                statusEl.innerHTML = `❌ Firebase test failed: ${error.message}`;
+                statusEl.innerHTML = `Firebase test failed: ${error.message}<br>
+                    <small>This usually means:<br>
+                    • Security rules are blocking access<br>
+                    • Admin user not properly set up<br>
+                    • Firestore index missing (check console for index link)</small>`;
                 statusEl.className = 'status error';
             }
         }
@@ -442,9 +702,17 @@
             }
         });
 
-        // Handle admin login - using onclick instead of form submit
-        document.addEventListener('DOMContentLoaded', function() {
+        // Handle admin login - attach event listeners
+        function attachLoginListeners() {
+            console.log('🔧 Attaching login event listeners...');
             const form = document.getElementById('admin-login-form');
+            const loginBtn = document.getElementById('admin-login-btn');
+            const testBtn = document.getElementById('test-login-btn');
+            
+            console.log('Form found:', !!form);
+            console.log('Login button found:', !!loginBtn);
+            console.log('Test button found:', !!testBtn);
+            
             if (form) {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -455,38 +723,122 @@
             } else {
                 console.error('❌ Login form not found');
             }
-        });
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    console.log('🔐 Login button clicked');
+                    await handleAdminLogin();
+                });
+                console.log('✅ Login button event listener attached');
+            } else {
+                console.error('❌ Login button not found');
+            }
+            
+            if (testBtn) {
+                testBtn.addEventListener('click', () => {
+                    console.log('🧪 Test login button clicked');
+                    const email = document.getElementById('admin-email')?.value;
+                    const password = document.getElementById('admin-password')?.value;
+                    console.log('📧 Email:', email);
+                    console.log('🔑 Password length:', password?.length);
+                    
+                    if (!email || !password) {
+                        alert('Please enter both email and password');
+                        return;
+                    }
+                    
+                    console.log('🚀 Starting test login...');
+                    handleAdminLogin();
+                });
+                console.log('✅ Test login button event listener attached');
+            } else {
+                console.error('❌ Test login button not found');
+            }
+        }
+        
+        // Try to attach listeners when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachLoginListeners);
+        } else {
+            // DOM is already loaded
+            attachLoginListeners();
+        }
 
         async function handleAdminLogin() {
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
+            const emailEl = document.getElementById('admin-email');
+            const passwordEl = document.getElementById('admin-password');
             const statusEl = document.getElementById('login-status');
+            
+            if (!emailEl || !passwordEl) {
+                console.error('❌ Login form elements not found');
+                alert('Error: Login form not found. Please refresh the page.');
+                return;
+            }
+            
+            const email = emailEl.value.trim();
+            const password = passwordEl.value;
+            
+            if (!email || !password) {
+                if (statusEl) {
+                    statusEl.style.display = 'block';
+                    statusEl.style.background = '#fee2e2';
+                    statusEl.style.border = '1px solid #ef4444';
+                    statusEl.style.color = '#991b1b';
+                    statusEl.innerHTML = '❌ Please enter both email and password';
+                } else {
+                    alert('Please enter both email and password');
+                }
+                return;
+            }
             
             try {
                 console.log('🔐 Starting admin login process...');
+                if (statusEl) {
                 statusEl.style.display = 'block';
                 statusEl.style.background = '#dbeafe';
                 statusEl.style.border = '1px solid #3b82f6';
                 statusEl.style.color = '#1e40af';
-                statusEl.innerHTML = '🔄 Authenticating...';
+                statusEl.innerHTML = 'Authenticating...';
+                }
                 
                 // Wait for Firebase to be ready
                 if (!window.firebaseReady) {
                     console.log('⏳ Waiting for Firebase to be ready...');
-                    await new Promise((resolve) => {
-                        window.addEventListener('firebaseReady', resolve, { once: true });
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => {
+                            reject(new Error('Firebase initialization timeout. Please refresh the page.'));
+                        }, 10000); // 10 second timeout
+                        
+                        window.addEventListener('firebaseReady', () => {
+                            clearTimeout(timeout);
+                            resolve();
+                        }, { once: true });
+                        
+                        // Also check if it becomes ready before event fires
+                        const checkInterval = setInterval(() => {
+                            if (window.firebaseReady) {
+                                clearTimeout(timeout);
+                                clearInterval(checkInterval);
+                                resolve();
+                            }
+                        }, 100);
                     });
                 }
                 
                 if (!window.firebase || !window.firebase.db) {
-                    throw new Error('Firebase not initialized');
+                    throw new Error('Firebase not initialized. Please refresh the page.');
                 }
                 
                 console.log('✅ Firebase ready, attempting authentication...');
-                const { getAuth, signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
                 const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                const auth = getAuth();
+                if (!window.firebase || !window.firebase.auth) {
+                    throw new Error('Firebase Auth not initialized. Please refresh the page.');
+                }
+                
+                const auth = window.firebase.auth;
                 console.log('🔑 Attempting to sign in with email:', email);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log('✅ User authenticated successfully:', userCredential.user.uid);
@@ -497,19 +849,7 @@
                 
                 if (!userDoc.exists()) {
                     console.log('❌ User not found in admins collection');
-                    // For debugging, let's create the admin entry automatically
-                    console.log('🔧 Auto-creating admin entry for debugging...');
-                    const { setDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
-                    await setDoc(doc(window.firebase.db, 'admins', userCredential.user.uid), {
-                        uid: userCredential.user.uid,
-                        email: email,
-                        name: 'Admin User',
-                        role: 'admin',
-                        permissions: ['view_registrations', 'approve_registrations', 'reject_registrations'],
-                        createdAt: new Date().toISOString(),
-                        createdBy: 'auto_created'
-                    });
-                    console.log('✅ Admin entry created automatically');
+                    throw new Error('Access Denied: This user is not an admin. Please contact an administrator to grant admin access.');
                 }
                 
                 // Get admin data
@@ -517,30 +857,55 @@
                 currentAdmin = adminDoc.data();
                 console.log('✅ Admin data loaded:', currentAdmin);
                 
-                document.getElementById('admin-name').textContent = currentAdmin.name || currentAdmin.email;
+                const adminNameEl = document.getElementById('admin-name');
+                if (adminNameEl) {
+                    adminNameEl.textContent = currentAdmin.name || currentAdmin.email;
+                }
                 
+                if (statusEl) {
                 statusEl.style.background = '#d1fae5';
                 statusEl.style.border = '1px solid #10b981';
                 statusEl.style.color = '#065f46';
-                statusEl.innerHTML = '✅ Authentication successful! Loading admin panel...';
+                statusEl.innerHTML = 'Authentication successful! Loading admin panel...';
+                }
                 
                 // Show admin dashboard
                 setTimeout(() => {
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-dashboard').style.display = 'block';
+                    const loginSection = document.getElementById('login-section');
+                    const adminDashboard = document.getElementById('admin-dashboard');
+                    if (loginSection) loginSection.style.display = 'none';
+                    if (adminDashboard) adminDashboard.style.display = 'block';
+                    if (typeof loadRegistrations === 'function') {
                     loadRegistrations();
+                    }
                 }, 1000);
                 
             } catch (error) {
                 console.error('❌ Admin login error:', error);
+                const errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
+                if (statusEl) {
                 statusEl.style.background = '#fee2e2';
                 statusEl.style.border = '1px solid #ef4444';
                 statusEl.style.color = '#991b1b';
-                statusEl.innerHTML = `❌ ${error.message}`;
+                    statusEl.innerHTML = errorMessage;
+                } else {
+                    alert(`Login Error: ${errorMessage}`);
+                }
             }
         }
 
-        function logout() {
+        async function logout() {
+            try {
+                // Sign out from Firebase Auth
+                if (window.firebase && window.firebase.auth) {
+                    const { signOut } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                    await signOut(window.firebase.auth);
+                    console.log('✅ Signed out from Firebase Auth');
+                }
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+            
             currentAdmin = null;
             document.getElementById('login-section').style.display = 'block';
             document.getElementById('admin-dashboard').style.display = 'none';
@@ -548,11 +913,319 @@
             document.getElementById('login-status').style.display = 'none';
         }
 
+        // Verification Workflow Modal
+        async function openVerificationWorkflow(registrationId) {
+            window.location.href = `admin-verification-workflow.html?clinicId=${registrationId}`;
+        }
+        
+        async function openVerificationWorkflowOld(registrationId) {
+            try {
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    alert('Firebase not available');
+                    return;
+                }
+                
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                const regDoc = await getDoc(doc(window.firebase.db, 'providerRegistrations', registrationId));
+                
+                if (!regDoc.exists()) {
+                    alert('Registration not found');
+                    return;
+                }
+                
+                const reg = { id: regDoc.id, ...regDoc.data() };
+                
+                // Calculate verification status
+                const expYears = reg.experienceYears || reg.clinicExperienceYears;
+                const expStr = expYears ? String(expYears) : '';
+                const meetsExpRequirement = expStr === '3-5' || expStr === '6-10' || expStr === '11-15' || expStr === '16-20' || expStr === '20+' || 
+                    (typeof expYears === 'number' && expYears >= 3) ||
+                    (typeof reg.clinicExperienceYears === 'number' && reg.clinicExperienceYears >= 3);
+                
+                const hasCertifications = (reg.certifications && Array.isArray(reg.certifications) && reg.certifications.length > 0) ||
+                    (reg.clinicCertifications && Array.isArray(reg.clinicCertifications) && reg.clinicCertifications.length > 0) ||
+                    (reg.professionals && Array.isArray(reg.professionals) && reg.professionals.some(p => p.certifications && Array.isArray(p.certifications) && p.certifications.length > 0));
+                
+                const hasInsurance = reg.insuranceProvider && reg.insurancePolicyNumber;
+                const insuranceValid = hasInsurance && reg.insuranceEndDate && new Date(reg.insuranceEndDate) >= new Date();
+                
+                const hasDocuments = reg.documents && reg.documents.license && reg.documents.insurance;
+                
+                const allCriteriaMet = hasCertifications && hasInsurance && insuranceValid && meetsExpRequirement && hasDocuments;
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0;">🔍 Step-by-Step Verification</h2>
+                            <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                        </div>
+                        
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 10px 0; color: #1f2937;">${reg.clinicName || 'Clinic'}</h3>
+                            <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">${reg.email || ''}</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 15px; margin-bottom: 20px;">
+                            <!-- Step 1: Certifications -->
+                            <div style="padding: 15px; background: ${hasCertifications ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border: 2px solid ${hasCertifications ? '#10b981' : '#ef4444'};">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <input type="checkbox" id="checkCertifications" ${hasCertifications ? 'checked' : ''} style="width: 20px; height: 20px;">
+                                    <label for="checkCertifications" style="font-weight: 600; font-size: 1.125rem; cursor: pointer;">
+                                        Step 1: Certifications Verification
+                                    </label>
+                                </div>
+                                <div style="margin-left: 30px; font-size: 0.875rem; color: #374151;">
+                                    ${hasCertifications ? 
+                                        '<span style="color: #10b981;">Certifications provided</span>' : 
+                                        '<span style="color: #ef4444;">No certifications found</span>'
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Insurance -->
+                            <div style="padding: 15px; background: ${insuranceValid ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border: 2px solid ${insuranceValid ? '#10b981' : '#ef4444'};">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <input type="checkbox" id="checkInsurance" ${insuranceValid ? 'checked' : ''} style="width: 20px; height: 20px;">
+                                    <label for="checkInsurance" style="font-weight: 600; font-size: 1.125rem; cursor: pointer;">
+                                        Step 2: Malpractice Insurance Verification
+                                    </label>
+                                </div>
+                                <div style="margin-left: 30px; font-size: 0.875rem; color: #374151;">
+                                    ${hasInsurance ? 
+                                        (insuranceValid ? 
+                                            '<span style="color: #10b981;">Valid insurance coverage</span>' : 
+                                            '<span style="color: #ef4444;">Insurance expired or invalid</span>'
+                                        ) : 
+                                        '<span style="color: #ef4444;">No insurance information</span>'
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: Experience -->
+                            <div style="padding: 15px; background: ${meetsExpRequirement ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border: 2px solid ${meetsExpRequirement ? '#10b981' : '#ef4444'};">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <input type="checkbox" id="checkExperience" ${meetsExpRequirement ? 'checked' : ''} style="width: 20px; height: 20px;">
+                                    <label for="checkExperience" style="font-weight: 600; font-size: 1.125rem; cursor: pointer;">
+                                        Step 3: Experience Requirement (3+ years)
+                                    </label>
+                                </div>
+                                <div style="margin-left: 30px; font-size: 0.875rem; color: #374151;">
+                                    ${meetsExpRequirement ? 
+                                        '<span style="color: #10b981;">Meets minimum experience requirement</span>' : 
+                                        '<span style="color: #ef4444;">Does not meet minimum requirement</span>'
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4: Documents -->
+                            <div style="padding: 15px; background: ${hasDocuments ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border: 2px solid ${hasDocuments ? '#10b981' : '#ef4444'};">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <input type="checkbox" id="checkDocuments" ${hasDocuments ? 'checked' : ''} style="width: 20px; height: 20px;">
+                                    <label for="checkDocuments" style="font-weight: 600; font-size: 1.125rem; cursor: pointer;">
+                                        Step 4: Document Verification
+                                    </label>
+                                </div>
+                                <div style="margin-left: 30px; font-size: 0.875rem; color: #374151;">
+                                    ${hasDocuments ? 
+                                        '<span style="color: #10b981;">Required documents uploaded</span>' : 
+                                        '<span style="color: #ef4444;">Missing required documents</span>'
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 15px; background: ${allCriteriaMet ? '#d1fae5' : '#fef3c7'}; border-radius: 8px; margin-bottom: 20px; border: 2px solid ${allCriteriaMet ? '#10b981' : '#f59e0b'};">
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">
+                                Verification Summary
+                            </div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">
+                                ${allCriteriaMet ? 
+                                    '<span style="color: #10b981; font-weight: 500;">All criteria met - Ready for approval</span>' :
+                                    '<span style="color: #f59e0b; font-weight: 500;">Some criteria missing - Review required</span>'
+                                }
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                            <button class="btn btn-danger" onclick="updateStatus('${registrationId}', 'rejected'); this.closest('.modal').remove();">
+                                ❌ Reject
+                            </button>
+                            <button class="btn btn-success" onclick="completeVerification('${registrationId}', ${allCriteriaMet}); this.closest('.modal').remove();" 
+                                    ${!allCriteriaMet ? 'style="opacity: 0.6; cursor: not-allowed;" disabled' : ''}>
+                                Approve
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                console.error('Error opening verification workflow:', error);
+                alert('Error loading verification workflow: ' + error.message);
+            }
+        }
+        
+        async function completeVerification(registrationId, allCriteriaMet) {
+            if (!allCriteriaMet) {
+                if (!confirm('Some verification criteria are not met. Do you still want to approve this registration?')) {
+                    return;
+                }
+            }
+            await updateStatus(registrationId, 'approved');
+        }
+        
+        // Badge Status Check
+        async function checkBadgeStatus(registrationId) {
+            try {
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    alert('Firebase not available');
+                    return;
+                }
+                
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                const regDoc = await getDoc(doc(window.firebase.db, 'providerRegistrations', registrationId));
+                
+                if (!regDoc.exists()) {
+                    alert('Registration not found');
+                    return;
+                }
+                
+                const reg = { id: regDoc.id, ...regDoc.data() };
+                
+                // Check badge status
+                const badges = {
+                    certified: false,
+                    insured: false,
+                    experienced: false,
+                    verified: false
+                };
+                
+                const issues = [];
+                
+                // Certified badge
+                const hasCertifications = (reg.certifications && Array.isArray(reg.certifications) && reg.certifications.length > 0) ||
+                    (reg.clinicCertifications && Array.isArray(reg.clinicCertifications) && reg.clinicCertifications.length > 0) ||
+                    (reg.professionals && Array.isArray(reg.professionals) && reg.professionals.some(p => p.certifications && Array.isArray(p.certifications) && p.certifications.length > 0));
+                badges.certified = hasCertifications;
+                if (!hasCertifications) issues.push('Missing certifications');
+                
+                // Insured badge
+                const hasInsurance = reg.insuranceProvider && reg.insurancePolicyNumber;
+                const insuranceValid = hasInsurance && reg.insuranceEndDate && new Date(reg.insuranceEndDate) >= new Date();
+                badges.insured = insuranceValid;
+                if (!insuranceValid) {
+                    if (!hasInsurance) {
+                        issues.push('Missing insurance information');
+                    } else {
+                        issues.push('Insurance expired or will expire soon');
+                    }
+                }
+                
+                // Experienced badge
+                const expYears = reg.experienceYears || reg.clinicExperienceYears;
+                const expStr = expYears ? String(expYears) : '';
+                const meetsExpRequirement = expStr === '3-5' || expStr === '6-10' || expStr === '11-15' || expStr === '16-20' || expStr === '20+' || 
+                    (typeof expYears === 'number' && expYears >= 3) ||
+                    (typeof reg.clinicExperienceYears === 'number' && reg.clinicExperienceYears >= 3);
+                badges.experienced = meetsExpRequirement;
+                if (!meetsExpRequirement) issues.push('Does not meet experience requirement');
+                
+                // Verified badge
+                badges.verified = badges.certified && badges.insured && badges.experienced && reg.status === 'approved';
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 600px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0;">Badge Status Check</h2>
+                            <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                        </div>
+                        
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 10px 0; color: #1f2937;">${reg.clinicName || 'Clinic'}</h3>
+                        </div>
+                        
+                        <div style="display: grid; gap: 10px; margin-bottom: 20px;">
+                            <div style="padding: 12px; background: ${badges.certified ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border-left: 4px solid ${badges.certified ? '#10b981' : '#ef4444'};">
+                                <div style="font-weight: 600; margin-bottom: 5px;">
+                                    Certified Badge
+                                </div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">
+                                    ${badges.certified ? 'Active' : 'Inactive - Missing certifications'}
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 12px; background: ${badges.insured ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border-left: 4px solid ${badges.insured ? '#10b981' : '#ef4444'};">
+                                <div style="font-weight: 600; margin-bottom: 5px;">
+                                    Insured Badge
+                                </div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">
+                                    ${badges.insured ? 
+                                        `Active - Valid until ${reg.insuranceEndDate ? new Date(reg.insuranceEndDate).toLocaleDateString() : 'N/A'}` : 
+                                        'Inactive - Insurance expired or missing'
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 12px; background: ${badges.experienced ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border-left: 4px solid ${badges.experienced ? '#10b981' : '#ef4444'};">
+                                <div style="font-weight: 600; margin-bottom: 5px;">
+                                    Experienced Badge
+                                </div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">
+                                    ${badges.experienced ? 'Active' : 'Inactive - Does not meet requirement'}
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 12px; background: ${badges.verified ? '#d1fae5' : '#fee2e2'}; border-radius: 8px; border-left: 4px solid ${badges.verified ? '#10b981' : '#ef4444'};">
+                                <div style="font-weight: 600; margin-bottom: 5px;">
+                                    Verified Badge
+                                </div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">
+                                    ${badges.verified ? 'Active - Fully verified' : 'Inactive - Not all criteria met'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${issues.length > 0 ? `
+                            <div style="padding: 12px; background: #fef3c7; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                                <div style="font-weight: 600; margin-bottom: 8px; color: #92400e;">Issues Found</div>
+                                <ul style="margin: 0; padding-left: 20px; color: #78350f; font-size: 0.875rem;">
+                                    ${issues.map(issue => `<li>${issue}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Close</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                console.error('Error checking badge status:', error);
+                alert('Error checking badge status: ' + error.message);
+            }
+        }
+        
+        // Make functions globally accessible
+        window.openVerificationWorkflow = openVerificationWorkflow;
+        window.checkBadgeStatus = checkBadgeStatus;
+        window.completeVerification = completeVerification;
+
         // Secure updateStatus function
         async function updateStatus(registrationId, newStatus) {
             try {
                 if (!currentAdmin) {
-                    alert('❌ Authentication required: Please log in to update registration status.');
+                    alert('Authentication required: Please log in to update registration status.');
                     return;
                 }
                 
@@ -576,9 +1249,22 @@
                 
                 console.log(`Registration ${registrationId} updated to ${newStatus} by ${currentAdmin.email}`);
                 
+                // Update badges if clinic is approved
+                if (newStatus === 'approved' && window.ClinicVerificationSystem) {
+                    try {
+                        const verificationSystem = new ClinicVerificationSystem();
+                        verificationSystem.initialize(window.firebase.db);
+                        await verificationSystem.updateClinicBadges(registrationId);
+                        console.log('Badges updated for approved clinic');
+                    } catch (badgeError) {
+                        console.warn('Error updating badges:', badgeError);
+                        // Continue even if badge update fails
+                    }
+                }
+                
                 // Show success message
                 const statusMessages = {
-                    'approved': 'Registration approved successfully!',
+                    'approved': 'Registration approved successfully! Badges updated.',
                     'rejected': 'Registration rejected.',
                     'pending': 'Registration status reset to pending.'
                 };
@@ -594,30 +1280,148 @@
             }
         }
 
-        // Test function for debugging
-        function testLogin() {
-            console.log('🧪 Test login button clicked');
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            console.log('📧 Email:', email);
-            console.log('🔑 Password length:', password.length);
+        // Password Reset Helper for Admins
+        async function showPasswordResetHelper() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">🔑 Password Reset Helper</h2>
+                        <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                    </div>
+                    <div id="password-reset-helper-content">
+                        <div style="text-align: center; padding: 40px;">
+                            <div class="spinner"></div>
+                            <p>Loading provider data...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
             
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
+            try {
+                await loadPasswordResetData(modal);
+            } catch (error) {
+                console.error('Error loading password reset data:', error);
+                document.getElementById('password-reset-helper-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <p>Error loading data: ${error.message}</p>
+                        <button onclick="showPasswordResetHelper()" class="btn btn-primary" style="margin-top: 15px;">Retry</button>
+                    </div>
+                `;
             }
+        }
+        
+        async function loadPasswordResetData(modal) {
+            const contentEl = document.getElementById('password-reset-helper-content');
             
-            console.log('🚀 Starting test login...');
-            handleAdminLogin();
+            try {
+                if (!window.firebase || !window.firebase.db || !window.firebaseReady) {
+                    throw new Error('Firebase not initialized');
+                }
+                
+                const { collection, query, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Load all registrations
+                const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
+                let registrations = [];
+                try {
+                    const q = query(registrationsRef, orderBy('submittedAt', 'desc'));
+                    const snapshot = await getDocs(q);
+                    registrations = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.warn('Could not order, loading all:', error);
+                    const snapshot = await getDocs(registrationsRef);
+                    registrations = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                }
+                
+                if (registrations.length === 0) {
+                    contentEl.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <p>No provider registrations found.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                contentEl.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">
+                            <strong>Instructions:</strong> Find the provider below and use the email to reset their password via Firebase Console or the reset button.
+                        </p>
+                        <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <p style="margin: 0; color: #92400e; font-size: 14px;">
+                                <strong>💡 Tip:</strong> Click "Open Firebase Console" to reset passwords directly, or copy the email and use the password reset feature in provider-auth.html
+                            </p>
+                        </div>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${registrations.map(reg => `
+                            <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                                    <div>
+                                        <h4 style="margin: 0 0 5px 0;">${reg.clinicName || 'Unnamed Clinic'}</h4>
+                                        <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                                            <strong>Email:</strong> ${reg.email || 'N/A'}
+                                        </p>
+                                        ${reg.contactPerson ? `<p style="margin: 5px 0 0 0; color: #6b7280; font-size: 14px;"><strong>Contact:</strong> ${reg.contactPerson}</p>` : ''}
+                                    </div>
+                                    <span style="background: ${reg.status === 'approved' ? '#d1fae5' : reg.status === 'rejected' ? '#fee2e2' : '#fef3c7'}; color: ${reg.status === 'approved' ? '#065f46' : reg.status === 'rejected' ? '#991b1b' : '#92400e'}; padding: 4px 12px; border-radius: 12px; font-size: 12px; text-transform: capitalize;">
+                                        ${reg.status || 'pending'}
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <button onclick="
+                                        window.open('https://console.firebase.google.com/project/careluva-5635e/authentication/users', '_blank');
+                                        alert('Opened Firebase Console. Search for: ${reg.email}');
+                                    " class="btn btn-primary" style="flex: 1; font-size: 12px; padding: 8px;">
+                                        🔥 Open Firebase Console
+                                    </button>
+                                    <button onclick="
+                                        navigator.clipboard.writeText('${reg.email}');
+                                        alert('Email copied: ${reg.email}');
+                                    " class="btn btn-secondary" style="flex: 1; font-size: 12px; padding: 8px;">
+                                        📋 Copy Email
+                                    </button>
+                                </div>
+                                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+                                    <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                                        <strong>Registration ID:</strong> ${reg.id}
+                                    </p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+                        <p style="margin: 0; color: #0369a1; font-size: 14px;">
+                            <strong>How to Reset Password:</strong><br>
+                            1. Click "Open Firebase Console" for the provider<br>
+                            2. Search for their email in Authentication → Users<br>
+                            3. Click on the user → Click "Reset Password"<br>
+                            4. Or copy the email and use it in provider-auth.html "Forgot Password?"
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                throw error;
+            }
         }
 
-        // Make functions globally available
+        // Make functions globally available (needed for onclick handlers in HTML)
+        window.handleAdminLogin = handleAdminLogin;
+        window.logout = logout;
         window.loadRegistrations = loadRegistrations;
         window.testConnection = testConnection;
         window.updateStatus = updateStatus;
-        window.logout = logout;
-        window.testLogin = testLogin;
-        window.handleAdminLogin = handleAdminLogin;
+        window.showPasswordResetHelper = showPasswordResetHelper;
     </script>
 </body>
 </html>

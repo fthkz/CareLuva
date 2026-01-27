@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Prices - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .comparison-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .comparison-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .clinic-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .price-lowest {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .price-highest {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .price-average {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-verified {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-transparent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .view-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .view-btn:hover {
+            background: #2563eb;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #d1d5db;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-balance-scale"></i> Compare Prices</h1>
+            <a href="find-clinics.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Search</a>
+        </div>
+        
+        <div class="search-section">
+            <h2 style="margin-bottom: 20px; color: #1f2937;">Select Service to Compare</h2>
+            <form class="search-form" id="comparisonForm">
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="">Select category...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="service">Service</label>
+                    <select id="service" required disabled>
+                        <option value="">Select service...</option>
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Compare Prices
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="statsSection" class="stats-section" style="display: none;"></div>
+        
+        <div id="comparisonSection" class="comparison-section" style="display: none;">
+            <h2 style="margin-bottom: 20px; color: #1f2937;" id="comparisonTitle"></h2>
+            <div id="comparisonTableContainer"></div>
+        </div>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>No Results Found</h3>
+            <p>Select a service above to compare prices across clinics.</p>
+        </div>
+        
+        <div id="loadingState" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading price comparison...</p>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    <script src="service-catalog.js"></script>
+    <script src="verification-badges.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, query, where, doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        // Check authentication
+        if (!window.authUtils || !window.authUtils.getSession()) {
+            alert('Please log in to access this page.');
+            window.location.href = 'patient-auth.html';
+        }
+
+        // Load categories
+        async function loadCategories() {
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = '<option value="">Select category...</option>';
+            
+            if (window.getAllCategories) {
+                const categories = window.getAllCategories();
+                const categoryNames = {
+                    'dentistry': 'Dentistry',
+                    'hair-transplant': 'Hair Transplant',
+                    'cosmetic-surgery': 'Cosmetic Surgery',
+                    'general-medicine': 'General Medicine'
+                };
+                
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = categoryNames[cat] || cat;
+                    categorySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Load services when category is selected
+        document.getElementById('category').addEventListener('change', async (e) => {
+            const serviceSelect = document.getElementById('service');
+            serviceSelect.innerHTML = '<option value="">Select service...</option>';
+            serviceSelect.disabled = !e.target.value;
+            
+            if (e.target.value && window.getServicesForCategory) {
+                const services = window.getServicesForCategory(e.target.value);
+                services.forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service.id;
+                    option.textContent = service.name;
+                    serviceSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('comparisonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const serviceId = document.getElementById('service').value;
+            if (!serviceId) return;
+            
+            await comparePrices(serviceId);
+        });
+
+        // Compare prices across clinics
+        async function comparePrices(serviceId) {
+            const loadingState = document.getElementById('loadingState');
+            const comparisonSection = document.getElementById('comparisonSection');
+            const emptyState = document.getElementById('emptyState');
+            const statsSection = document.getElementById('statsSection');
+            
+            loadingState.style.display = 'block';
+            comparisonSection.style.display = 'none';
+            emptyState.style.display = 'none';
+            statsSection.style.display = 'none';
+            
+            try {
+                // Get service info
+                const service = window.getServiceById ? window.getServiceById(serviceId) : null;
+                if (!service) {
+                    throw new Error('Service not found');
+                }
+                
+                // Load all approved pricing data
+                const pricingRef = collection(db, 'servicePricing');
+                const pricingSnapshot = await getDocs(pricingRef);
+                
+                const clinicsWithService = [];
+                const verificationBadges = new window.VerificationBadges();
+                
+                for (const pricingDoc of pricingSnapshot.docs) {
+                    const pricingData = pricingDoc.data();
+                    
+                    // Only check approved pricing
+                    if (pricingData.status !== 'approved' || !pricingData.services) continue;
+                    
+                    // Check if this clinic offers the selected service
+                    if (pricingData.services[serviceId]) {
+                        const clinicId = pricingDoc.id;
+                        
+                        // Load clinic info
+                        const clinicDoc = await getDoc(doc(db, 'providerRegistrations', clinicId));
+                        if (!clinicDoc.exists()) continue;
+                        
+                        const clinicData = clinicDoc.data();
+                        
+                        // Check pricing transparency (has pricing for multiple services)
+                        const serviceCount = Object.keys(pricingData.services || {}).length;
+                        const hasTransparentPricing = serviceCount >= 5; // At least 5 services priced
+                        
+                        // Calculate badges
+                        const badges = verificationBadges.calculateBadges(clinicData);
+                        
+                        clinicsWithService.push({
+                            clinicId: clinicId,
+                            clinicName: clinicData.clinicName || 'Unknown Clinic',
+                            specialization: clinicData.specialization || 'General',
+                            city: clinicData.city || 'N/A',
+                            price: parseFloat(pricingData.services[serviceId].price || 0),
+                            serviceName: pricingData.services[serviceId].serviceName || service.name,
+                            hasTransparentPricing: hasTransparentPricing,
+                            badges: badges,
+                            status: clinicData.status || 'pending',
+                            rating: clinicData.averageRating || 0
+                        });
+                    }
+                }
+                
+                if (clinicsWithService.length === 0) {
+                    loadingState.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                // Sort by price
+                clinicsWithService.sort((a, b) => a.price - b.price);
+                
+                // Calculate statistics
+                const prices = clinicsWithService.map(c => c.price);
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+                
+                // Display statistics
+                statsSection.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-label">Clinics Found</div>
+                        <div class="stat-value">${clinicsWithService.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Lowest Price</div>
+                        <div class="stat-value" style="color: #10b981;">$${minPrice.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Highest Price</div>
+                        <div class="stat-value" style="color: #ef4444;">$${maxPrice.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average Price</div>
+                        <div class="stat-value" style="color: #f59e0b;">$${avgPrice.toFixed(2)}</div>
+                    </div>
+                `;
+                statsSection.style.display = 'grid';
+                
+                // Display comparison table
+                document.getElementById('comparisonTitle').textContent = `Price Comparison: ${service.name}`;
+                
+                const tableHTML = `
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Clinic</th>
+                                <th>Location</th>
+                                <th>Price</th>
+                                <th>Badges</th>
+                                <th>Rating</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${clinicsWithService.map((clinic, index) => {
+                                let priceClass = '';
+                                if (clinic.price === minPrice) priceClass = 'price-lowest';
+                                else if (clinic.price === maxPrice) priceClass = 'price-highest';
+                                else if (Math.abs(clinic.price - avgPrice) < avgPrice * 0.1) priceClass = 'price-average';
+                                
+                                return `
+                                    <tr>
+                                        <td>
+                                            <div class="clinic-name">${clinic.clinicName}</div>
+                                            <div style="font-size: 0.875rem; color: #6b7280;">${clinic.specialization}</div>
+                                        </td>
+                                        <td>${clinic.city}</td>
+                                        <td>
+                                            <div class="price ${priceClass}">$${clinic.price.toFixed(2)}</div>
+                                            ${clinic.price === minPrice ? '<div style="font-size: 0.75rem; color: #10b981; margin-top: 4px;">Best Price</div>' : ''}
+                                        </td>
+                                        <td>
+                                            ${verificationBadges.generateBadgesHTML(clinic.badges, 'small', 'horizontal')}
+                                            ${clinic.hasTransparentPricing ? '<span class="badge badge-transparent" style="margin-left: 4px;"><i class="fas fa-dollar-sign"></i> Transparent</span>' : ''}
+                                        </td>
+                                        <td>
+                                            ${clinic.rating > 0 ? `
+                                                <div style="display: flex; align-items: center; gap: 4px;">
+                                                    <span style="color: #fbbf24;">${'★'.repeat(Math.round(clinic.rating))}</span>
+                                                    <span style="color: #6b7280; font-size: 0.875rem;">${clinic.rating.toFixed(1)}</span>
+                                                </div>
+                                            ` : '<span style="color: #9ca3af;">No ratings</span>'}
+                                        </td>
+                                        <td>
+                                            <a href="provider-directory.html?clinicId=${clinic.clinicId}" class="view-btn">
+                                                View Profile
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                document.getElementById('comparisonTableContainer').innerHTML = tableHTML;
+                
+                loadingState.style.display = 'none';
+                comparisonSection.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error comparing prices:', error);
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'block';
+                emptyState.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error Loading Comparison</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        // Initialize
+        await window.initializeServiceCatalog();
+        loadCategories();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Google Auth Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #3367d6;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            color: #007bff;
+            font-weight: bold;
+        }
+        .checklist li.done:before {
+            content: "☑ ";
+            color: #28a745;
+        }
+        .checklist li.error:before {
+            content: "☒ ";
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Advanced Google Auth Diagnostic</h1>
+        <p>This tool performs deep diagnostics to find the exact cause of "The requested action is invalid" error.</p>
+        
+        <div id="status" class="status info">
+            🔄 Initializing advanced diagnostic...
+        </div>
+        
+        <div class="step">
+            <h3>Step 1: Firebase Configuration Deep Check</h3>
+            <div id="config-status">Checking...</div>
+            <button id="test-config-btn" class="btn" onclick="testFirebaseConfig()">Test Firebase Config</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Google Sign-In Provider Check</h3>
+            <div id="provider-status">Ready to test...</div>
+            <button id="test-provider-btn" class="btn" onclick="testGoogleProvider()" disabled>Test Google Provider</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: OAuth Configuration Check</h3>
+            <div id="oauth-status">Ready to test...</div>
+            <button id="test-oauth-btn" class="btn" onclick="testOAuthConfig()" disabled>Test OAuth Config</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Full Google Sign-In Test</h3>
+            <div id="google-status">Ready to test...</div>
+            <button id="test-google-btn" class="btn" onclick="testGoogleSignIn()" disabled>Test Google Sign-In</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 5: Alternative Solutions</h3>
+            <div id="solutions">
+                <p>If Google Sign-In still fails, try these alternatives:</p>
+                <button id="test-demo-btn" class="btn" onclick="testDemoMode()">Test Demo Mode</button>
+                <button id="test-email-btn" class="btn" onclick="testEmailSignUp()">Test Email Sign-Up</button>
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>Diagnostic Results</h3>
+            <div id="diagnostic-results" class="details" style="display: none;">
+                <h4>Detailed Results:</h4>
+                <div id="results-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0"
+        };
+
+        let app, auth;
+        let configTested = false;
+        let providerTested = false;
+        let oauthTested = false;
+
+        // Update status
+        function updateStatus(message, type = 'info') {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').className = `status ${type}`;
+        }
+
+        // Update config status
+        function updateConfigStatus(message, type = 'info') {
+            const el = document.getElementById('config-status');
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        // Update provider status
+        function updateProviderStatus(message, type = 'info') {
+            const el = document.getElementById('provider-status');
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        // Update OAuth status
+        function updateOAuthStatus(message, type = 'info') {
+            const el = document.getElementById('oauth-status');
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        // Update Google status
+        function updateGoogleStatus(message, type = 'info') {
+            const el = document.getElementById('google-status');
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        // Show diagnostic results
+        function showResults(results) {
+            const resultsEl = document.getElementById('diagnostic-results');
+            const contentEl = document.getElementById('results-content');
+            
+            contentEl.innerHTML = `
+                <div class="code">${JSON.stringify(results, null, 2)}</div>
+            `;
+            resultsEl.style.display = 'block';
+        }
+
+        // Test Firebase configuration
+        window.testFirebaseConfig = async function() {
+            try {
+                updateConfigStatus('🔄 Testing Firebase configuration...', 'info');
+                
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                // Test basic Firebase functionality
+                const testResults = {
+                    firebaseConfig: firebaseConfig,
+                    auth: !!auth,
+                    app: !!app,
+                    timestamp: new Date().toISOString()
+                };
+                
+                updateConfigStatus('✅ Firebase configuration is valid!', 'success');
+                updateStatus('✅ Firebase initialized successfully!', 'success');
+                
+                document.getElementById('test-provider-btn').disabled = false;
+                configTested = true;
+                
+                showResults(testResults);
+                
+            } catch (error) {
+                console.error('Firebase config error:', error);
+                updateConfigStatus('❌ Firebase configuration failed', 'error');
+                updateStatus('❌ Firebase initialization failed', 'error');
+                showResults({ error: error.message, stack: error.stack });
+            }
+        };
+
+        // Test Google Provider
+        window.testGoogleProvider = async function() {
+            if (!configTested) {
+                updateProviderStatus('⚠️ Please test Firebase config first', 'warning');
+                return;
+            }
+
+            try {
+                updateProviderStatus('🔄 Testing Google Provider...', 'info');
+                document.getElementById('test-provider-btn').innerHTML = '<div class="spinner"></div> Testing...';
+                document.getElementById('test-provider-btn').disabled = true;
+
+                const provider = new GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+
+                // Test provider configuration
+                const providerResults = {
+                    provider: provider,
+                    scopes: provider.getScopes(),
+                    customParameters: provider.getCustomParameters(),
+                    timestamp: new Date().toISOString()
+                };
+
+                updateProviderStatus('✅ Google Provider configured correctly!', 'success');
+                document.getElementById('test-oauth-btn').disabled = false;
+                providerTested = true;
+                
+                showResults(providerResults);
+
+            } catch (error) {
+                console.error('Google Provider error:', error);
+                updateProviderStatus('❌ Google Provider failed', 'error');
+                showResults({ error: error.message, stack: error.stack });
+            } finally {
+                document.getElementById('test-provider-btn').innerHTML = 'Test Google Provider';
+                document.getElementById('test-provider-btn').disabled = false;
+            }
+        };
+
+        // Test OAuth Configuration
+        window.testOAuthConfig = async function() {
+            if (!providerTested) {
+                updateOAuthStatus('⚠️ Please test Google Provider first', 'warning');
+                return;
+            }
+
+            try {
+                updateOAuthStatus('🔄 Testing OAuth configuration...', 'info');
+                document.getElementById('test-oauth-btn').innerHTML = '<div class="spinner"></div> Testing...';
+                document.getElementById('test-oauth-btn').disabled = true;
+
+                // Test OAuth configuration by checking sign-in methods
+                const testEmail = 'test@example.com';
+                const signInMethods = await fetchSignInMethodsForEmail(auth, testEmail);
+                
+                const oauthResults = {
+                    signInMethods: signInMethods,
+                    authDomain: firebaseConfig.authDomain,
+                    projectId: firebaseConfig.projectId,
+                    timestamp: new Date().toISOString()
+                };
+
+                updateOAuthStatus('✅ OAuth configuration is valid!', 'success');
+                document.getElementById('test-google-btn').disabled = false;
+                oauthTested = true;
+                
+                showResults(oauthResults);
+
+            } catch (error) {
+                console.error('OAuth config error:', error);
+                updateOAuthStatus('❌ OAuth configuration failed', 'error');
+                showResults({ error: error.message, stack: error.stack });
+            } finally {
+                document.getElementById('test-oauth-btn').innerHTML = 'Test OAuth Config';
+                document.getElementById('test-oauth-btn').disabled = false;
+            }
+        };
+
+        // Test Google Sign-In
+        window.testGoogleSignIn = async function() {
+            if (!oauthTested) {
+                updateGoogleStatus('⚠️ Please test OAuth config first', 'warning');
+                return;
+            }
+
+            try {
+                updateGoogleStatus('🔄 Testing Google Sign-In...', 'info');
+                document.getElementById('test-google-btn').innerHTML = '<div class="spinner"></div> Testing...';
+                document.getElementById('test-google-btn').disabled = true;
+
+                const provider = new GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                updateGoogleStatus('✅ Google Sign-In successful!', 'success');
+                updateStatus('🎉 Google Sign-In is working perfectly!', 'success');
+                
+                showResults({
+                    user: {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL,
+                        providerData: user.providerData
+                    },
+                    timestamp: new Date().toISOString()
+                });
+
+            } catch (error) {
+                console.error('Google Sign-In failed:', error);
+                updateGoogleStatus('❌ Google Sign-In failed', 'error');
+                updateStatus('❌ Google Sign-In failed', 'error');
+                
+                // Provide specific guidance based on error
+                let errorMessage = error.message;
+                if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = 'Google Sign-In not enabled. Enable it in Firebase Console → Authentication → Sign-in method';
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    errorMessage = 'Domain not authorized. Add localhost to Firebase Console → Authentication → Settings → Authorized domains';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Popup blocked. Allow popups for this site and try again';
+                } else if (error.message.includes('invalid')) {
+                    errorMessage = 'OAuth configuration issue. Check Google Cloud Console → APIs & Services → OAuth consent screen';
+                }
+                
+                updateGoogleStatus(`❌ ${errorMessage}`, 'error');
+                
+                showResults({
+                    error: {
+                        code: error.code,
+                        message: error.message,
+                        fullError: error
+                    },
+                    timestamp: new Date().toISOString()
+                });
+                
+            } finally {
+                document.getElementById('test-google-btn').innerHTML = 'Test Google Sign-In';
+                document.getElementById('test-google-btn').disabled = false;
+            }
+        };
+
+        // Test Demo Mode
+        window.testDemoMode = function() {
+            window.location.href = 'provider-auth.html';
+        };
+
+        // Test Email Sign-Up
+        window.testEmailSignUp = function() {
+            window.location.href = 'provider-auth.html';
+        };
+
+        // Initialize
+        try {
+            updateStatus('✅ Advanced diagnostic tool ready!', 'success');
+            updateConfigStatus('Ready to test Firebase configuration', 'info');
+            updateProviderStatus('Ready to test Google Provider', 'info');
+            updateOAuthStatus('Ready to test OAuth configuration', 'info');
+            updateGoogleStatus('Ready to test Google Sign-In', 'info');
+        } catch (error) {
+            updateStatus('❌ Advanced diagnostic tool failed to initialize', 'error');
+            showResults({ error: error.message, stack: error.stack });
+        }
+    </script>
+</body>
+</html>

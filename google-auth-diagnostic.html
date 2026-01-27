@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Auth Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #3367d6;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            color: #007bff;
+            font-weight: bold;
+        }
+        .checklist li.done:before {
+            content: "☑ ";
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Google Auth Diagnostic Tool</h1>
+        <p>This tool helps diagnose and fix Google Sign-In issues in Firebase.</p>
+        
+        <div id="status" class="status info">
+            🔄 Initializing diagnostic...
+        </div>
+        
+        <div class="step">
+            <h3>Step 1: Firebase Configuration Check</h3>
+            <div id="config-status">Checking...</div>
+            <button id="test-config-btn" class="btn" onclick="testFirebaseConfig()">Test Firebase Config</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Google Sign-In Test</h3>
+            <div id="google-status">Ready to test...</div>
+            <button id="test-google-btn" class="btn" onclick="testGoogleSignIn()" disabled>Test Google Sign-In</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Firebase Console Checklist</h3>
+            <p>Complete these steps in Firebase Console:</p>
+            <ul class="checklist" id="checklist">
+                <li>Go to Authentication → Sign-in method</li>
+                <li>Click on Google provider</li>
+                <li>Enable Google Sign-In (toggle ON)</li>
+                <li>Set Project support email</li>
+                <li>Save the configuration</li>
+                <li>Go to Authentication → Settings</li>
+                <li>Add 'localhost' to Authorized domains</li>
+                <li>Add '127.0.0.1' to Authorized domains</li>
+            </ul>
+            <button id="refresh-btn" class="btn" onclick="refreshDiagnostic()">Refresh After Changes</button>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Error Details</h3>
+            <div id="error-details" style="display: none;">
+                <h4>Error Information:</h4>
+                <div id="error-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0"
+        };
+
+        let app, auth;
+        let configTested = false;
+
+        // Update status
+        function updateStatus(message, type = 'info') {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').className = `status ${type}`;
+        }
+
+        // Update config status
+        function updateConfigStatus(message, type = 'info') {
+            const el = document.getElementById('config-status');
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        // Update Google status
+        function updateGoogleStatus(message, type = 'info') {
+            const el = document.getElementById('google-status');
+            el.textContent = message;
+            el.className = `status ${type}`;
+        }
+
+        // Show error details
+        function showError(error) {
+            const errorDetails = document.getElementById('error-details');
+            const errorContent = document.getElementById('error-content');
+            
+            errorContent.innerHTML = `
+                <div class="code">
+                    <strong>Error Code:</strong> ${error.code || 'N/A'}<br>
+                    <strong>Error Message:</strong> ${error.message}<br>
+                    <strong>Full Error:</strong><br>
+                    <pre>${JSON.stringify(error, null, 2)}</pre>
+                </div>
+            `;
+            errorDetails.style.display = 'block';
+        }
+
+        // Test Firebase configuration
+        window.testFirebaseConfig = async function() {
+            try {
+                updateConfigStatus('🔄 Testing Firebase configuration...', 'info');
+                
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                updateConfigStatus('✅ Firebase configuration is valid!', 'success');
+                updateStatus('✅ Firebase initialized successfully!', 'success');
+                
+                document.getElementById('test-google-btn').disabled = false;
+                configTested = true;
+                
+            } catch (error) {
+                console.error('Firebase config error:', error);
+                updateConfigStatus('❌ Firebase configuration failed', 'error');
+                updateStatus('❌ Firebase initialization failed', 'error');
+                showError(error);
+            }
+        };
+
+        // Test Google Sign-In
+        window.testGoogleSignIn = async function() {
+            if (!configTested) {
+                updateGoogleStatus('⚠️ Please test Firebase config first', 'warning');
+                return;
+            }
+
+            try {
+                updateGoogleStatus('🔄 Testing Google Sign-In...', 'info');
+                document.getElementById('test-google-btn').innerHTML = '<div class="spinner"></div> Testing...';
+                document.getElementById('test-google-btn').disabled = true;
+
+                const provider = new GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                updateGoogleStatus('✅ Google Sign-In successful!', 'success');
+                updateStatus('🎉 Google Sign-In is working perfectly!', 'success');
+                
+                // Mark checklist items as done
+                const checklist = document.getElementById('checklist');
+                const items = checklist.querySelectorAll('li');
+                items.forEach(item => item.classList.add('done'));
+
+            } catch (error) {
+                console.error('Google Sign-In failed:', error);
+                updateGoogleStatus('❌ Google Sign-In failed', 'error');
+                updateStatus('❌ Google Sign-In failed', 'error');
+                showError(error);
+                
+                // Provide specific guidance based on error
+                if (error.code === 'auth/operation-not-allowed') {
+                    updateGoogleStatus('❌ Google Sign-In not enabled. Enable it in Firebase Console → Authentication → Sign-in method', 'error');
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    updateGoogleStatus('❌ Domain not authorized. Add localhost to Firebase Console → Authentication → Settings → Authorized domains', 'error');
+                }
+                
+            } finally {
+                document.getElementById('test-google-btn').innerHTML = 'Test Google Sign-In';
+                document.getElementById('test-google-btn').disabled = false;
+            }
+        };
+
+        // Refresh diagnostic
+        window.refreshDiagnostic = function() {
+            location.reload();
+        };
+
+        // Initialize
+        try {
+            updateStatus('✅ Diagnostic tool ready!', 'success');
+            updateConfigStatus('Ready to test Firebase configuration', 'info');
+            updateGoogleStatus('Ready to test Google Sign-In', 'info');
+        } catch (error) {
+            updateStatus('❌ Diagnostic tool failed to initialize', 'error');
+            showError(error);
+        }
+    </script>
+</body>
+</html>
+
+
+

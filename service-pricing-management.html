@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Pricing Management - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="service-catalog.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .info-banner {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-banner h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .info-banner p {
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+        
+        .category-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .service-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .service-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .service-item:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        
+        .service-item.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .service-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        
+        .service-info {
+            flex: 1;
+        }
+        
+        .service-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .service-description {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .service-price-input {
+            width: 150px;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .service-price-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .currency-symbol {
+            color: #6b7280;
+            margin-right: 5px;
+        }
+        
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 32px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            z-index: 100;
+        }
+        
+        .save-btn:hover {
+            background: #059669;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-dollar-sign"></i> Service Pricing Management</h1>
+            <a href="provider-account.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Account</a>
+        </div>
+        
+        <div class="info-banner">
+            <h3><i class="fas fa-info-circle"></i> How It Works</h3>
+            <p>
+                CareLuva provides a comprehensive service catalog for each medical category. 
+                Select the services your clinic offers and enter your pricing. 
+                Your selections and pricing will be reviewed by our admin team before being published on your profile.
+            </p>
+        </div>
+        
+        <div id="categoriesContainer">
+            <!-- Categories will be loaded here -->
+        </div>
+        
+        <button class="save-btn" onclick="savePricing()">
+            <i class="fas fa-save"></i> Submit for Review
+        </button>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        let clinicId = null;
+        let currentPricing = null;
+
+        // Listen for catalog updates from admin panel
+        window.addEventListener('serviceCatalogUpdated', async () => {
+            if (window.refreshServiceCatalog) {
+                await window.refreshServiceCatalog();
+                await renderCategories();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            // Initialize service catalog from Firestore
+            if (window.initializeServiceCatalog) {
+                await window.initializeServiceCatalog();
+            }
+            await loadCurrentPricing();
+            await renderCategories();
+        });
+
+        async function checkAuth() {
+            if (!window.authUtils) {
+                window.location.href = 'provider-auth.html';
+                return;
+            }
+
+            const session = window.authUtils.getSession();
+            if (!session || !session.session || !session.session.uid) {
+                window.location.href = 'provider-auth.html';
+                return;
+            }
+
+            clinicId = session.session.uid;
+        }
+
+        async function loadCurrentPricing() {
+            if (!clinicId) return;
+
+            try {
+                const pricingRef = doc(db, 'servicePricing', clinicId);
+                const pricingSnap = await getDoc(pricingRef);
+                
+                if (pricingSnap.exists()) {
+                    currentPricing = pricingSnap.data();
+                } else {
+                    currentPricing = {
+                        clinicId: clinicId,
+                        services: {},
+                        status: 'pending',
+                        submittedAt: null,
+                        approvedAt: null
+                    };
+                }
+            } catch (error) {
+                console.error('Error loading pricing:', error);
+                currentPricing = {
+                    clinicId: clinicId,
+                    services: {},
+                    status: 'pending',
+                    submittedAt: null,
+                    approvedAt: null
+                };
+            }
+        }
+
+        async function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            
+            // Ensure catalog is loaded
+            if (window.initializeServiceCatalog && (!window.serviceCatalog || Object.keys(window.serviceCatalog || {}).length === 0)) {
+                await window.initializeServiceCatalog();
+            }
+            
+            const categories = window.getAllCategories();
+            
+            container.innerHTML = categories.map(category => {
+                const services = window.getServicesForCategory(category);
+                const categoryDisplayName = category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                
+                return `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <div class="category-title">${categoryDisplayName}</div>
+                            ${currentPricing && currentPricing.status ? `
+                                <span class="status-badge status-${currentPricing.status}">
+                                    ${currentPricing.status.charAt(0).toUpperCase() + currentPricing.status.slice(1)}
+                                </span>
+                            ` : ''}
+                        </div>
+                        <div class="service-list">
+                            ${services.map(service => {
+                                const isSelected = currentPricing.services[service.id] ? true : false;
+                                const price = currentPricing.services[service.id]?.price || '';
+                                
+                                return `
+                                    <div class="service-item ${isSelected ? 'selected' : ''}" data-service-id="${service.id}">
+                                        <input type="checkbox" 
+                                               class="service-checkbox" 
+                                               ${isSelected ? 'checked' : ''}
+                                               onchange="toggleService('${service.id}', '${category}')">
+                                        <div class="service-info">
+                                            <div class="service-name">${service.name}</div>
+                                            <div class="service-description">${service.description}</div>
+                                        </div>
+                                        <div style="display: flex; align-items: center;">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="number" 
+                                                   class="service-price-input" 
+                                                   placeholder="0.00" 
+                                                   min="0" 
+                                                   step="0.01"
+                                                   value="${price}"
+                                                   ${!isSelected ? 'disabled' : ''}
+                                                   onchange="updatePrice('${service.id}', this.value)"
+                                                   oninput="updatePrice('${service.id}', this.value)">
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleService(serviceId, category) {
+            const checkbox = document.querySelector(`[data-service-id="${serviceId}"] .service-checkbox`);
+            const serviceItem = document.querySelector(`[data-service-id="${serviceId}"]`);
+            const priceInput = serviceItem.querySelector('.service-price-input');
+            
+            if (checkbox.checked) {
+                serviceItem.classList.add('selected');
+                priceInput.disabled = false;
+                if (!currentPricing.services[serviceId]) {
+                    currentPricing.services[serviceId] = {
+                        category: category,
+                        price: '',
+                        serviceName: window.getServiceById(serviceId)?.name || ''
+                    };
+                }
+            } else {
+                serviceItem.classList.remove('selected');
+                priceInput.disabled = true;
+                priceInput.value = '';
+                delete currentPricing.services[serviceId];
+            }
+        }
+
+        function updatePrice(serviceId, price) {
+            if (currentPricing.services[serviceId]) {
+                currentPricing.services[serviceId].price = parseFloat(price) || 0;
+            }
+        }
+
+        async function savePricing() {
+            if (!clinicId) {
+                alert('Please log in first');
+                return;
+            }
+
+            const selectedServices = Object.keys(currentPricing.services).filter(id => 
+                currentPricing.services[id].price && currentPricing.services[id].price > 0
+            );
+
+            if (selectedServices.length === 0) {
+                alert('Please select at least one service and enter pricing');
+                return;
+            }
+
+            const saveBtn = document.querySelector('.save-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                currentPricing.status = 'pending';
+                currentPricing.submittedAt = new Date().toISOString();
+                currentPricing.lastUpdated = new Date().toISOString();
+
+                const pricingRef = doc(db, 'servicePricing', clinicId);
+                await setDoc(pricingRef, currentPricing, { merge: true });
+
+                alert('✅ Service pricing submitted for review! It will be published after admin approval.');
+                await loadCurrentPricing();
+                await renderCategories();
+            } catch (error) {
+                console.error('Error saving pricing:', error);
+                alert('❌ Error saving pricing: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Submit for Review';
+            }
+        }
+
+        window.toggleService = toggleService;
+        window.updatePrice = updatePrice;
+        window.savePricing = savePricing;
+    </script>
+</body>
+</html>
+

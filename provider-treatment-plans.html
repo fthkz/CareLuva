@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treatment Plans - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .plan-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-meta {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .plan-status {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .progress-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 0.3s;
+        }
+        
+        .appointments-list {
+            margin-top: 1.5rem;
+        }
+        
+        .appointment-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .appointment-info {
+            flex: 1;
+        }
+        
+        .appointment-number {
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 0.25rem;
+        }
+        
+        .appointment-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .appointment-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.25rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">CareLuva</div>
+        <div class="header-actions">
+            <a href="create-treatment-plan.html" class="btn btn-primary">Create Treatment Plan</a>
+            <a href="provider-dashboard.html" class="back-btn">Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h1 style="font-size: 2rem; font-weight: 700; color: #1f2937; margin-bottom: 2rem;">Treatment Plans</h1>
+        
+        <div id="plansList">
+            <div style="text-align: center; padding: 4rem; color: #6b7280;">
+                <div class="spinner" style="display: inline-block; width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div>
+                <p>Loading treatment plans...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="treatment-plan-manager.js"></script>
+    <script src="auth-utils.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        const treatmentPlanManager = new TreatmentPlanManager();
+        treatmentPlanManager.initialize(db);
+
+        let clinicId = null;
+
+        // Load clinic ID
+        async function loadClinicId() {
+            try {
+                const session = window.authUtils?.getSession();
+                if (!session) {
+                    window.location.href = 'provider-auth.html';
+                    return;
+                }
+
+                const email = session.registrationData?.email;
+                if (!email) return;
+
+                const clinicsRef = collection(db, 'providerRegistrations');
+                const emailQuery = query(clinicsRef, where('email', '==', email));
+                const snapshot = await getDocs(emailQuery);
+
+                if (!snapshot.empty) {
+                    clinicId = snapshot.docs[0].id;
+                    loadTreatmentPlans();
+                }
+            } catch (error) {
+                console.error('Error loading clinic ID:', error);
+            }
+        }
+
+        // Load treatment plans
+        async function loadTreatmentPlans() {
+            if (!clinicId) return;
+
+            try {
+                const plans = await treatmentPlanManager.getClinicTreatmentPlans(clinicId);
+                displayPlans(plans);
+            } catch (error) {
+                console.error('Error loading treatment plans:', error);
+                document.getElementById('plansList').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Error Loading Plans</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display plans
+        function displayPlans(plans) {
+            const container = document.getElementById('plansList');
+            
+            if (plans.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Treatment Plans</h3>
+                        <p>You haven't created any treatment plans yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = plans.map(plan => {
+                const createdDate = plan.createdAt ? (plan.createdAt.toDate ? plan.createdAt.toDate().toLocaleDateString() : new Date(plan.createdAt).toLocaleDateString()) : 'N/A';
+                const completedCount = plan.appointments.filter(apt => apt.status === 'completed').length;
+
+                return `
+                    <div class="plan-card">
+                        <div class="plan-header">
+                            <div>
+                                <div class="plan-title">${plan.planName}</div>
+                                <div class="plan-meta">
+                                    Patient: ${plan.patientName} | Created: ${createdDate} | ${plan.totalAppointments} appointments
+                                </div>
+                            </div>
+                            <div class="plan-status status-${plan.status}">${plan.status.toUpperCase()}</div>
+                        </div>
+                        
+                        ${plan.description ? `
+                        <div style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                            ${plan.description}
+                        </div>
+                        ` : ''}
+                        
+                        <div class="progress-section">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600; color: #374151;">Progress</span>
+                                <span style="color: #6b7280; font-size: 0.875rem;">${completedCount} of ${plan.totalAppointments} completed</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${plan.progress || 0}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="appointments-list">
+                            <div style="font-weight: 600; color: #374151; margin-bottom: 1rem;">Appointments</div>
+                            ${plan.appointments.map(apt => {
+                                const aptDate = apt.scheduledDate ? new Date(apt.scheduledDate).toLocaleDateString() : 'N/A';
+                                return `
+                                    <div class="appointment-item">
+                                        <div class="appointment-info">
+                                            <div class="appointment-number">Appointment ${apt.sequenceNumber}: ${apt.service}</div>
+                                            <div class="appointment-details">
+                                                ${aptDate} at ${apt.scheduledTime || 'N/A'} | ${apt.professionalName || 'N/A'}
+                                            </div>
+                                        </div>
+                                        <div class="appointment-status status-${apt.status}">${apt.status}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 0.875rem; color: #6b7280;">
+                                CareLuva Fee: <strong style="color: #1f2937;">₺${plan.careluvaFee.toFixed(2)}</strong>
+                            </div>
+                            ${plan.status === 'active' ? `
+                            <button class="btn btn-primary" onclick="cancelPlan('${plan.id}')">Cancel Plan</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.cancelPlan = async function(planId) {
+            const reason = prompt('Please provide a reason for cancellation:');
+            if (!reason) return;
+
+            try {
+                await treatmentPlanManager.cancelTreatmentPlan(planId, reason, 'provider');
+                alert('Treatment plan cancelled.');
+                loadTreatmentPlans();
+            } catch (error) {
+                console.error('Error cancelling plan:', error);
+                alert('Error cancelling plan: ' + error.message);
+            }
+        };
+
+        // Initialize
+        loadClinicId();
+    </script>
+</body>
+</html>
+

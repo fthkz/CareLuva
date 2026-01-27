@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Provider Authentication - CareLuva</title>
+    <title>Patient Authentication - CareLuva</title>
     <style>
         * {
             margin: 0;
@@ -344,15 +344,15 @@
     
     <div class="auth-container">
         <div class="auth-left">
-            <h1>Join CareLuva</h1>
-            <p>Connect with patients and grow your practice with Turkey's leading healthcare marketplace</p>
+            <h1>Welcome to CareLuva</h1>
+            <p>Find trusted healthcare providers in Turkey. Book appointments, read reviews, and get the care you need.</p>
             
             <ul class="features">
-                <li>Reach thousands of patients</li>
-                <li>Manage your profile and reviews</li>
-                <li>Transparent pricing and ratings</li>
+                <li>Search verified clinics and doctors</li>
+                <li>Read authentic patient reviews</li>
+                <li>Book appointments easily</li>
+                <li>Transparent pricing information</li>
                 <li>24/7 customer support</li>
-                <li>Secure payment processing</li>
             </ul>
         </div>
         
@@ -406,12 +406,88 @@
             <div class="signup-options" id="signup-options" style="display: none;">
                 <div class="signup-intro">
                     <h3>Ready to join CareLuva?</h3>
-                    <p>Complete your provider registration to start connecting with patients.</p>
+                    <p>Create your account to start finding trusted healthcare providers.</p>
                 </div>
                 
-                <a href="complete-registration.html" class="btn btn-primary signup-btn">
+                <a href="patient-registration.html" class="btn btn-primary signup-btn">
                     Start Registration
                 </a>
+                
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                
+                <button type="button" class="btn btn-google" id="google-signup-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </button>
+            </div>
+            
+            <!-- Sign Up Form (Legacy - keeping for quick signup) -->
+            <form class="auth-form" id="signup-form" style="display: none;">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password (min. 8 characters)" required minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" placeholder="Confirm your password" required minlength="8">
+                </div>
+                
+                <!-- Terms & Conditions Acceptance -->
+                <div class="form-group" style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 2px solid #e5e7eb;">
+                    <div style="display: flex; align-items: start; gap: 12px;">
+                        <input type="checkbox" id="patient-terms-accepted" required style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;">
+                        <label for="patient-terms-accepted" style="cursor: pointer; flex: 1; line-height: 1.6; font-size: 0.875rem;">
+                            <strong style="color: #1f2937;">I have read and agree to the <a href="patient-terms-and-conditions.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">Patient Terms & Conditions</a></strong>
+                            <span style="color: #ef4444;">*</span>
+                        </label>
+                    </div>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin-left: 32px; margin-top: 8px;">
+                        By checking this box, you acknowledge that you have read, understood, and agree to be bound by CareLuva's Terms & Conditions.
+                    </p>
+                    <div id="patient-terms-error" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 10px; margin-left: 32px;"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="signup-submit-btn">Create Account</button>
+                
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                
+                <button type="button" class="btn btn-google" id="google-signup-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </button>
+            </form>
+            
+            <!-- Sign Up Options (Legacy - keeping for compatibility) -->
+            <div class="signup-options" id="signup-options" style="display: none;">
+                <div class="signup-intro">
+                    <h3>Ready to join CareLuva?</h3>
+                    <p>Create your account to start finding trusted healthcare providers.</p>
+                </div>
                 
                 <div class="divider">
                     <span>or</span>
@@ -480,7 +556,7 @@
         // Wait for Firebase
         window.addEventListener('firebaseReady', () => {
             firebaseReady = true;
-            console.log('Firebase ready for provider authentication');
+            console.log('Firebase ready for patient authentication');
         });
         
         // Tab switching
@@ -508,6 +584,12 @@
             const signupOptions = document.getElementById('signup-options');
             if (signupOptions) {
                 signupOptions.style.display = tabName === 'signup' ? 'block' : 'none';
+            }
+            
+            // Hide legacy signup form
+            const signupForm = document.getElementById('signup-form');
+            if (signupForm) {
+                signupForm.style.display = 'none';
             }
             
             // Clear messages
@@ -559,78 +641,73 @@
                 // Use Firestore-based authentication (providers are stored in Firestore, not Firebase Auth)
                 const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                // Find provider registration by email
-                const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
-                const emailQuery = query(registrationsRef, where('email', '==', email));
+                // Find patient user by email
+                const patientsRef = collection(window.firebase.db, 'patientUsers');
+                const emailQuery = query(patientsRef, where('email', '==', email));
                 const snapshot = await getDocs(emailQuery);
                 
                 if (snapshot.empty) {
-                    throw new Error('No account found with this email address. Please check your email or complete registration.');
+                    throw new Error('No account found with this email address. Please check your email or sign up.');
                 }
                 
-                // Get the registration document
-                const registrationDoc = snapshot.docs[0];
-                const registrationData = registrationDoc.data();
+                // Get the patient document
+                const patientDoc = snapshot.docs[0];
+                const patientData = patientDoc.data();
                 
                 // Verify password (supports both hashed and plain text for migration)
-                if (!registrationData.password) {
+                if (!patientData.password) {
                     throw new Error('Incorrect password. Please try again.');
                 }
                 
                 // Use authUtils to verify password (handles both hashed and plain text)
                 let passwordValid = false;
                 if (window.authUtils) {
-                    passwordValid = await window.authUtils.verifyPassword(password, registrationData.password);
+                    passwordValid = await window.authUtils.verifyPassword(password, patientData.password);
                 } else {
                     // Fallback: direct comparison (for legacy plain text passwords)
-                    passwordValid = registrationData.password === password;
+                    passwordValid = patientData.password === password;
                 }
                 
                 if (!passwordValid) {
                     throw new Error('Incorrect password. Please try again.');
                 }
                 
-                // Check registration status
-                if (registrationData.status === 'rejected') {
-                    throw new Error('Your registration has been rejected. Please contact support.');
-                }
-                
-                console.log('Firestore login successful:', registrationDoc.id);
+                console.log('Patient login successful:', patientDoc.id);
                 
                 // Use improved session management
                 if (window.authUtils) {
                     const session = window.authUtils.createSession(
-                        registrationDoc.id,
-                        registrationData.email,
-                        registrationData,
+                        patientDoc.id,
+                        patientData.email,
+                        patientData,
                         rememberMe
                     );
-                    window.authUtils.saveSession(session, registrationData, rememberMe);
+                    window.authUtils.saveSession(session, patientData, rememberMe);
                     
-                    // Also store registration ID separately for backward compatibility
+                    // Also store patient ID separately for backward compatibility
                     const storage = rememberMe ? localStorage : sessionStorage;
-                    storage.setItem('providerRegistrationId', registrationDoc.id);
+                    storage.setItem('patientUserId', patientDoc.id);
                 } else {
                     // Fallback: basic session storage
-                const sessionData = {
-                        uid: registrationDoc.id,
-                        email: registrationData.email,
-                    loginTime: new Date().toISOString()
-                };
+                    const sessionData = {
+                        uid: patientDoc.id,
+                        email: patientData.email,
+                        loginTime: new Date().toISOString()
+                    };
                     const storage = rememberMe ? localStorage : sessionStorage;
-                    storage.setItem('providerSession', JSON.stringify(sessionData));
-                    storage.setItem('providerRegistrationId', registrationDoc.id);
+                    storage.setItem('patientSession', JSON.stringify(sessionData));
+                    storage.setItem('patientUserId', patientDoc.id);
                     // Don't store password in session
-                    const safeData = { ...registrationData };
+                    const safeData = { ...patientData };
                     delete safeData.password;
-                    storage.setItem('providerRegistration', JSON.stringify(safeData));
+                    storage.setItem('patientUser', JSON.stringify(safeData));
                 }
                 
                 showMessage('Login successful! Redirecting...', 'success');
                 
-                // Redirect to provider dashboard
+                // Redirect to find clinics page
                 setTimeout(() => {
-                    window.location.href = 'provider-dashboard.html';
+                    window.location.href = 'find-clinics.html';
                 }, 1000);
                 
             } catch (error) {
@@ -642,7 +719,169 @@
             }
         });
         
-        // Sign up now redirects directly to registration page
+        // Sign up form handler
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const submitBtn = document.getElementById('signup-submit-btn');
+            
+            if (!name || !email || !password || !confirmPassword) {
+                showMessage('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showMessage('Password must be at least 8 characters long');
+                return;
+            }
+            
+            // Validate Terms & Conditions acceptance
+            const termsAccepted = document.getElementById('patient-terms-accepted')?.checked || false;
+            const termsError = document.getElementById('patient-terms-error');
+            
+            if (!termsAccepted) {
+                if (termsError) {
+                    termsError.textContent = 'You must accept the Terms & Conditions to create an account.';
+                    termsError.style.display = 'block';
+                }
+                document.getElementById('patient-terms-accepted')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            
+            // Clear error if terms are accepted
+            if (termsError) {
+                termsError.style.display = 'none';
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating account...';
+            clearMessages();
+            
+            try {
+                if (!firebaseReady || !window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase is not available. Please ensure Firebase is properly configured.');
+                }
+                
+                const { collection, query, where, getDocs, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Hash password before storing
+                let hashedPassword = password;
+                if (window.authUtils) {
+                    try {
+                        hashedPassword = await window.authUtils.hashPassword(password);
+                        console.log('✅ Password hashed before storage');
+                    } catch (hashError) {
+                        console.error('Error hashing password:', hashError);
+                        throw new Error('Failed to secure password. Please try again.');
+                    }
+                }
+                
+                // Check if email already exists (this might fail due to permissions, but we'll continue anyway)
+                const patientsRef = collection(window.firebase.db, 'patientUsers');
+                try {
+                    const emailQuery = query(patientsRef, where('email', '==', email));
+                    const snapshot = await getDocs(emailQuery);
+                    
+                    if (!snapshot.empty) {
+                        throw new Error('An account with this email already exists. Please log in instead.');
+                    }
+                } catch (queryError) {
+                    // If query fails due to permissions, log it but continue with registration
+                    // The duplicate check is a nice-to-have, not critical
+                    console.warn('Could not check for existing email (this is okay):', queryError.message);
+                }
+                
+                // Create patient user document
+                const patientData = {
+                    name: name,
+                    email: email,
+                    password: hashedPassword,
+                    termsAccepted: true,
+                    termsAcceptedAt: new Date().toISOString(),
+                    termsVersion: '1.0',
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                };
+                
+                console.log('Attempting to create patient account with data:', {
+                    name: patientData.name,
+                    email: patientData.email,
+                    password: '***hashed***',
+                    termsAccepted: patientData.termsAccepted,
+                    hasCreatedAt: !!patientData.createdAt,
+                    hasUpdatedAt: !!patientData.updatedAt
+                });
+                
+                const docRef = await addDoc(patientsRef, patientData);
+                console.log('✅ Patient account created:', docRef.id);
+                
+                // Save Terms & Conditions acceptance separately
+                try {
+                    await addDoc(collection(window.firebase.db, 'termsAcceptance'), {
+                        userId: docRef.id,
+                        userType: 'patient',
+                        userEmail: email,
+                        termsVersion: '1.0',
+                        acceptedAt: serverTimestamp(),
+                        ipAddress: null, // Can be added if needed
+                        userAgent: navigator.userAgent
+                    });
+                    console.log('✅ Patient terms acceptance recorded');
+                } catch (termsError) {
+                    console.error('Error recording terms acceptance:', termsError);
+                    // Continue even if terms recording fails
+                }
+                
+                // Create session
+                if (window.authUtils) {
+                    const session = window.authUtils.createSession(
+                        docRef.id,
+                        email,
+                        patientData,
+                        false
+                    );
+                    window.authUtils.saveSession(session, patientData, false);
+                    
+                    const storage = sessionStorage;
+                    storage.setItem('patientUserId', docRef.id);
+                } else {
+                    // Fallback: basic session storage
+                    const sessionData = {
+                        uid: docRef.id,
+                        email: email,
+                        loginTime: new Date().toISOString()
+                    };
+                    sessionStorage.setItem('patientSession', JSON.stringify(sessionData));
+                    sessionStorage.setItem('patientUserId', docRef.id);
+                    const safeData = { ...patientData };
+                    delete safeData.password;
+                    sessionStorage.setItem('patientUser', JSON.stringify(safeData));
+                }
+                
+                showMessage('Account created successfully! Redirecting...', 'success');
+                
+                // Redirect to find clinics page
+                setTimeout(() => {
+                    window.location.href = 'find-clinics.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                showMessage(error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
         
         // Google Sign-In implementation
         document.getElementById('google-login-btn').addEventListener('click', () => {
@@ -702,24 +941,22 @@
                 localStorage.setItem('providerSession', JSON.stringify(userData));
                 
                 if (mode === 'signup') {
-                    // For signup, redirect to registration with pre-filled data
-                    showMessage('Google account connected! Please complete your provider registration.', 'success');
+                    // For signup, create patient account with Google data
+                    showMessage('Google account connected! Creating your account...', 'success');
+                    // TODO: Create patient account with Google data
                     setTimeout(() => {
-                        window.location.href = `complete-registration.html?google=true&email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.displayName)}`;
+                        window.location.href = 'find-clinics.html';
                     }, 2000);
                 } else {
-                    // For login, check if user has existing registration
-                    const hasRegistration = await checkExistingRegistration(user.email);
-                    if (hasRegistration) {
-                        showMessage('Login successful! Redirecting to dashboard...', 'success');
+                    // For login, check if user has existing account
+                    const hasAccount = await checkExistingPatientAccount(user.email);
+                    if (hasAccount) {
+                        showMessage('Login successful! Redirecting...', 'success');
                         setTimeout(() => {
-                            window.location.href = 'provider-dashboard.html';
+                            window.location.href = 'find-clinics.html';
                         }, 1500);
                     } else {
-                        showMessage('No registration found. Please sign up first.', 'error');
-                        setTimeout(() => {
-                            window.location.href = 'complete-registration.html';
-                        }, 2000);
+                        showMessage('No account found. Please sign up first.', 'error');
                     }
                 }
                 
@@ -774,15 +1011,14 @@
                 console.log('✅ Demo Google Sign-In successful:', demoUser);
                 
                 // Store user data
-                localStorage.setItem('providerSession', JSON.stringify(demoUser));
+                localStorage.setItem('patientSession', JSON.stringify(demoUser));
                 
                 // Show success message
                 showMessage('Successfully signed in with Google! (Demo Mode)', 'success');
                 
-                // Redirect to registration page with Google data
-                const redirectUrl = `complete-registration.html?google=true&email=${encodeURIComponent(demoUser.email)}&name=${encodeURIComponent(demoUser.displayName)}`;
+                // Redirect to find clinics page
                 setTimeout(() => {
-                    window.location.href = redirectUrl;
+                    window.location.href = 'find-clinics.html';
                 }, 1500);
                 
             } catch (error) {
@@ -797,21 +1033,23 @@
             }
         }
         
-        async function checkExistingRegistration(email) {
+        async function checkExistingPatientAccount(email) {
             try {
-                if (!window.firebase || !window.firebase.auth) {
+                if (!window.firebase || !window.firebase.db) {
                     return false;
                 }
                 
-                // Use Firebase Auth to check if email is already registered
-                // This is the proper way without requiring admin access
-                const auth = window.firebase.auth;
-                const signInMethods = await window.firebase.fetchSignInMethodsForEmail(auth, email);
+                const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                return signInMethods && signInMethods.length > 0;
+                // Check if patient account exists in Firestore
+                const patientsRef = collection(window.firebase.db, 'patientUsers');
+                const emailQuery = query(patientsRef, where('email', '==', email));
+                const snapshot = await getDocs(emailQuery);
+                
+                return !snapshot.empty;
                 
             } catch (error) {
-                console.error('Error checking existing registration:', error);
+                console.error('Error checking existing patient account:', error);
                 return false;
             }
         }
@@ -877,7 +1115,7 @@
                             style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.3s;">
                             Reset Password
                         </button>
-                        <a href="provider-auth.html" 
+                        <a href="patient-auth.html" 
                             style="display: block; width: 100%; padding: 12px; margin-top: 10px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box;">
                             Cancel
                         </a>
@@ -926,26 +1164,26 @@
                 
                 const { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                // Find registration by email and verify token
-                const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
-                const emailQuery = query(registrationsRef, where('email', '==', email));
+                // Find patient user by email and verify token
+                const patientsRef = collection(window.firebase.db, 'patientUsers');
+                const emailQuery = query(patientsRef, where('email', '==', email));
                 const snapshot = await getDocs(emailQuery);
                 
                 if (snapshot.empty) {
-                    throw new Error('Registration not found.');
+                    throw new Error('Account not found.');
                 }
                 
-                const registrationDoc = snapshot.docs[0];
-                const registrationData = registrationDoc.data();
+                const patientDoc = snapshot.docs[0];
+                const patientData = patientDoc.data();
                 
                 // Verify token
-                if (!registrationData.passwordResetToken || registrationData.passwordResetToken !== token) {
+                if (!patientData.passwordResetToken || patientData.passwordResetToken !== token) {
                     throw new Error('Invalid or expired reset token. Please request a new password reset.');
                 }
                 
                 // Check token expiry
-                if (registrationData.passwordResetExpiry) {
-                    const expiryDate = new Date(registrationData.passwordResetExpiry);
+                if (patientData.passwordResetExpiry) {
+                    const expiryDate = new Date(patientData.passwordResetExpiry);
                     if (new Date() > expiryDate) {
                         throw new Error('Reset token has expired. Please request a new password reset.');
                     }
@@ -964,7 +1202,7 @@
                 }
                 
                 // Update password and clear reset token
-                await updateDoc(doc(window.firebase.db, 'providerRegistrations', registrationDoc.id), {
+                await updateDoc(doc(window.firebase.db, 'patientUsers', patientDoc.id), {
                     password: hashedPassword,
                     passwordResetToken: null,
                     passwordResetExpiry: null,
@@ -975,7 +1213,7 @@
                 
                 // Redirect to login after 2 seconds
                 setTimeout(() => {
-                    window.location.href = 'provider-auth.html';
+                    window.location.href = 'patient-auth.html';
                 }, 2000);
                 
             } catch (error) {

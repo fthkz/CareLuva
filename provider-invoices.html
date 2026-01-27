@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing & Invoices - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .stat-value.pending {
+            color: #f59e0b;
+        }
+        
+        .stat-value.paid {
+            color: #10b981;
+        }
+        
+        .stat-value.overdue {
+            color: #ef4444;
+        }
+        
+        .tabs {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #6b7280;
+        }
+        
+        .tab:hover {
+            color: #1e40af;
+        }
+        
+        .tab.active {
+            color: #1e40af;
+            border-bottom-color: #1e40af;
+        }
+        
+        .invoices-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-card {
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .invoice-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .invoice-info h3 {
+            font-size: 1.25rem;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .invoice-number {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .invoice-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-sent {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .invoice-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 0.875rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .invoice-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin: 15px 0;
+        }
+        
+        .invoice-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .payment-section {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .payment-section h4 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .bank-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .bank-details p {
+            margin: 5px 0;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        .bank-details strong {
+            color: #1f2937;
+        }
+        
+        .upload-section {
+            margin-top: 15px;
+        }
+        
+        .upload-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-input-button:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .payment-form {
+            display: grid;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-file-invoice-dollar"></i> Billing & Invoices</h1>
+            <a href="provider-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-label">Total Invoices</div>
+                <div class="stat-value" id="totalInvoices">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending Payment</div>
+                <div class="stat-value pending" id="pendingAmount">₺0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value paid" id="paidAmount">₺0.00</div>
+                <div class="stat-label">Total Paid</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value overdue" id="overdueAmount">₺0.00</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="all">All Invoices</div>
+            <div class="tab" data-tab="pending">Pending</div>
+            <div class="tab" data-tab="paid">Paid</div>
+            <div class="tab" data-tab="overdue">Overdue</div>
+        </div>
+        
+        <!-- Invoices Section -->
+        <div class="invoices-section">
+            <div id="invoicesList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading invoices...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Upload Modal -->
+    <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: #1e40af;">Upload Payment Receipt</h2>
+                <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;">&times;</button>
+            </div>
+            
+            <div id="paymentModalContent">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    <script src="invoice-generator.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        window.firebase = { app, db, storage };
+        window.firebaseReady = true;
+
+        let currentClinicId = null;
+        let allInvoices = [];
+        let currentTab = 'all';
+
+        // Check authentication
+        if (!window.authUtils || !window.authUtils.getSession()) {
+            alert('Please log in to view your invoices.');
+            window.location.href = 'provider-auth.html';
+        } else {
+            const session = window.authUtils.getSession();
+            if (session && session.registrationData) {
+                // Get clinic ID from registration
+                const email = session.registrationData.email;
+                await loadClinicId(email);
+            }
+        }
+
+        // Load clinic ID from email
+        async function loadClinicId(email) {
+            try {
+                const clinicsRef = collection(db, 'providerRegistrations');
+                const emailQuery = query(clinicsRef, where('email', '==', email));
+                const snapshot = await getDocs(emailQuery);
+                
+                if (!snapshot.empty) {
+                    currentClinicId = snapshot.docs[0].id;
+                    await loadInvoices();
+                } else {
+                    document.getElementById('invoicesList').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Clinic Not Found</h3>
+                            <p>Unable to find your clinic registration.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading clinic ID:', error);
+            }
+        }
+
+        // Load invoices
+        async function loadInvoices() {
+            if (!currentClinicId) return;
+
+            try {
+                const invoiceGenerator = new InvoiceGenerator();
+                allInvoices = await invoiceGenerator.getClinicInvoices(currentClinicId);
+                
+                updateStatistics();
+                displayInvoices();
+            } catch (error) {
+                console.error('Error loading invoices:', error);
+                document.getElementById('invoicesList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Invoices</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const total = allInvoices.length;
+            const pending = allInvoices.filter(inv => inv.status === 'pending' || inv.status === 'sent').reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+            const paid = allInvoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
+            const overdue = allInvoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + ((inv.totalAmount || 0) + (inv.lateFee || 0)), 0);
+
+            document.getElementById('totalInvoices').textContent = total;
+            document.getElementById('pendingAmount').textContent = `₺${pending.toFixed(2)}`;
+            document.getElementById('paidAmount').textContent = `₺${paid.toFixed(2)}`;
+            document.getElementById('overdueAmount').textContent = `₺${overdue.toFixed(2)}`;
+        }
+
+        // Display invoices
+        function displayInvoices() {
+            const container = document.getElementById('invoicesList');
+            
+            let filteredInvoices = allInvoices;
+            if (currentTab !== 'all') {
+                filteredInvoices = allInvoices.filter(inv => inv.status === currentTab);
+            }
+
+            if (filteredInvoices.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-invoice"></i>
+                        <h3>No Invoices Found</h3>
+                        <p>${currentTab === 'all' ? 'You don\'t have any invoices yet.' : `No ${currentTab} invoices.`}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredInvoices.map(invoice => {
+                const dueDate = invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A';
+                const createdDate = invoice.createdAt ? (invoice.createdAt.toDate ? invoice.createdAt.toDate().toLocaleDateString() : new Date(invoice.createdAt).toLocaleDateString()) : 'N/A';
+                const totalWithLateFee = (invoice.totalAmount || 0) + (invoice.lateFee || 0);
+
+                return `
+                    <div class="invoice-card">
+                        <div class="invoice-header">
+                            <div class="invoice-info">
+                                <h3>Invoice ${invoice.invoiceNumber}</h3>
+                                <div class="invoice-number">Created: ${createdDate} | Due: ${dueDate}</div>
+                            </div>
+                            <div class="invoice-status status-${invoice.status}">${invoice.status.toUpperCase()}</div>
+                        </div>
+                        
+                        <div class="invoice-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Total Amount</div>
+                                <div class="detail-value">₺${(invoice.totalAmount || 0).toFixed(2)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Treatments</div>
+                                <div class="detail-value">${invoice.treatments ? invoice.treatments.length : 0}</div>
+                            </div>
+                            ${invoice.lateFee > 0 ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Late Fee</div>
+                                <div class="detail-value" style="color: #ef4444;">₺${invoice.lateFee.toFixed(2)}</div>
+                            </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <div class="detail-label">Total Due</div>
+                                <div class="detail-value" style="font-weight: 700; color: #1e40af;">₺${totalWithLateFee.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        ${invoice.status !== 'paid' ? `
+                        <div class="payment-section">
+                            <h4><i class="fas fa-credit-card"></i> Payment Options</h4>
+                            
+                            <div class="bank-details">
+                                <p><strong>Bank:</strong> ${invoice.bankAccountDetails?.bankName || 'N/A'}</p>
+                                <p><strong>Account Name:</strong> ${invoice.bankAccountDetails?.accountName || 'N/A'}</p>
+                                <p><strong>IBAN:</strong> ${invoice.bankAccountDetails?.IBAN || 'N/A'}</p>
+                                <p><strong>Reference:</strong> ${invoice.invoiceNumber}</p>
+                            </div>
+                            
+                            <div class="upload-section">
+                                <label>Upload Payment Receipt</label>
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="receipt-${invoice.id}" accept="image/*,application/pdf" onchange="handleReceiptUpload('${invoice.id}', this.files[0])">
+                                    <div class="file-input-button">
+                                        <i class="fas fa-upload"></i>
+                                        <span>Choose file or drag and drop</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-form" id="payment-form-${invoice.id}" style="display: none;">
+                                <div class="form-group">
+                                    <label>Transfer Reference Number</label>
+                                    <input type="text" id="transfer-ref-${invoice.id}" placeholder="Havale/EFT Referans No">
+                                </div>
+                                <div class="form-group">
+                                    <label>Transfer Date</label>
+                                    <input type="date" id="transfer-date-${invoice.id}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Transfer Amount (TRY)</label>
+                                    <input type="number" id="transfer-amount-${invoice.id}" step="0.01" value="${totalWithLateFee.toFixed(2)}">
+                                </div>
+                                <button class="btn btn-success" onclick="submitPayment('${invoice.id}')">
+                                    <i class="fas fa-check"></i> Submit Payment
+                                </button>
+                            </div>
+                        </div>
+                        ` : `
+                        <div style="background: #d1fae5; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <p style="color: #065f46; font-weight: 600;">
+                                <i class="fas fa-check-circle"></i> Payment Verified
+                            </p>
+                            <p style="color: #065f46; font-size: 0.875rem; margin-top: 5px;">
+                                Paid on: ${invoice.paidAt ? (invoice.paidAt.toDate ? invoice.paidAt.toDate().toLocaleDateString() : new Date(invoice.paidAt).toLocaleDateString()) : 'N/A'}
+                            </p>
+                        </div>
+                        `}
+                        
+                        <div class="invoice-actions">
+                            <button class="btn btn-secondary" onclick="downloadInvoice('${invoice.id}')">
+                                <i class="fas fa-download"></i> Download PDF
+                            </button>
+                            ${invoice.status !== 'paid' ? `
+                            <button class="btn btn-primary" onclick="openPaymentModal('${invoice.id}')">
+                                <i class="fas fa-credit-card"></i> Pay with iyzico
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Handle receipt upload
+        window.handleReceiptUpload = async function(invoiceId, file) {
+            if (!file) return;
+
+            // Show payment form
+            const form = document.getElementById(`payment-form-${invoiceId}`);
+            if (form) {
+                form.style.display = 'grid';
+            }
+
+            // Store file for later upload
+            window[`receiptFile_${invoiceId}`] = file;
+        };
+
+        // Submit payment
+        window.submitPayment = async function(invoiceId) {
+            const transferRef = document.getElementById(`transfer-ref-${invoiceId}`)?.value;
+            const transferDate = document.getElementById(`transfer-date-${invoiceId}`)?.value;
+            const transferAmount = parseFloat(document.getElementById(`transfer-amount-${invoiceId}`)?.value || 0);
+            const receiptFile = window[`receiptFile_${invoiceId}`];
+
+            if (!transferRef || !transferDate || !receiptFile) {
+                alert('Please fill in all fields and upload a receipt.');
+                return;
+            }
+
+            try {
+                // Upload receipt to Firebase Storage
+                const receiptRef = ref(storage, `payment-receipts/${invoiceId}/${Date.now()}_${receiptFile.name}`);
+                await uploadBytes(receiptRef, receiptFile);
+                const receiptUrl = await getDownloadURL(receiptRef);
+
+                // Update invoice
+                const invoiceRef = doc(db, 'invoices', invoiceId);
+                await updateDoc(invoiceRef, {
+                    status: 'pending', // Will be changed to 'paid' after admin verification
+                    transferReference: transferRef,
+                    transferDate: transferDate,
+                    transferAmount: transferAmount,
+                    paymentReceiptUrl: receiptUrl,
+                    paymentVerified: false,
+                    updatedAt: serverTimestamp()
+                });
+
+                alert('Payment receipt uploaded successfully! Your payment will be verified by our team within 1-2 business days.');
+                await loadInvoices();
+            } catch (error) {
+                console.error('Error submitting payment:', error);
+                alert('Error uploading payment receipt. Please try again.');
+            }
+        };
+
+        // Open payment modal (for iyzico)
+        window.openPaymentModal = function(invoiceId) {
+            const invoice = allInvoices.find(inv => inv.id === invoiceId);
+            if (!invoice) return;
+
+            const modal = document.getElementById('paymentModal');
+            const content = document.getElementById('paymentModalContent');
+            
+            content.innerHTML = `
+                <h3>Pay with iyzico</h3>
+                <p style="margin: 15px 0; color: #6b7280;">This feature will be available soon. For now, please use bank transfer.</p>
+                <button class="btn btn-secondary" onclick="closePaymentModal()">Close</button>
+            `;
+            
+            modal.style.display = 'flex';
+        };
+
+        window.closePaymentModal = function() {
+            document.getElementById('paymentModal').style.display = 'none';
+        };
+
+        window.downloadInvoice = function(invoiceId) {
+            // TODO: Implement PDF download
+            alert('PDF download will be available soon.');
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTab = tab.dataset.tab;
+                displayInvoices();
+            });
+        });
+
+        // Initialize
+        if (currentClinicId) {
+            loadInvoices();
+        }
+    </script>
+</body>
+</html>
+

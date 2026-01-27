@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics & Reports - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            padding: 25px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .stat-card-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .stat-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .stat-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card-4 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        /* Content Sections */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .content-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .content-card h3 {
+            margin: 0 0 20px 0;
+            color: #1f2937;
+            font-size: 1.25rem;
+        }
+        
+        .progress-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 150px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .progress-fill.completed {
+            background: #10b981;
+        }
+        
+        .progress-fill.scheduled {
+            background: #3b82f6;
+        }
+        
+        .progress-fill.cancelled {
+            background: #ef4444;
+        }
+        
+        .review-item {
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        
+        .review-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .review-rating {
+            color: #fbbf24;
+        }
+        
+        .review-text {
+            margin: 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .summary-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .summary-value.positive {
+            color: #10b981;
+        }
+        
+        .summary-value.negative {
+            color: #ef4444;
+        }
+        
+        .summary-value.neutral {
+            color: #3b82f6;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-chart-bar"></i> Analytics & Reports</h1>
+            <a href="provider-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <!-- Analytics Content -->
+        <div id="analyticsContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading analytics...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        // Load clinic ID from session
+        function loadClinicId() {
+            if (window.authUtils) {
+                if (!window.authUtils.isAuthenticated()) {
+                    console.log('No valid session found');
+                    return null;
+                }
+                
+                const sessionInfo = window.authUtils.getSession();
+                if (sessionInfo && sessionInfo.session.uid) {
+                    return sessionInfo.session.uid;
+                }
+            }
+            
+            // Fallback: try direct localStorage/sessionStorage access
+            try {
+                let registrationId = localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+                if (registrationId) {
+                    return registrationId;
+                }
+                
+                let session = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession');
+                if (session) {
+                    const sessionData = JSON.parse(session);
+                    if (sessionData.uid) {
+                        return sessionData.uid;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading session:', error);
+            }
+            
+            return null;
+        }
+
+        // Load analytics data
+        async function loadAnalytics() {
+            try {
+                const clinicId = loadClinicId();
+                
+                if (!clinicId) {
+                    document.getElementById('analyticsContent').innerHTML = `
+                        <div class="loading">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 20px;"></i>
+                            <h3>Not Logged In</h3>
+                            <p>Please log in to view analytics.</p>
+                            <a href="provider-auth.html" class="back-btn" style="margin-top: 15px; display: inline-block;">
+                                Log In
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Load appointments
+                const appointmentsRef = collection(db, 'appointments');
+                let appointments = [];
+                try {
+                    let appointmentsQuery;
+                    try {
+                        appointmentsQuery = query(
+                            appointmentsRef,
+                            where('clinicId', '==', clinicId),
+                            orderBy('createdAt', 'desc')
+                        );
+                    } catch (error) {
+                        appointmentsQuery = query(
+                            appointmentsRef,
+                            where('clinicId', '==', clinicId)
+                        );
+                    }
+                    const snapshot = await getDocs(appointmentsQuery);
+                    appointments = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    
+                    if (appointments.length > 0 && !appointmentsQuery._query?.orderBy) {
+                        appointments.sort((a, b) => {
+                            const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return dateB.getTime() - dateA.getTime();
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Error loading appointments:', error);
+                }
+                
+                // Load reviews
+                const reviewsRef = collection(db, 'reviews');
+                let reviews = [];
+                try {
+                    const reviewsQuery = query(reviewsRef, where('clinicId', '==', clinicId));
+                    const snapshot = await getDocs(reviewsQuery);
+                    reviews = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.warn('Error loading reviews:', error);
+                }
+                
+                // Calculate statistics
+                const totalAppointments = appointments.length;
+                const completedAppointments = appointments.filter(a => a.status === 'completed').length;
+                const cancelledAppointments = appointments.filter(a => a.status === 'cancelled').length;
+                const scheduledAppointments = appointments.filter(a => a.status === 'scheduled' || a.status === 'confirmed' || a.status === 'pending' || !a.status).length;
+                
+                const approvedReviews = reviews.filter(r => r.status === 'approved' || !r.status);
+                const totalReviews = approvedReviews.length;
+                const averageRating = approvedReviews.length > 0 
+                    ? (approvedReviews.reduce((sum, r) => sum + (r.overallRating || 0), 0) / approvedReviews.length).toFixed(1)
+                    : 0;
+                
+                // Calculate monthly stats
+                const now = new Date();
+                const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const thisMonthAppointments = appointments.filter(apt => {
+                    const aptDate = apt.date ? (apt.date.toDate ? apt.date.toDate() : new Date(apt.date)) : (apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : null));
+                    return aptDate && aptDate >= thisMonth;
+                }).length;
+                
+                const uniquePatients = new Set(appointments.map(a => a.patientId || a.patientEmail || a.patientName)).size;
+                
+                // Render analytics
+                document.getElementById('analyticsContent').innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card stat-card-1">
+                            <h3>Total Appointments</h3>
+                            <div class="value">${totalAppointments}</div>
+                            <div class="subtitle">${thisMonthAppointments} this month</div>
+                        </div>
+                        <div class="stat-card stat-card-2">
+                            <h3>Completed</h3>
+                            <div class="value">${completedAppointments}</div>
+                            <div class="subtitle">${totalAppointments > 0 ? Math.round((completedAppointments / totalAppointments) * 100) : 0}% completion rate</div>
+                        </div>
+                        <div class="stat-card stat-card-3">
+                            <h3>Scheduled</h3>
+                            <div class="value">${scheduledAppointments}</div>
+                            <div class="subtitle">Upcoming appointments</div>
+                        </div>
+                        <div class="stat-card stat-card-4">
+                            <h3>Average Rating</h3>
+                            <div class="value">${averageRating}</div>
+                            <div class="subtitle">From ${totalReviews} review${totalReviews !== 1 ? 's' : ''}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-grid">
+                        <div class="content-card">
+                            <h3>Appointment Status</h3>
+                            <div class="progress-item">
+                                <span>Completed</span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill completed" style="width: ${totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0}%;"></div>
+                                    </div>
+                                    <span style="font-weight: 600;">${completedAppointments}</span>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <span>Scheduled</span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill scheduled" style="width: ${totalAppointments > 0 ? (scheduledAppointments / totalAppointments) * 100 : 0}%;"></div>
+                                    </div>
+                                    <span style="font-weight: 600;">${scheduledAppointments}</span>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <span>Cancelled</span>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill cancelled" style="width: ${totalAppointments > 0 ? (cancelledAppointments / totalAppointments) * 100 : 0}%;"></div>
+                                    </div>
+                                    <span style="font-weight: 600;">${cancelledAppointments}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="content-card">
+                            <h3>Recent Reviews</h3>
+                            ${approvedReviews.length > 0 ? `
+                                ${approvedReviews.slice(0, 5).map(review => `
+                                    <div class="review-item">
+                                        <div class="review-header">
+                                            <span class="review-name">${review.reviewerName || 'Anonymous'}</span>
+                                            <span class="review-rating">${'★'.repeat(Math.floor(review.overallRating || 0))}${'☆'.repeat(5 - Math.floor(review.overallRating || 0))}</span>
+                                        </div>
+                                        <p class="review-text">${(review.reviewText || '').substring(0, 150)}${(review.reviewText || '').length > 150 ? '...' : ''}</p>
+                                    </div>
+                                `).join('')}
+                            ` : `
+                                <p style="color: #6b7280; text-align: center; padding: 20px;">No reviews yet</p>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <h3 style="margin-bottom: 20px;">Performance Summary</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="summary-label">Completion Rate</div>
+                                <div class="summary-value positive">
+                                    ${totalAppointments > 0 ? Math.round((completedAppointments / totalAppointments) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Cancellation Rate</div>
+                                <div class="summary-value negative">
+                                    ${totalAppointments > 0 ? Math.round((cancelledAppointments / totalAppointments) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Total Patients</div>
+                                <div class="summary-value neutral">${uniquePatients}</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">This Month</div>
+                                <div class="summary-value neutral">${thisMonthAppointments}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                document.getElementById('analyticsContent').innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 20px;"></i>
+                        <h3>Error Loading Analytics</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" class="back-btn" style="margin-top: 15px; cursor: pointer; border: none;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        loadAnalytics();
+    </script>
+</body>
+</html>
+

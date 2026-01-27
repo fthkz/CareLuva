@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Schedules - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #f3f4f6;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Professional Selector */
+        .professional-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .professional-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .professional-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        /* Schedule Card */
+        .schedule-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .schedule-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .schedule-card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .sync-status.synced {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .sync-status.syncing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .sync-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Weekly Schedule */
+        .weekly-schedule {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+        }
+        
+        .day-schedule {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .day-schedule.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .day-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .day-toggle {
+            width: 40px;
+            height: 20px;
+            background: #d1d5db;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .day-toggle.active {
+            background: #3b82f6;
+        }
+        
+        .day-toggle::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        
+        .day-toggle.active::after {
+            transform: translateX(20px);
+        }
+        
+        .time-slots {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .time-slot-input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .time-slot-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+        
+        .time-slot-input button {
+            padding: 8px 12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .add-time-slot {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            width: 100%;
+        }
+        
+        /* Calendar View */
+        .calendar-view {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .calendar-nav button {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 10px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .calendar-day:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .calendar-day.today {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+        
+        .calendar-day.has-appointments {
+            background: #fef3c7;
+        }
+        
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .calendar-day-appointments {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 32px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            z-index: 100;
+        }
+        
+        .save-btn:hover {
+            background: #059669;
+        }
+        
+        /* Real-time Sync Indicator */
+        .realtime-sync {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .realtime-sync-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .realtime-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .realtime-indicator.disconnected {
+            background: #ef4444;
+            animation: none;
+        }
+        
+        /* Conflict Warning */
+        .conflict-warning {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .conflict-warning i {
+            color: #f59e0b;
+            font-size: 1.5rem;
+        }
+        
+        .conflict-warning-content {
+            flex: 1;
+        }
+        
+        .conflict-warning-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 5px;
+        }
+        
+        .conflict-warning-text {
+            font-size: 0.875rem;
+            color: #78350f;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        @media (max-width: 768px) {
+            .weekly-schedule {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+            
+            .calendar-day {
+                font-size: 0.75rem;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-calendar-check"></i> Professional Schedules</h1>
+            <a href="provider-account.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Account</a>
+        </div>
+        
+        <!-- Real-time Sync Indicator -->
+        <div class="realtime-sync">
+            <div class="realtime-sync-info">
+                <div class="realtime-indicator" id="realtimeIndicator"></div>
+                <div>
+                    <div style="font-weight: 600; color: #1f2937;">Real-time Sync</div>
+                    <div style="font-size: 0.875rem; color: #6b7280;" id="syncStatusText">Connected to clinic system</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleRealtimeSync()">
+                <i class="fas fa-sync-alt"></i> <span id="syncToggleText">Disable Sync</span>
+            </button>
+        </div>
+        
+        <!-- Professional Selector -->
+        <div class="professional-selector">
+            <label for="professionalSelect"><i class="fas fa-user-md"></i> Select Professional</label>
+            <select id="professionalSelect" onchange="loadProfessionalSchedule()">
+                <option value="">Loading professionals...</option>
+            </select>
+        </div>
+        
+        <!-- Conflict Warning -->
+        <div class="conflict-warning" id="conflictWarning" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="conflict-warning-content">
+                <div class="conflict-warning-title">Schedule Conflicts Detected</div>
+                <div class="conflict-warning-text" id="conflictWarningText"></div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('weekly')">
+                <i class="fas fa-calendar-week"></i> Weekly Schedule
+            </button>
+            <button class="tab" onclick="switchTab('calendar')">
+                <i class="fas fa-calendar-alt"></i> Calendar View
+            </button>
+        </div>
+        
+        <!-- Weekly Schedule Tab -->
+        <div id="weeklyTab" class="tab-content active">
+            <div class="schedule-card">
+                <div class="schedule-card-header">
+                    <div class="schedule-card-title">Weekly Availability</div>
+                    <div class="sync-status synced" id="scheduleSyncStatus">
+                        <i class="fas fa-check-circle"></i> Synced
+                    </div>
+                </div>
+                <div class="weekly-schedule" id="weeklySchedule">
+                    <div class="loading">Select a professional to manage their schedule</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calendar View Tab -->
+        <div id="calendarTab" class="tab-content">
+            <div class="calendar-view">
+                <div class="calendar-header">
+                    <h2 id="calendarMonthYear">January 2024</h2>
+                    <div class="calendar-nav">
+                        <button onclick="previousMonth()"><i class="fas fa-chevron-left"></i></button>
+                        <button onclick="todayMonth()">Today</button>
+                        <button onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Save Button -->
+        <button class="save-btn" onclick="saveSchedule()">
+            <i class="fas fa-save"></i> Save Schedule
+        </button>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        // Global variables
+        let clinicId = null;
+        let clinicData = null;
+        let professionals = [];
+        let selectedProfessionalIndex = null;
+        let currentSchedule = null;
+        let realtimeSyncEnabled = true;
+        let realtimeUnsubscribe = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // Days of week
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const daysOfWeekShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadClinicData();
+            await loadProfessionals();
+            setupRealtimeSync();
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            if (!window.authUtils) {
+                window.location.href = 'provider-auth.html';
+                return;
+            }
+
+            const session = window.authUtils.getSession();
+            if (!session || !session.session || !session.session.uid) {
+                window.location.href = 'provider-auth.html';
+                return;
+            }
+
+            clinicId = session.session.uid;
+        }
+
+        // Load clinic data
+        async function loadClinicData() {
+            if (!clinicId) return;
+
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                const clinicSnap = await getDoc(clinicRef);
+                
+                if (clinicSnap.exists()) {
+                    clinicData = clinicSnap.data();
+                }
+            } catch (error) {
+                console.error('Error loading clinic data:', error);
+            }
+        }
+
+        // Load professionals
+        async function loadProfessionals() {
+            if (!clinicData || !clinicData.professionals || clinicData.professionals.length === 0) {
+                document.getElementById('professionalSelect').innerHTML = '<option value="">No professionals found</option>';
+                return;
+            }
+
+            professionals = clinicData.professionals;
+            const select = document.getElementById('professionalSelect');
+            select.innerHTML = '<option value="">Select a professional...</option>';
+            
+            professionals.forEach((prof, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${prof.name} - ${prof.specialization || 'General'}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Load professional schedule
+        async function loadProfessionalSchedule() {
+            const select = document.getElementById('professionalSelect');
+            selectedProfessionalIndex = select.value === '' ? null : parseInt(select.value);
+            
+            if (selectedProfessionalIndex === null) {
+                document.getElementById('weeklySchedule').innerHTML = '<div class="loading">Select a professional to manage their schedule</div>';
+                document.getElementById('calendarGrid').innerHTML = '';
+                return;
+            }
+
+            const professional = professionals[selectedProfessionalIndex];
+            if (!professional) return;
+
+            // Load schedule from Firestore
+            try {
+                const scheduleRef = doc(db, 'professionalSchedules', `${clinicId}_${selectedProfessionalIndex}`);
+                const scheduleSnap = await getDoc(scheduleRef);
+                
+                if (scheduleSnap.exists()) {
+                    currentSchedule = scheduleSnap.data();
+                } else {
+                    // Create default schedule
+                    currentSchedule = createDefaultSchedule();
+                }
+                
+                renderWeeklySchedule();
+                renderCalendar();
+                checkConflicts();
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+                alert('Error loading schedule: ' + error.message);
+            }
+        }
+
+        // Create default schedule
+        function createDefaultSchedule() {
+            const schedule = {
+                professionalId: selectedProfessionalIndex,
+                professionalName: professionals[selectedProfessionalIndex].name,
+                clinicId: clinicId,
+                weeklySchedule: {},
+                lastUpdated: new Date().toISOString(),
+                syncedWithClinic: false
+            };
+
+            // Default: Monday-Friday, 9 AM - 5 PM
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(day => {
+                schedule.weeklySchedule[day] = {
+                    enabled: true,
+                    timeSlots: [
+                        { start: '09:00', end: '12:00' },
+                        { start: '13:00', end: '17:00' }
+                    ]
+                };
+            });
+
+            ['Saturday', 'Sunday'].forEach(day => {
+                schedule.weeklySchedule[day] = {
+                    enabled: false,
+                    timeSlots: []
+                };
+            });
+
+            return schedule;
+        }
+
+        // Render weekly schedule
+        function renderWeeklySchedule() {
+            if (!currentSchedule) return;
+
+            const container = document.getElementById('weeklySchedule');
+            container.innerHTML = '';
+
+            daysOfWeek.forEach(day => {
+                const daySchedule = currentSchedule.weeklySchedule[day] || { enabled: false, timeSlots: [] };
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `day-schedule ${daySchedule.enabled ? 'active' : ''}`;
+                
+                dayDiv.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-name">${day}</div>
+                        <div class="day-toggle ${daySchedule.enabled ? 'active' : ''}" 
+                             onclick="toggleDay('${day}')"></div>
+                    </div>
+                    <div class="time-slots" id="timeSlots_${day}">
+                        ${daySchedule.enabled ? daySchedule.timeSlots.map((slot, index) => `
+                            <div class="time-slot-input">
+                                <input type="time" value="${slot.start}" onchange="updateTimeSlot('${day}', ${index}, 'start', this.value)">
+                                <span>to</span>
+                                <input type="time" value="${slot.end}" onchange="updateTimeSlot('${day}', ${index}, 'end', this.value)">
+                                <button onclick="removeTimeSlot('${day}', ${index})"><i class="fas fa-times"></i></button>
+                            </div>
+                        `).join('') : '<div style="color: #9ca3af; font-size: 0.875rem;">Day off</div>'}
+                    </div>
+                    ${daySchedule.enabled ? `<button class="add-time-slot" onclick="addTimeSlot('${day}')">
+                        <i class="fas fa-plus"></i> Add Time Slot
+                    </button>` : ''}
+                `;
+                
+                container.appendChild(dayDiv);
+            });
+        }
+
+        // Toggle day
+        function toggleDay(day) {
+            if (!currentSchedule.weeklySchedule[day]) {
+                currentSchedule.weeklySchedule[day] = { enabled: false, timeSlots: [] };
+            }
+            
+            currentSchedule.weeklySchedule[day].enabled = !currentSchedule.weeklySchedule[day].enabled;
+            
+            if (currentSchedule.weeklySchedule[day].enabled && currentSchedule.weeklySchedule[day].timeSlots.length === 0) {
+                currentSchedule.weeklySchedule[day].timeSlots = [
+                    { start: '09:00', end: '17:00' }
+                ];
+            }
+            
+            renderWeeklySchedule();
+            checkConflicts();
+        }
+
+        // Add time slot
+        function addTimeSlot(day) {
+            if (!currentSchedule.weeklySchedule[day]) {
+                currentSchedule.weeklySchedule[day] = { enabled: true, timeSlots: [] };
+            }
+            
+            currentSchedule.weeklySchedule[day].timeSlots.push({
+                start: '09:00',
+                end: '17:00'
+            });
+            
+            renderWeeklySchedule();
+            checkConflicts();
+        }
+
+        // Update time slot
+        function updateTimeSlot(day, index, type, value) {
+            if (!currentSchedule.weeklySchedule[day] || !currentSchedule.weeklySchedule[day].timeSlots[index]) return;
+            
+            currentSchedule.weeklySchedule[day].timeSlots[index][type] = value;
+            checkConflicts();
+        }
+
+        // Remove time slot
+        function removeTimeSlot(day, index) {
+            if (!currentSchedule.weeklySchedule[day] || !currentSchedule.weeklySchedule[day].timeSlots[index]) return;
+            
+            currentSchedule.weeklySchedule[day].timeSlots.splice(index, 1);
+            renderWeeklySchedule();
+            checkConflicts();
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const container = document.getElementById('calendarGrid');
+            container.innerHTML = '';
+
+            // Month/year header
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarMonthYear').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+            // Day headers
+            daysOfWeekShort.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                container.appendChild(header);
+            });
+
+            // Get first day of month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+
+            // Load appointments for this professional
+            loadAppointmentsForCalendar().then(appointments => {
+                // Empty days before month starts
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day';
+                    container.appendChild(emptyDay);
+                }
+
+                // Days of month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    const date = new Date(currentYear, currentMonth, day);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    dayDiv.className = 'calendar-day';
+                    
+                    // Check if today
+                    if (date.toDateString() === today.toDateString()) {
+                        dayDiv.classList.add('today');
+                    }
+                    
+                    // Check if has appointments
+                    const dayAppointments = appointments.filter(apt => {
+                        const aptDate = new Date(apt.date);
+                        return aptDate.toDateString() === date.toDateString();
+                    });
+                    
+                    if (dayAppointments.length > 0) {
+                        dayDiv.classList.add('has-appointments');
+                    }
+                    
+                    dayDiv.innerHTML = `
+                        <div class="calendar-day-number">${day}</div>
+                        ${dayAppointments.length > 0 ? `<div class="calendar-day-appointments">${dayAppointments.length} appointment${dayAppointments.length > 1 ? 's' : ''}</div>` : ''}
+                    `;
+                    
+                    dayDiv.onclick = () => viewDayDetails(dateStr, dayAppointments);
+                    container.appendChild(dayDiv);
+                }
+            });
+        }
+
+        // Load appointments for calendar
+        async function loadAppointmentsForCalendar() {
+            if (selectedProfessionalIndex === null) return [];
+
+            try {
+                const appointmentsRef = collection(db, 'appointments');
+                const q = query(
+                    appointmentsRef,
+                    where('clinicId', '==', clinicId),
+                    where('professionalId', '==', selectedProfessionalIndex)
+                );
+                const snapshot = await getDocs(q);
+                
+                const appointments = [];
+                snapshot.forEach(doc => {
+                    appointments.push({ id: doc.id, ...doc.data() });
+                });
+                
+                return appointments;
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                return [];
+            }
+        }
+
+        // View day details
+        function viewDayDetails(dateStr, appointments) {
+            // This could open a modal with appointment details
+            console.log('Viewing details for', dateStr, appointments);
+        }
+
+        // Previous month
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        // Next month
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        // Today month
+        function todayMonth() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar();
+        }
+
+        // Check conflicts
+        async function checkConflicts() {
+            if (selectedProfessionalIndex === null || !currentSchedule) return;
+
+            try {
+                const appointmentsRef = collection(db, 'appointments');
+                const q = query(
+                    appointmentsRef,
+                    where('clinicId', '==', clinicId),
+                    where('professionalId', '==', selectedProfessionalIndex),
+                    where('status', 'in', ['pending', 'confirmed'])
+                );
+                const snapshot = await getDocs(q);
+                
+                const conflicts = [];
+                snapshot.forEach(doc => {
+                    const apt = doc.data();
+                    const aptDate = new Date(apt.date);
+                    const dayName = daysOfWeek[aptDate.getDay()];
+                    const daySchedule = currentSchedule.weeklySchedule[dayName];
+                    
+                    if (!daySchedule || !daySchedule.enabled) {
+                        conflicts.push({
+                            date: apt.date,
+                            time: apt.time,
+                            reason: 'Professional not available on this day'
+                        });
+                    } else {
+                        // Check if time slot is within available hours
+                        const aptTime = apt.time || '00:00';
+                        const isWithinSlot = daySchedule.timeSlots.some(slot => {
+                            return aptTime >= slot.start && aptTime <= slot.end;
+                        });
+                        
+                        if (!isWithinSlot) {
+                            conflicts.push({
+                                date: apt.date,
+                                time: apt.time,
+                                reason: 'Time slot outside available hours'
+                            });
+                        }
+                    }
+                });
+
+                if (conflicts.length > 0) {
+                    document.getElementById('conflictWarning').style.display = 'flex';
+                    document.getElementById('conflictWarningText').textContent = 
+                        `Found ${conflicts.length} appointment${conflicts.length > 1 ? 's' : ''} that conflict with the current schedule. Please review and adjust.`;
+                } else {
+                    document.getElementById('conflictWarning').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking conflicts:', error);
+            }
+        }
+
+        // Save schedule
+        async function saveSchedule() {
+            if (selectedProfessionalIndex === null || !currentSchedule) {
+                alert('Please select a professional first');
+                return;
+            }
+
+            const saveBtn = document.querySelector('.save-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                currentSchedule.lastUpdated = new Date().toISOString();
+                currentSchedule.syncedWithClinic = realtimeSyncEnabled;
+
+                const scheduleRef = doc(db, 'professionalSchedules', `${clinicId}_${selectedProfessionalIndex}`);
+                await setDoc(scheduleRef, currentSchedule, { merge: true });
+
+                // Update sync status
+                document.getElementById('scheduleSyncStatus').innerHTML = '<i class="fas fa-check-circle"></i> Synced';
+                document.getElementById('scheduleSyncStatus').className = 'sync-status synced';
+
+                alert('✅ Schedule saved successfully!');
+                checkConflicts();
+            } catch (error) {
+                console.error('Error saving schedule:', error);
+                alert('❌ Error saving schedule: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Schedule';
+            }
+        }
+
+        // Setup real-time sync
+        function setupRealtimeSync() {
+            if (!realtimeSyncEnabled || selectedProfessionalIndex === null) return;
+
+            // Simulate real-time sync with clinic system
+            // In production, this would connect to clinic's API/WebSocket
+            const indicator = document.getElementById('realtimeIndicator');
+            indicator.classList.remove('disconnected');
+            
+            // Simulate periodic sync
+            setInterval(async () => {
+                if (realtimeSyncEnabled && selectedProfessionalIndex !== null) {
+                    try {
+                        // In production: Fetch from clinic system API
+                        // For now, we'll just update the indicator
+                        indicator.classList.remove('disconnected');
+                        document.getElementById('syncStatusText').textContent = 'Connected to clinic system';
+                    } catch (error) {
+                        indicator.classList.add('disconnected');
+                        document.getElementById('syncStatusText').textContent = 'Disconnected from clinic system';
+                    }
+                }
+            }, 5000);
+        }
+
+        // Toggle real-time sync
+        function toggleRealtimeSync() {
+            realtimeSyncEnabled = !realtimeSyncEnabled;
+            
+            const toggleText = document.getElementById('syncToggleText');
+            const indicator = document.getElementById('realtimeIndicator');
+            
+            if (realtimeSyncEnabled) {
+                toggleText.textContent = 'Disable Sync';
+                indicator.classList.remove('disconnected');
+                document.getElementById('syncStatusText').textContent = 'Connected to clinic system';
+                setupRealtimeSync();
+            } else {
+                toggleText.textContent = 'Enable Sync';
+                indicator.classList.add('disconnected');
+                document.getElementById('syncStatusText').textContent = 'Sync disabled';
+                if (realtimeUnsubscribe) {
+                    realtimeUnsubscribe();
+                    realtimeUnsubscribe = null;
+                }
+            }
+        }
+
+        // Switch tab
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            if (tabName === 'calendar') {
+                renderCalendar();
+            }
+        }
+
+        // Make functions globally accessible
+        window.toggleDay = toggleDay;
+        window.addTimeSlot = addTimeSlot;
+        window.updateTimeSlot = updateTimeSlot;
+        window.removeTimeSlot = removeTimeSlot;
+        window.saveSchedule = saveSchedule;
+        window.toggleRealtimeSync = toggleRealtimeSync;
+        window.switchTab = switchTab;
+        window.previousMonth = previousMonth;
+        window.nextMonth = nextMonth;
+        window.todayMonth = todayMonth;
+        window.loadProfessionalSchedule = loadProfessionalSchedule;
+    </script>
+</body>
+</html>
+

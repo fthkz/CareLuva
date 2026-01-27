@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Verification - Admin - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .verification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            background: white;
+            padding: 0 1rem;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-number {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .step.active .step-label {
+            color: #3b82f6;
+        }
+        
+        .step.completed .step-label {
+            color: #10b981;
+        }
+        
+        .criteria-section {
+            margin-bottom: 2rem;
+        }
+        
+        .criteria-item {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .criteria-item.verified {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .criteria-item.failed {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .criteria-info {
+            flex: 1;
+        }
+        
+        .criteria-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .criteria-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .criteria-status {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .status-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Clinic Verification</h1>
+        <a href="admin-panel.html" class="back-btn">Back to Admin Panel</a>
+    </div>
+    
+    <div class="container">
+        <div class="verification-card">
+            <div id="verificationContent">
+                <div style="text-align: center; padding: 4rem; color: #6b7280;">
+                    <div class="spinner" style="display: inline-block; width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div>
+                    <p>Loading verification data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="clinic-verification-system.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        const verificationSystem = new ClinicVerificationSystem();
+        verificationSystem.initialize(db);
+
+        // Get clinic ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const clinicId = urlParams.get('clinicId');
+
+        if (!clinicId) {
+            document.getElementById('verificationContent').innerHTML = `
+                <div style="text-align: center; padding: 4rem; color: #ef4444;">
+                    <h3>No Clinic ID Provided</h3>
+                    <p>Please select a clinic from the admin panel.</p>
+                </div>
+            `;
+        } else {
+            loadVerification(clinicId);
+        }
+
+        async function loadVerification(clinicId) {
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                const clinicSnap = await getDoc(clinicRef);
+
+                if (!clinicSnap.exists()) {
+                    throw new Error('Clinic not found');
+                }
+
+                const clinicData = clinicSnap.data();
+                const badgeStatus = await verificationSystem.getBadgeStatus(clinicId);
+                const expiryIssues = verificationSystem.checkBadgeExpiry(clinicData);
+
+                displayVerification(clinicData, badgeStatus, expiryIssues);
+            } catch (error) {
+                console.error('Error loading verification:', error);
+                document.getElementById('verificationContent').innerHTML = `
+                    <div style="text-align: center; padding: 4rem; color: #ef4444;">
+                        <h3>Error Loading Verification</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayVerification(clinicData, badgeStatus, expiryIssues) {
+            const container = document.getElementById('verificationContent');
+            
+            const criteria = [
+                {
+                    name: 'Certified',
+                    key: 'certified',
+                    verified: badgeStatus.details.certified,
+                    details: badgeStatus.details.certified 
+                        ? 'Certifications verified' 
+                        : 'No certifications found'
+                },
+                {
+                    name: 'Insured',
+                    key: 'insured',
+                    verified: badgeStatus.details.insured,
+                    details: badgeStatus.details.insured 
+                        ? 'Malpractice insurance verified and valid' 
+                        : 'Insurance missing or expired'
+                },
+                {
+                    name: 'Experienced',
+                    key: 'experienced',
+                    verified: badgeStatus.details.experienced,
+                    details: badgeStatus.details.experienced 
+                        ? 'Minimum 3 years experience verified' 
+                        : 'Does not meet minimum 3 years requirement'
+                },
+                {
+                    name: 'Verified',
+                    key: 'verified',
+                    verified: badgeStatus.details.verified,
+                    details: badgeStatus.details.verified 
+                        ? 'All requirements met and approved' 
+                        : 'Not all requirements met'
+                }
+            ];
+
+            container.innerHTML = `
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-bottom: 2rem;">${clinicData.clinicName || clinicData.name}</h2>
+                
+                <div class="step-indicator">
+                    <div class="step ${badgeStatus.details.certified ? 'completed' : 'active'}">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Certifications</div>
+                    </div>
+                    <div class="step ${badgeStatus.details.certified ? (badgeStatus.details.insured ? 'completed' : 'active') : ''}">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Insurance</div>
+                    </div>
+                    <div class="step ${badgeStatus.details.certified && badgeStatus.details.insured ? (badgeStatus.details.experienced ? 'completed' : 'active') : ''}">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Experience</div>
+                    </div>
+                    <div class="step ${badgeStatus.details.verified ? 'completed' : ''}">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Approval</div>
+                    </div>
+                </div>
+                
+                <div class="criteria-section">
+                    ${criteria.map(criterion => `
+                        <div class="criteria-item ${criterion.verified ? 'verified' : 'failed'}">
+                            <div class="criteria-info">
+                                <div class="criteria-name">${criterion.name}</div>
+                                <div class="criteria-details">${criterion.details}</div>
+                            </div>
+                            <div class="criteria-status ${criterion.verified ? 'status-verified' : 'status-failed'}">
+                                ${criterion.verified ? 'Verified' : 'Not Verified'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${expiryIssues.length > 0 ? `
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <h3 style="font-size: 1rem; font-weight: 600; color: #92400e; margin-bottom: 0.5rem;">Expiry Warnings</h3>
+                    ${expiryIssues.map(issue => `
+                        <p style="font-size: 0.875rem; color: #92400e; margin-bottom: 0.25rem;">
+                            ${issue.badge}: ${issue.issue} ${issue.daysUntilExpiry ? `(${issue.daysUntilExpiry} days)` : ''}
+                        </p>
+                    `).join('')}
+                </div>
+                ` : ''}
+                
+                <div class="actions">
+                    <button class="btn btn-success" onclick="updateBadges('${clinicData.id || clinicId}')">Update Badges</button>
+                    ${clinicData.status === 'pending' ? `
+                    <button class="btn btn-primary" onclick="approveClinic('${clinicData.id || clinicId}')">Approve Clinic</button>
+                    <button class="btn btn-danger" onclick="rejectClinic('${clinicData.id || clinicId}')">Reject</button>
+                    ` : ''}
+                    <button class="btn btn-secondary" onclick="window.location.href='admin-panel.html'">Back</button>
+                </div>
+            `;
+        }
+
+        window.updateBadges = async function(clinicId) {
+            try {
+                await verificationSystem.updateClinicBadges(clinicId);
+                alert('Badges updated successfully!');
+                loadVerification(clinicId);
+            } catch (error) {
+                console.error('Error updating badges:', error);
+                alert('Error updating badges: ' + error.message);
+            }
+        };
+
+        window.approveClinic = async function(clinicId) {
+            if (!confirm('Are you sure you want to approve this clinic?')) {
+                return;
+            }
+
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                await updateDoc(clinicRef, {
+                    status: 'approved',
+                    approvedAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+
+                // Update badges after approval
+                await verificationSystem.updateClinicBadges(clinicId);
+                
+                alert('Clinic approved successfully!');
+                loadVerification(clinicId);
+            } catch (error) {
+                console.error('Error approving clinic:', error);
+                alert('Error approving clinic: ' + error.message);
+            }
+        };
+
+        window.rejectClinic = async function(clinicId) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (!reason) return;
+
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                await updateDoc(clinicRef, {
+                    status: 'rejected',
+                    rejectionReason: reason,
+                    rejectedAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+
+                alert('Clinic rejected.');
+                window.location.href = 'admin-panel.html';
+            } catch (error) {
+                console.error('Error rejecting clinic:', error);
+                alert('Error rejecting clinic: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html>
+

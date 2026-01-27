@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Tabs */
+        .tabs {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #6b7280;
+        }
+        
+        .tab:hover {
+            color: #1e40af;
+        }
+        
+        .tab.active {
+            color: #1e40af;
+            border-bottom-color: #1e40af;
+        }
+        
+        /* Appointments Section */
+        .appointments-section {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .appointment-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .appointment-info {
+            flex: 1;
+        }
+        
+        .appointment-id {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .patient-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .appointment-date-time {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 10px;
+            color: #6b7280;
+        }
+        
+        .appointment-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-completed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .appointment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .detail-item i {
+            color: #1e40af;
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #1e40af;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1e3a8a;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        /* No Appointments */
+        .no-appointments {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .no-appointments i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+        
+        .no-appointments h3 {
+            font-size: 1.5rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .no-appointments p {
+            color: #9ca3af;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #1e40af;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .appointment-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .appointment-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> My Appointments</h1>
+            <a href="provider-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalAppointments">0</div>
+                <div class="stat-label">Total Appointments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingAppointments">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="confirmedAppointments">0</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedAppointments">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div class="tabs" style="flex: 1;">
+                <div class="tab active" data-tab="all">All Appointments</div>
+                <div class="tab" data-tab="pending">Pending</div>
+                <div class="tab" data-tab="confirmed">Confirmed</div>
+                <div class="tab" data-tab="completed">Completed</div>
+                <div class="tab" data-tab="cancelled">Cancelled</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="professionalFilter" style="font-weight: 500; color: #374151; font-size: 14px;">Filter by Professional:</label>
+                <select id="professionalFilter" style="padding: 8px 12px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px; min-width: 200px; cursor: pointer;">
+                    <option value="all">All Professionals</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Appointments Section -->
+        <div class="appointments-section" id="appointmentsSection">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading appointments...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    <script src="treatment-plan-manager.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, orderBy, doc, updateDoc, Timestamp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get provider/clinic ID from session
+        let clinicId = null;
+        let allAppointments = [];
+        let currentFilter = 'all';
+        let currentProfessionalFilter = 'all';
+        let clinicData = null;
+
+        // Load clinic ID from session (using improved session management)
+        // Note: clinicId is the registration document ID, not email
+        function loadClinicId() {
+            // Try improved session management first
+            if (window.authUtils) {
+                if (!window.authUtils.isAuthenticated()) {
+                    console.log('No valid session found');
+                    return null;
+                }
+                
+                const sessionInfo = window.authUtils.getSession();
+                if (sessionInfo && sessionInfo.session.uid) {
+                    // Use registration document ID as clinicId (appointments use this)
+                    return sessionInfo.session.uid;
+                }
+            }
+            
+            // Fallback: try direct localStorage/sessionStorage access
+            try {
+                // First try: get registration ID directly (from localStorage or sessionStorage)
+                let registrationId = localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+                if (registrationId) {
+                    return registrationId;
+                }
+                
+                // Second try: get from session (check both storages)
+                let session = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession');
+                if (session) {
+                    const sessionData = JSON.parse(session);
+                    if (sessionData.uid) {
+                        return sessionData.uid;
+                    }
+                }
+                
+                // Third try: get from registration data
+                let registration = localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
+                if (registration) {
+                    const regData = JSON.parse(registration);
+                    // Try to get document ID from registration data if stored
+                    if (regData.id) {
+                        return regData.id;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading session:', error);
+            }
+            
+            return null;
+        }
+
+        // Load appointments
+        async function loadAppointments() {
+            try {
+                clinicId = loadClinicId();
+                console.log('Loaded clinicId:', clinicId);
+                
+                if (!clinicId) {
+                    document.getElementById('appointmentsSection').innerHTML = `
+                        <div class="no-appointments">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Not Logged In</h3>
+                            <p>Please log in to view your appointments.</p>
+                            <a href="provider-auth.html" class="btn-primary" style="margin-top: 15px; display: inline-block;">
+                                Log In
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Load appointments where clinicId matches (clinicId is the registration document ID)
+                const appointmentsRef = collection(db, 'appointments');
+                const appointmentsQuery = query(
+                    appointmentsRef,
+                    where('clinicId', '==', clinicId),
+                    orderBy('createdAt', 'desc')
+                );
+                
+                console.log('Querying appointments with clinicId:', clinicId);
+                const snapshot = await getDocs(appointmentsQuery);
+                console.log('Found appointments:', snapshot.size);
+                
+                allAppointments = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    allAppointments.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+
+                updateStats();
+                displayAppointments(allAppointments);
+
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                
+                // Check if it's a missing index error
+                if (error.message && error.message.includes('index')) {
+                    // Try query without orderBy (no index needed)
+                    try {
+                        console.log('Retrying without orderBy...');
+                        const appointmentsRef = collection(db, 'appointments');
+                        const appointmentsQuery = query(
+                            appointmentsRef,
+                            where('clinicId', '==', clinicId)
+                        );
+                        
+                        const snapshot = await getDocs(appointmentsQuery);
+                        allAppointments = [];
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            allAppointments.push({
+                                id: doc.id,
+                                ...data
+                            });
+                        });
+                        
+                        // Sort manually by createdAt
+                        allAppointments.sort((a, b) => {
+                            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                            return dateB - dateA; // Descending
+                        });
+                        
+                        updateStats();
+                        displayAppointments(allAppointments);
+                        
+                        // Load clinic data to get professionals list for filtering
+                        await loadClinicData();
+                        return;
+                    } catch (retryError) {
+                        console.error('Retry also failed:', retryError);
+                    }
+                }
+                
+                // Show detailed error message
+                const errorMessage = error.message || 'Unknown error occurred';
+                document.getElementById('appointmentsSection').innerHTML = `
+                    <div class="no-appointments">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Appointments</h3>
+                        <p style="color: #ef4444; margin: 10px 0;">${errorMessage}</p>
+                        <p style="font-size: 14px; color: #6b7280;">If this is a missing index error, please create a Firestore index for: appointments collection, fields: clinicId (Ascending), createdAt (Descending)</p>
+                        <button onclick="loadAppointments()" class="btn-primary" style="margin-top: 15px; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = allAppointments.length;
+            const pending = allAppointments.filter(a => a.status === 'pending').length;
+            const confirmed = allAppointments.filter(a => a.status === 'confirmed').length;
+            const completed = allAppointments.filter(a => a.status === 'completed').length;
+
+            document.getElementById('totalAppointments').textContent = total;
+            document.getElementById('pendingAppointments').textContent = pending;
+            document.getElementById('confirmedAppointments').textContent = confirmed;
+            document.getElementById('completedAppointments').textContent = completed;
+        }
+
+        // Load clinic data to get professionals
+        async function loadClinicData() {
+            if (!clinicId) return;
+            
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                const clinicSnap = await getDoc(clinicRef);
+                
+                if (clinicSnap.exists()) {
+                    clinicData = clinicSnap.data();
+                    populateProfessionalFilter();
+                }
+            } catch (error) {
+                console.error('Error loading clinic data:', error);
+            }
+        }
+        
+        // Populate professional filter dropdown
+        function populateProfessionalFilter() {
+            const filterSelect = document.getElementById('professionalFilter');
+            if (!filterSelect || !clinicData || !clinicData.professionals) return;
+            
+            // Clear existing options except "All Professionals"
+            filterSelect.innerHTML = '<option value="all">All Professionals</option>';
+            
+            // Add professionals
+            clinicData.professionals.forEach((prof, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = prof.name || `Professional ${index + 1}`;
+                filterSelect.appendChild(option);
+            });
+        }
+        
+        // Display appointments
+        function displayAppointments(appointments) {
+            const section = document.getElementById('appointmentsSection');
+            
+            // Filter by current tab
+            let filtered = appointments;
+            if (currentFilter !== 'all') {
+                filtered = appointments.filter(a => a.status === currentFilter);
+            }
+            
+            // Filter by professional
+            if (currentProfessionalFilter !== 'all') {
+                filtered = filtered.filter(a => {
+                    // Match by professionalId (index) or professionalName
+                    if (a.professionalId !== undefined) {
+                        return String(a.professionalId) === String(currentProfessionalFilter);
+                    }
+                    if (a.professionalName && clinicData && clinicData.professionals) {
+                        const profIndex = parseInt(currentProfessionalFilter);
+                        const prof = clinicData.professionals[profIndex];
+                        return prof && prof.name === a.professionalName;
+                    }
+                    return false;
+                });
+            }
+
+            if (filtered.length === 0) {
+                const message = currentFilter === 'all' 
+                    ? 'You don\'t have any appointments yet.' 
+                    : `No ${currentFilter} appointments found.`;
+                section.innerHTML = `
+                    <div class="no-appointments">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No Appointments</h3>
+                        <p>${message}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            section.innerHTML = filtered.map(appointment => {
+                const appointmentDate = appointment.date instanceof Timestamp 
+                    ? appointment.date.toDate() 
+                    : new Date(appointment.date);
+                
+                return `
+                    <div class="appointment-card">
+                        <div class="appointment-header">
+                            <div class="appointment-info">
+                                <div class="appointment-id">ID: ${appointment.id}</div>
+                                <div class="patient-name">${appointment.patientName}</div>
+                                <div class="appointment-date-time">
+                                    <span><i class="fas fa-calendar"></i> ${appointmentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                    <span><i class="fas fa-clock"></i> ${appointment.time}</span>
+                                </div>
+                                <span class="appointment-status status-${appointment.status}">${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-details">
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>${appointment.patientEmail}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-phone"></i>
+                                <span>${appointment.patientPhone}</span>
+                            </div>
+                            ${appointment.professionalName ? `
+                                <div class="detail-item">
+                                    <i class="fas fa-user-md"></i>
+                                    <span><strong>Professional:</strong> ${appointment.professionalName}</span>
+                                </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <i class="fas fa-stethoscope"></i>
+                                <span>${appointment.specialization || 'General Medicine'}</span>
+                            </div>
+                            ${appointment.reason ? `<div class="detail-item"><i class="fas fa-comment"></i><span>${appointment.reason}</span></div>` : ''}
+                        </div>
+                        
+                        <div class="appointment-actions">
+                            ${appointment.status === 'pending' ? `
+                                <button class="btn btn-success" onclick="updateAppointmentStatus('${appointment.id}', 'confirmed')">
+                                    <i class="fas fa-check"></i> Confirm
+                                </button>
+                                <button class="btn btn-danger" onclick="updateAppointmentStatus('${appointment.id}', 'cancelled')">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            ` : ''}
+                            ${appointment.status === 'confirmed' ? `
+                                <button class="btn btn-success" onclick="updateAppointmentStatus('${appointment.id}', 'completed')">
+                                    <i class="fas fa-check-circle"></i> Mark as Completed
+                                </button>
+                            ` : ''}
+                            <a href="appointment-details.html?id=${appointment.id}" class="btn btn-secondary">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update appointment status
+        window.updateAppointmentStatus = async function(appointmentId, newStatus) {
+            if (!confirm(`Are you sure you want to ${newStatus} this appointment?`)) {
+                return;
+            }
+
+            try {
+                const appointmentRef = doc(db, 'appointments', appointmentId);
+                const appointmentSnap = await getDoc(appointmentRef);
+                
+                if (!appointmentSnap.exists()) {
+                    throw new Error('Appointment not found');
+                }
+
+                const appointmentData = appointmentSnap.data();
+                const updateData = {
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                };
+
+                // Track response time when confirming
+                if (newStatus === 'confirmed') {
+                    const requestedAt = appointmentData.requestedAt || appointmentData.createdAt;
+                    if (requestedAt) {
+                        const requestedTime = new Date(requestedAt);
+                        const confirmedTime = new Date();
+                        const responseTimeMs = confirmedTime - requestedTime;
+                        const responseTimeHours = responseTimeMs / (1000 * 60 * 60);
+                        
+                        updateData.confirmedAt = confirmedTime.toISOString();
+                        updateData.responseTimeHours = responseTimeHours;
+                    }
+                }
+
+                await updateDoc(appointmentRef, updateData);
+
+                // Update treatment plan if this appointment is part of a plan
+                if (appointmentData.treatmentPlanId && window.TreatmentPlanManager) {
+                    try {
+                        const treatmentPlanManager = new TreatmentPlanManager();
+                        treatmentPlanManager.initialize(db);
+                        await treatmentPlanManager.updateAppointmentStatus(
+                            appointmentData.treatmentPlanId,
+                            appointmentId,
+                            newStatus
+                        );
+                    } catch (planError) {
+                        console.warn('Error updating treatment plan:', planError);
+                        // Continue even if treatment plan update fails
+                    }
+                }
+
+                // Reload appointments
+                await loadAppointments();
+            } catch (error) {
+                console.error('Error updating appointment status:', error);
+                alert('Error updating appointment status. Please try again.');
+            }
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.tab;
+                displayAppointments(allAppointments);
+            });
+        });
+        
+        // Professional filter listener
+        const professionalFilter = document.getElementById('professionalFilter');
+        if (professionalFilter) {
+            professionalFilter.addEventListener('change', (e) => {
+                currentProfessionalFilter = e.target.value;
+                displayAppointments(allAppointments);
+            });
+        }
+
+        // Initialize
+        loadAppointments();
+    </script>
+</body>
+</html>
+

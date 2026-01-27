@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Booking Form */
+        .booking-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+        
+        .booking-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .booking-summary {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e40af;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* Calendar */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header {
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .calendar-day {
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .calendar-day:hover {
+            border-color: #1e40af;
+            background: #eff6ff;
+        }
+        
+        .calendar-day.available {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #1f2937;
+        }
+        
+        .calendar-day.available:hover {
+            background: #dcfce7;
+        }
+        
+        .calendar-day.selected {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        
+        .calendar-day.disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .calendar-day.today {
+            border-color: #fbbf24;
+            font-weight: 600;
+        }
+        
+        /* Time Slots */
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .time-slot {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .time-slot:hover {
+            border-color: #1e40af;
+            background: #eff6ff;
+        }
+        
+        .time-slot.selected {
+            background: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        
+        .time-slot.disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .time-slot.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .time-slot.unavailable:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+        
+        /* Summary */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .summary-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .total-price {
+            font-size: 1.5rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 30px;
+        }
+        
+        .submit-btn:hover {
+            background: #059669;
+        }
+        
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #1e40af;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #065f46;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .booking-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .booking-summary {
+                position: static;
+            }
+            
+            .calendar {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+            
+            .calendar-day {
+                padding: 10px 5px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-calendar-check"></i> Book Appointment</h1>
+            <a href="find-clinics.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Search</a>
+        </div>
+        
+        <!-- Booking Container -->
+        <div class="booking-container">
+            <!-- Booking Form -->
+            <div class="booking-form">
+                <form id="bookingForm">
+                    <!-- Clinic Info -->
+                    <div class="form-section">
+                        <h2>Clinic Information</h2>
+                        <div id="clinicInfo" class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading clinic information...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Select Professional -->
+                    <div class="form-section" id="professionalSection" style="display: none;">
+                        <h2>Select Professional *</h2>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 15px;">Choose the healthcare professional you'd like to see</p>
+                        <div id="professionalsList" style="display: grid; gap: 15px;"></div>
+                        <div id="noProfessionals" style="display: none; padding: 20px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; color: #92400e;">
+                            <i class="fas fa-exclamation-triangle"></i> No professionals available at this clinic.
+                        </div>
+                    </div>
+                    
+                    <!-- Select Date -->
+                    <div class="form-section" id="dateSection" style="display: none;">
+                        <h2>Select Date</h2>
+                        <div class="calendar" id="calendar"></div>
+                    </div>
+                    
+                    <!-- Select Time -->
+                    <div class="form-section" id="timeSection" style="display: none;">
+                        <h2>Select Time</h2>
+                        <div class="time-slots" id="timeSlots"></div>
+                    </div>
+                    
+                    <!-- Patient Information -->
+                    <div class="form-section">
+                        <h2>Patient Information</h2>
+                        <div class="form-group">
+                            <label for="patientName">Full Name *</label>
+                            <input type="text" id="patientName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="patientEmail">Email *</label>
+                            <input type="email" id="patientEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="patientPhone">Phone *</label>
+                            <input type="tel" id="patientPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appointmentReason">Reason for Visit</label>
+                            <textarea id="appointmentReason" placeholder="Please describe the reason for your visit..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <i class="fas fa-check"></i> Confirm Appointment
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Booking Summary -->
+            <div class="booking-summary">
+                <h2 style="margin-bottom: 20px; color: #1f2937;">Booking Summary</h2>
+                <div id="bookingSummary">
+                    <div class="summary-item">
+                        <span class="summary-label">Clinic:</span>
+                        <span class="summary-value" id="summaryClinic">-</span>
+                    </div>
+                    <div class="summary-item" id="summaryProfessionalItem" style="display: none;">
+                        <span class="summary-label">Professional:</span>
+                        <span class="summary-value" id="summaryProfessional">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span class="summary-value" id="summaryDate">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Time:</span>
+                        <span class="summary-value" id="summaryTime">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Specialization:</span>
+                        <span class="summary-value" id="summarySpecialization">-</span>
+                    </div>
+                    <div class="summary-item" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                        <span class="summary-label total-price">Total:</span>
+                        <span class="summary-value total-price" id="summaryTotal">Free</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        // Initialize EmailJS
+        // Replace 'YOUR_PUBLIC_KEY' with your EmailJS public key
+        (function(){
+            emailjs.init({
+                publicKey: "YOUR_PUBLIC_KEY",
+            });
+        })();
+    </script>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Email notification function
+        async function sendEmailNotification(appointmentData, appointmentId) {
+            // Using EmailJS for email notifications
+            // You'll need to set up EmailJS account and replace YOUR_SERVICE_ID and YOUR_TEMPLATE_ID
+            if (typeof emailjs === 'undefined') {
+                console.log('EmailJS not loaded, skipping email notification');
+                return;
+            }
+
+            try {
+                // Email to patient
+                await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+                    to_email: appointmentData.patientEmail,
+                    to_name: appointmentData.patientName,
+                    clinic_name: appointmentData.clinicName,
+                    specialization: appointmentData.specialization,
+                    appointment_date: new Date(appointmentData.date).toLocaleDateString(),
+                    appointment_time: appointmentData.time,
+                    appointment_id: appointmentId,
+                    message: 'Your appointment has been confirmed successfully.'
+                });
+
+                // Email to clinic (if clinic email is available)
+                if (clinicData && clinicData.email) {
+                    await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID_PROVIDER', {
+                        to_email: clinicData.email,
+                        clinic_name: appointmentData.clinicName,
+                        patient_name: appointmentData.patientName,
+                        patient_email: appointmentData.patientEmail,
+                        patient_phone: appointmentData.patientPhone,
+                        appointment_date: new Date(appointmentData.date).toLocaleDateString(),
+                        appointment_time: appointmentData.time,
+                        appointment_id: appointmentId,
+                        reason: appointmentData.reason || 'Not specified'
+                    });
+                }
+
+                console.log('Email notifications sent successfully');
+            } catch (error) {
+                console.error('Error sending email notifications:', error);
+                throw error;
+            }
+        }
+
+        // Get clinic ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const clinicId = urlParams.get('clinic');
+
+        let clinicData = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        let selectedProfessional = null;
+
+        // Time slots (8 AM to 6 PM)
+        const timeSlots = [
+            '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+            '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+            '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
+        ];
+
+        // Load clinic information
+        async function loadClinicInfo() {
+            if (!clinicId) {
+                document.getElementById('clinicInfo').innerHTML = `
+                    <div class="error-message">
+                        <p>Clinic not specified. Please select a clinic first.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                const clinicSnap = await getDoc(clinicRef);
+
+                if (!clinicSnap.exists()) {
+                    document.getElementById('clinicInfo').innerHTML = `
+                        <div class="error-message">
+                            <p>Clinic not found.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                clinicData = clinicSnap.data();
+                displayClinicInfo(clinicData);
+                displayProfessionals(clinicData);
+                updateSummary();
+            } catch (error) {
+                console.error('Error loading clinic info:', error);
+                document.getElementById('clinicInfo').innerHTML = `
+                    <div class="error-message">
+                        <p>Error loading clinic information.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display clinic info
+        function displayClinicInfo(clinic) {
+            document.getElementById('clinicInfo').innerHTML = `
+                <div class="form-group">
+                    <label>Clinic Name</label>
+                    <input type="text" value="${clinic.clinicName || clinic.name || 'Clinic'}" disabled style="background: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label>Primary Specialization</label>
+                    <input type="text" value="${clinic.specialization || 'General Medicine'}" disabled style="background: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" value="${clinic.address || clinic.city || 'Location not specified'}" disabled style="background: #f3f4f6;">
+                </div>
+            `;
+        }
+        
+        // Display professionals
+        function displayProfessionals(clinic) {
+            const professionalsList = document.getElementById('professionalsList');
+            const professionalSection = document.getElementById('professionalSection');
+            const noProfessionals = document.getElementById('noProfessionals');
+            
+            if (!clinic.professionals || !Array.isArray(clinic.professionals) || clinic.professionals.length === 0) {
+                professionalSection.style.display = 'none';
+                noProfessionals.style.display = 'block';
+                return;
+            }
+            
+            professionalSection.style.display = 'block';
+            noProfessionals.style.display = 'none';
+            
+            professionalsList.innerHTML = clinic.professionals.map((prof, index) => {
+                const specializationDisplay = prof.specialization ? prof.specialization.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'General Practice';
+                const experienceDisplay = prof.experienceYears || 'Not specified';
+                
+                return `
+                    <div class="professional-card" data-professional-index="${index}" style="
+                        padding: 20px;
+                        border: 2px solid #e5e7eb;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                        background: white;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">
+                                    ${prof.name || 'Professional ' + (index + 1)}
+                                </h3>
+                                <div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">
+                                    <i class="fas fa-stethoscope" style="margin-right: 6px; color: #3b82f6;"></i>
+                                    <strong>Specialization:</strong> ${specializationDisplay}
+                                </div>
+                                <div style="font-size: 14px; color: #6b7280;">
+                                    <i class="fas fa-clock" style="margin-right: 6px; color: #f59e0b;"></i>
+                                    <strong>Experience:</strong> ${experienceDisplay} years
+                                </div>
+                            </div>
+                            <div class="professional-select-indicator" style="
+                                width: 24px;
+                                height: 24px;
+                                border: 2px solid #e5e7eb;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                flex-shrink: 0;
+                            ">
+                                <i class="fas fa-check" style="display: none; color: white; font-size: 12px;"></i>
+                            </div>
+                        </div>
+                        ${prof.certifications && Array.isArray(prof.certifications) && prof.certifications.length > 0 ? `
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+                                <div style="font-size: 12px; color: #6b7280;">
+                                    <i class="fas fa-certificate" style="margin-right: 4px; color: #10b981;"></i>
+                                    ${prof.certifications.length} certification${prof.certifications.length !== 1 ? 's' : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Add click handlers
+            professionalsList.querySelectorAll('.professional-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const index = parseInt(card.dataset.professionalIndex);
+                    selectProfessional(index, clinic.professionals[index]);
+                });
+            });
+        }
+        
+        // Select professional
+        function selectProfessional(index, professional) {
+            selectedProfessional = { index, ...professional };
+            
+            // Update UI
+            document.querySelectorAll('.professional-card').forEach((card, i) => {
+                const indicator = card.querySelector('.professional-select-indicator');
+                const checkIcon = indicator.querySelector('.fas.fa-check');
+                
+                if (i === index) {
+                    card.style.borderColor = '#1e40af';
+                    card.style.background = '#eff6ff';
+                    indicator.style.background = '#1e40af';
+                    indicator.style.borderColor = '#1e40af';
+                    checkIcon.style.display = 'block';
+                } else {
+                    card.style.borderColor = '#e5e7eb';
+                    card.style.background = 'white';
+                    indicator.style.background = 'transparent';
+                    indicator.style.borderColor = '#e5e7eb';
+                    checkIcon.style.display = 'none';
+                }
+            });
+            
+            // Show date and time sections
+            document.getElementById('dateSection').style.display = 'block';
+            document.getElementById('timeSection').style.display = 'block';
+            
+            // Generate calendar and time slots
+            generateCalendar();
+            if (selectedDate) {
+                generateTimeSlots();
+            }
+            updateSummary();
+        }
+
+        // Generate calendar
+        function generateCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = ''; // Clear existing calendar
+            
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            // Days of week
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            daysOfWeek.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+
+            // Generate next 30 days
+            for (let i = 0; i < 35; i++) {
+                const date = new Date(currentYear, currentMonth, today.getDate() + i);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                if (i === 0) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Mark as available (for demo, all future dates are available)
+                if (i > 0) {
+                    dayElement.classList.add('available');
+                }
+                
+                dayElement.textContent = date.getDate();
+                dayElement.dataset.date = date.toISOString().split('T')[0];
+                
+                dayElement.addEventListener('click', async () => {
+                    if (dayElement.classList.contains('available')) {
+                        document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+                        dayElement.classList.add('selected');
+                        selectedDate = dayElement.dataset.date;
+                        updateSummary();
+                        await generateTimeSlots();
+                    }
+                });
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Generate time slots with availability checking
+        async function generateTimeSlots() {
+            const timeSlotsContainer = document.getElementById('timeSlots');
+            timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;"><i class="fas fa-spinner fa-spin"></i> Checking availability...</div>';
+
+            if (!selectedDate || !selectedProfessional) {
+                timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Please select a date and professional first</div>';
+                return;
+            }
+
+            try {
+                // Load professional schedule
+                const professionalSchedule = await loadProfessionalSchedule(selectedProfessional.index);
+                
+                // Load existing appointments for conflict checking
+                const existingAppointments = await loadExistingAppointments(selectedDate);
+                
+                // Get available time slots based on schedule
+                const availableSlots = getAvailableTimeSlots(selectedDate, professionalSchedule);
+                
+                timeSlotsContainer.innerHTML = '';
+
+                if (availableSlots.length === 0) {
+                    timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;"><i class="fas fa-calendar-times"></i> No available time slots for this date</div>';
+                    return;
+                }
+
+                availableSlots.forEach(time => {
+                    const slot = document.createElement('div');
+                    const isBooked = existingAppointments.some(apt => apt.time === time);
+                    
+                    if (isBooked) {
+                        slot.className = 'time-slot unavailable';
+                        slot.title = 'This time slot is already booked';
+                    } else {
+                        slot.className = 'time-slot available';
+                    }
+                    
+                    slot.textContent = time;
+                    slot.dataset.time = time;
+                    
+                    slot.addEventListener('click', () => {
+                        if (slot.classList.contains('available')) {
+                            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                            slot.classList.add('selected');
+                            selectedTime = slot.dataset.time;
+                            updateSummary();
+                        }
+                    });
+                    
+                    timeSlotsContainer.appendChild(slot);
+                });
+            } catch (error) {
+                console.error('Error generating time slots:', error);
+                timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Error loading availability. Please try again.</div>';
+            }
+        }
+
+        // Load professional schedule
+        async function loadProfessionalSchedule(professionalIndex) {
+            try {
+                const scheduleRef = doc(db, 'professionalSchedules', `${clinicId}_${professionalIndex}`);
+                const scheduleSnap = await getDoc(scheduleRef);
+                
+                if (scheduleSnap.exists()) {
+                    return scheduleSnap.data();
+                }
+                
+                // Return null if no schedule exists (will use default availability)
+                return null;
+            } catch (error) {
+                console.error('Error loading professional schedule:', error);
+                return null;
+            }
+        }
+
+        // Load existing appointments
+        async function loadExistingAppointments(date) {
+            if (!selectedProfessional || !clinicId) return [];
+
+            try {
+                const appointmentsRef = collection(db, 'appointments');
+                const q = query(
+                    appointmentsRef,
+                    where('clinicId', '==', clinicId),
+                    where('professionalId', '==', selectedProfessional.index),
+                    where('date', '==', date),
+                    where('status', 'in', ['pending', 'confirmed'])
+                );
+                const snapshot = await getDocs(q);
+                
+                const appointments = [];
+                snapshot.forEach(doc => {
+                    appointments.push(doc.data());
+                });
+                
+                return appointments;
+            } catch (error) {
+                console.error('Error loading existing appointments:', error);
+                return [];
+            }
+        }
+
+        // Get available time slots based on schedule
+        function getAvailableTimeSlots(dateStr, schedule) {
+            const date = new Date(dateStr);
+            const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+            
+            // If no schedule exists, return all default time slots
+            if (!schedule || !schedule.weeklySchedule || !schedule.weeklySchedule[dayName]) {
+                return timeSlots;
+            }
+            
+            const daySchedule = schedule.weeklySchedule[dayName];
+            
+            // If day is not enabled, return empty array
+            if (!daySchedule.enabled || !daySchedule.timeSlots || daySchedule.timeSlots.length === 0) {
+                return [];
+            }
+            
+            // Generate available slots from time ranges
+            const availableSlots = [];
+            
+            daySchedule.timeSlots.forEach(range => {
+                const startTime = range.start || '09:00';
+                const endTime = range.end || '17:00';
+                
+                // Find slots within this range
+                timeSlots.forEach(slot => {
+                    if (slot >= startTime && slot < endTime) {
+                        availableSlots.push(slot);
+                    }
+                });
+            });
+            
+            return availableSlots.sort();
+        }
+
+        // Check for booking conflicts
+        async function checkBookingConflicts(date, time) {
+            if (!selectedProfessional || !clinicId) return [];
+
+            try {
+                const appointmentsRef = collection(db, 'appointments');
+                const q = query(
+                    appointmentsRef,
+                    where('clinicId', '==', clinicId),
+                    where('professionalId', '==', selectedProfessional.index),
+                    where('date', '==', date),
+                    where('time', '==', time),
+                    where('status', 'in', ['pending', 'confirmed'])
+                );
+                const snapshot = await getDocs(q);
+                
+                const conflicts = [];
+                snapshot.forEach(doc => {
+                    conflicts.push({ id: doc.id, ...doc.data() });
+                });
+                
+                return conflicts;
+            } catch (error) {
+                console.error('Error checking conflicts:', error);
+                // If we can't check, assume no conflicts (fail open for better UX)
+                return [];
+            }
+        }
+
+        // Update summary
+        function updateSummary() {
+            if (clinicData) {
+                document.getElementById('summaryClinic').textContent = clinicData.clinicName || clinicData.name || 'Clinic';
+            }
+            
+            if (selectedProfessional) {
+                document.getElementById('summaryProfessionalItem').style.display = 'flex';
+                document.getElementById('summaryProfessional').textContent = selectedProfessional.name;
+                document.getElementById('summarySpecialization').textContent = selectedProfessional.specialization 
+                    ? selectedProfessional.specialization.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    : clinicData.specialization || 'General Medicine';
+            } else {
+                document.getElementById('summaryProfessionalItem').style.display = 'none';
+                document.getElementById('summarySpecialization').textContent = clinicData?.specialization || 'General Medicine';
+            }
+            
+            if (selectedDate) {
+                const date = new Date(selectedDate);
+                document.getElementById('summaryDate').textContent = date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else {
+                document.getElementById('summaryDate').textContent = '-';
+            }
+            
+            if (selectedTime) {
+                document.getElementById('summaryTime').textContent = selectedTime;
+            } else {
+                document.getElementById('summaryTime').textContent = '-';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedProfessional) {
+                alert('Please select a professional first.');
+                return;
+            }
+            
+            if (!selectedDate || !selectedTime) {
+                alert('Please select a date and time for your appointment.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner" style="display: inline-block; width: 20px; height: 20px; margin-right: 10px;"></div> Booking...';
+
+            try {
+                if (!selectedProfessional) {
+                    alert('Please select a professional first');
+                    return;
+                }
+                
+                // Check for conflicts before booking
+                const conflicts = await checkBookingConflicts(selectedDate, selectedTime);
+                if (conflicts.length > 0) {
+                    alert('⚠️ This time slot is no longer available. Please select another time.');
+                    await generateTimeSlots(); // Refresh available slots
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirm Appointment';
+                    return;
+                }
+                
+                // Validate required fields
+                const patientEmail = document.getElementById('patientEmail').value.trim();
+                const patientName = document.getElementById('patientName').value.trim();
+                
+                if (!clinicId || clinicId.trim() === '') {
+                    alert('Error: Clinic ID is missing. Please refresh the page and try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirm Appointment';
+                    return;
+                }
+                
+                if (!patientEmail || patientEmail === '') {
+                    alert('Please enter your email address.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirm Appointment';
+                    return;
+                }
+                
+                if (!patientName || patientName === '') {
+                    alert('Please enter your name.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirm Appointment';
+                    return;
+                }
+                
+                const now = new Date().toISOString();
+                const appointmentData = {
+                    clinicId: clinicId.trim(),
+                    clinicName: clinicData.clinicName || clinicData.name,
+                    professionalId: selectedProfessional.index,
+                    professionalName: selectedProfessional.name,
+                    specialization: selectedProfessional.specialization || clinicData.specialization,
+                    date: selectedDate,
+                    time: selectedTime,
+                    patientName: patientName,
+                    patientEmail: patientEmail,
+                    patientPhone: document.getElementById('patientPhone').value.trim(),
+                    reason: document.getElementById('appointmentReason').value.trim() || '',
+                    status: 'pending',
+                    createdAt: now,
+                    requestedAt: now // Track when appointment was requested for response time calculation
+                };
+
+                console.log('Saving appointment with data:', appointmentData);
+                const appointmentsRef = collection(db, 'appointments');
+                const docRef = await addDoc(appointmentsRef, appointmentData);
+
+                // Send email notification
+                try {
+                    await sendEmailNotification(appointmentData, docRef.id);
+                } catch (emailError) {
+                    console.error('Error sending email:', emailError);
+                    // Continue even if email fails
+                }
+
+                // Show success message
+                document.getElementById('bookingForm').innerHTML = `
+                    <div class="success-message">
+                        <h3><i class="fas fa-check-circle"></i> Appointment Booked Successfully!</h3>
+                        <p>Your appointment has been confirmed. You will receive a confirmation email shortly.</p>
+                        <p style="margin-top: 15px;"><strong>Date:</strong> ${new Date(selectedDate).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${selectedTime}</p>
+                        <p><strong>Appointment ID:</strong> ${docRef.id}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+                console.error('Error details:', {
+                    code: error.code,
+                    message: error.message,
+                    appointmentData: appointmentData
+                });
+                
+                // Show detailed error message
+                let errorMessage = 'Error booking appointment. ';
+                if (error.code === 'permission-denied') {
+                    errorMessage += 'Permission denied. Please check that you are logged in and have the correct permissions.';
+                } else if (error.code === 'failed-precondition') {
+                    errorMessage += 'Validation failed. Please check all fields are filled correctly.';
+                } else if (error.message) {
+                    errorMessage += error.message;
+                } else {
+                    errorMessage += 'Please try again.';
+                }
+                
+                alert(errorMessage);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirm Appointment';
+            }
+        });
+
+        // Initialize
+        loadClinicInfo();
+    </script>
+</body>
+</html>

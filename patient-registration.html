@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Registration - CareLuva</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-group input.valid {
+            border-color: #10b981;
+        }
+        
+        .form-group input.invalid {
+            border-color: #ef4444;
+        }
+        
+        .validation-message {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            display: none;
+        }
+        
+        .validation-message.show {
+            display: block;
+        }
+        
+        .validation-message.error {
+            color: #dc2626;
+        }
+        
+        .validation-message.success {
+            color: #059669;
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .password-strength-fill {
+            height: 100%;
+            transition: width 0.3s, background-color 0.3s;
+            border-radius: 2px;
+        }
+        
+        .password-strength-fill.weak {
+            width: 33%;
+            background: #ef4444;
+        }
+        
+        .password-strength-fill.medium {
+            width: 66%;
+            background: #f59e0b;
+        }
+        
+        .password-strength-fill.strong {
+            width: 100%;
+            background: #10b981;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #2563eb;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .terms-checkbox input[type="checkbox"] {
+            width: auto;
+            margin-top: 4px;
+        }
+        
+        .terms-checkbox label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: normal;
+        }
+        
+        .terms-checkbox a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <a href="patient-auth.html" class="back-link">← Back to Login</a>
+        
+        <div class="header">
+            <h1>🏥 Patient Registration</h1>
+            <p>Create your account to find trusted healthcare providers</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    <div class="validation-message" id="fullNameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" placeholder="Enter your email address" required>
+                    <div class="validation-message" id="emailError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number (Optional)</label>
+                    <input type="tel" id="phone" placeholder="Enter your phone number">
+                    <div class="validation-message" id="phoneError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateOfBirth">Date of Birth (Optional)</label>
+                    <input type="date" id="dateOfBirth">
+                    <div class="validation-message" id="dateOfBirthError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" placeholder="Create a password (min. 8 characters)" required minlength="8">
+                    <div class="password-strength">
+                        <div class="password-strength-fill" id="passwordStrength"></div>
+                    </div>
+                    <div class="validation-message" id="passwordError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required minlength="8">
+                    <div class="validation-message" id="confirmPasswordError"></div>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="termsAccepted" required>
+                    <label for="termsAccepted">
+                        I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a> *
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import firebaseConfig from './firebase-config.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            window.firebase = { app, db };
+            window.firebaseReady = true;
+            console.log('✅ Firebase initialized successfully!');
+            window.dispatchEvent(new CustomEvent('firebaseReady'));
+        } catch (error) {
+            console.error('❌ Firebase initialization failed:', error);
+            window.firebaseReady = false;
+            window.dispatchEvent(new CustomEvent('firebaseError', { detail: error }));
+        }
+    </script>
+
+    <script>
+        let firebaseReady = false;
+        
+        window.addEventListener('firebaseReady', () => {
+            firebaseReady = true;
+        });
+        
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthFill = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthFill.style.width = '0%';
+                strengthFill.className = 'password-strength-fill';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+            
+            if (strength <= 2) {
+                strengthFill.className = 'password-strength-fill weak';
+            } else if (strength <= 3) {
+                strengthFill.className = 'password-strength-fill medium';
+            } else {
+                strengthFill.className = 'password-strength-fill strong';
+            }
+        });
+        
+        // Password match checker
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const errorDiv = document.getElementById('confirmPasswordError');
+            
+            if (confirmPassword && password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.className = 'validation-message show error';
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+            } else if (confirmPassword && password === confirmPassword) {
+                errorDiv.textContent = '';
+                errorDiv.className = 'validation-message';
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+            } else {
+                errorDiv.textContent = '';
+                errorDiv.className = 'validation-message';
+                this.classList.remove('invalid', 'valid');
+            }
+        });
+        
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Hide messages
+            errorMessage.classList.remove('show');
+            successMessage.classList.remove('show');
+            
+            // Get form values
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dateOfBirth = document.getElementById('dateOfBirth').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const termsAccepted = document.getElementById('termsAccepted').checked;
+            
+            // Validation
+            if (!fullName || !email || !password || !confirmPassword) {
+                errorMessage.textContent = 'Please fill in all required fields.';
+                errorMessage.classList.add('show');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match.';
+                errorMessage.classList.add('show');
+                return;
+            }
+            
+            if (password.length < 8) {
+                errorMessage.textContent = 'Password must be at least 8 characters long.';
+                errorMessage.classList.add('show');
+                return;
+            }
+            
+            if (!termsAccepted) {
+                errorMessage.textContent = 'Please accept the Terms of Service and Privacy Policy.';
+                errorMessage.classList.add('show');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMessage.textContent = 'Please enter a valid email address.';
+                errorMessage.classList.add('show');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+            
+            try {
+                if (!firebaseReady || !window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase is not available. Please ensure Firebase is properly configured.');
+                }
+                
+                const { collection, query, where, getDocs, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Check if email already exists
+                const patientsRef = collection(window.firebase.db, 'patientUsers');
+                try {
+                    const emailQuery = query(patientsRef, where('email', '==', email));
+                    const snapshot = await getDocs(emailQuery);
+                    
+                    if (!snapshot.empty) {
+                        throw new Error('An account with this email already exists. Please log in instead.');
+                    }
+                } catch (queryError) {
+                    console.warn('Could not check for existing email:', queryError.message);
+                }
+                
+                // Hash password before storing
+                let hashedPassword = password;
+                if (window.authUtils) {
+                    try {
+                        hashedPassword = await window.authUtils.hashPassword(password);
+                        console.log('✅ Password hashed before storage');
+                    } catch (hashError) {
+                        console.error('Error hashing password:', hashError);
+                        throw new Error('Failed to secure password. Please try again.');
+                    }
+                }
+                
+                // Create patient user document
+                const patientData = {
+                    name: fullName,
+                    email: email,
+                    password: hashedPassword,
+                    phone: phone || null,
+                    dateOfBirth: dateOfBirth || null,
+                    termsAccepted: termsAccepted,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                };
+                
+                const docRef = await addDoc(patientsRef, patientData);
+                console.log('✅ Patient account created:', docRef.id);
+                
+                // Create session
+                if (window.authUtils) {
+                    const session = window.authUtils.createSession(
+                        docRef.id,
+                        email,
+                        patientData,
+                        false
+                    );
+                    window.authUtils.saveSession(session, patientData, false);
+                    sessionStorage.setItem('patientUserId', docRef.id);
+                } else {
+                    // Fallback: basic session storage
+                    const sessionData = {
+                        uid: docRef.id,
+                        email: email,
+                        loginTime: new Date().toISOString()
+                    };
+                    sessionStorage.setItem('patientSession', JSON.stringify(sessionData));
+                    sessionStorage.setItem('patientUserId', docRef.id);
+                    const safeData = { ...patientData };
+                    delete safeData.password;
+                    sessionStorage.setItem('patientUser', JSON.stringify(safeData));
+                }
+                
+                successMessage.textContent = 'Account created successfully! Redirecting...';
+                successMessage.classList.add('show');
+                
+                // Redirect to find clinics page
+                setTimeout(() => {
+                    window.location.href = 'find-clinics.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = error.message || 'An error occurred. Please try again.';
+                errorMessage.classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
+

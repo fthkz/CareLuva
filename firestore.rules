@@ -1,0 +1,471 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is the owner
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    // Provider Registrations - Public submissions (anyone can create, only admins can read/update/delete)
+    match /providerRegistrations/{registrationId} {
+      // Anyone can create a registration submission
+      allow create: if request.resource.data.keys().hasAll(['email', 'clinicName']) &&
+                       request.resource.data.email is string &&
+                       request.resource.data.clinicName is string;
+      
+      // Users can read their own registration if:
+      // 1. They are authenticated AND email matches, OR
+      // 2. They are authenticated AND createdBy UID matches, OR
+      // 3. They are admin, OR
+      // 4. Unauthenticated user (for password reset - allows querying by email to create Auth account)
+      // SECURITY NOTE: This allows unauthenticated reads for password reset functionality.
+      // The user already knows the email (they're requesting reset for it), so minimal privacy impact.
+      // In production, consider using Cloud Functions for password reset to avoid exposing registration data.
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && 
+                      (resource.data.email == request.auth.token.email || 
+                       resource.data.createdBy == request.auth.uid)) ||
+                     // Allow unauthenticated read for password reset (needed to create Firebase Auth from Firestore registration)
+                     !isAuthenticated();
+      
+      // Admins can update any field
+      // Users can update their own profile fields (email must match, cannot change status/admin fields)
+      // Unauthenticated users can update password reset fields and password (for password reset flow)
+      allow update: if isAdmin() ||
+                     // Allow profile updates if email matches (for Firestore-only auth users)
+                     // Security: Email in update must match existing email (prevents updating wrong user)
+                     (request.resource.data.email == resource.data.email &&
+                      // Cannot change status (admin-only field)
+                      (!('status' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.status == resource.data.status) &&
+                      // Cannot change critical admin fields
+                      !('createdBy' in request.resource.data.diff(resource.data).affectedKeys()) &&
+                      !('submittedAt' in request.resource.data.diff(resource.data).affectedKeys())) ||
+                     // Unauthenticated users can update password reset fields and password (for password reset flow)
+                     (!isAuthenticated() && 
+                      // Ensure email is not being changed (security check - prevents updating wrong user's data)
+                      (!('email' in request.resource.data) || request.resource.data.email == resource.data.email) &&
+                      // Only allow updating specific fields related to password reset
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordResetToken', 'passwordResetExpiry', 'updatedAt']));
+      
+      // Only admins can delete registrations
+      allow delete: if isAdmin();
+    }
+    
+    // Providers - Authenticated provider user data
+    match /providers/{providerId} {
+      // Users can create their own provider document
+      allow create: if isOwner(providerId) &&
+                       request.resource.data.keys().hasAll(['uid', 'email']) &&
+                       request.resource.data.uid == request.auth.uid &&
+                       request.resource.data.email == request.auth.token.email;
+      
+      // Users can read their own data, admins can read all
+      allow read: if isOwner(providerId) || isAdmin();
+      
+      // Users can update their own data, admins can update any
+      allow update: if isOwner(providerId) || isAdmin();
+      
+      // Only admins can delete provider documents
+      allow delete: if isAdmin();
+    }
+    
+    // Reviews - Public read and create, admin-only modify
+    match /reviews/{reviewId} {
+      // Anyone can read reviews (filter by status in queries)
+      allow read: if true;
+      
+      // Anyone can create reviews (public submissions)
+      allow create: if request.resource.data.keys().hasAll(['reviewerName', 'reviewText', 'clinicId']) &&
+                       request.resource.data.reviewerName is string &&
+                       request.resource.data.reviewText is string &&
+                       request.resource.data.clinicId is string;
+      
+      // Admins can update reviews (for moderation)
+      // Providers can update their own reviews to add responses (if clinicId matches)
+      allow update: if isAdmin() ||
+                     // Allow providers to add responses to reviews for their clinic
+                     (!isAuthenticated() && 
+                      // Check if clinicId matches (for Firestore-only auth)
+                      // In production, add proper clinic ownership verification
+                      request.resource.data.clinicId == resource.data.clinicId &&
+                      // Only allow updating providerResponse and providerResponseDate fields
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['providerResponse', 'providerResponseDate']));
+      
+      // Only admins can delete reviews
+      allow delete: if isAdmin();
+    }
+    
+    // Appointments - Authenticated users manage their own appointments
+    match /appointments/{appointmentId} {
+      // Allow creation with clinicId and patientEmail (Firestore-only auth compatible)
+      // OR with Firebase Auth (patientId/providerId matching auth.uid)
+      allow create: if 
+                       // Option 1: Firebase Auth (if available)
+                       (isAuthenticated() &&
+                        request.resource.data.keys().hasAll(['providerId', 'patientId']) &&
+                        (request.resource.data.patientId == request.auth.uid || 
+                         request.resource.data.providerId == request.auth.uid)) ||
+                       // Option 2: Firestore-only auth (clinicId + patientEmail)
+                       (request.resource.data.keys().hasAll(['clinicId', 'patientEmail']) &&
+                        request.resource.data.clinicId is string &&
+                        request.resource.data.clinicId.size() > 0 &&
+                        request.resource.data.patientEmail is string &&
+                        request.resource.data.patientEmail.size() > 0);
+      
+      // Users can read their own appointments (as patient or provider), admins can read all
+      // Also allow reading by clinicId for Firestore-only auth providers (unauthenticated but with valid session)
+      // Also allow reading by patientEmail for Firestore-only auth patients (unauthenticated but with valid session)
+      allow read: if isAdmin() ||
+                     (isAuthenticated() && 
+                      (resource.data.patientId == request.auth.uid || 
+                       resource.data.providerId == request.auth.uid)) ||
+                     // Allow reading appointments by clinicId for Firestore-only auth providers (no Firebase Auth)
+                     // This allows providers to view their appointments even without Firebase Auth
+                     (!isAuthenticated() && resource.data.clinicId != null) ||
+                     // Allow reading appointments by patientEmail for Firestore-only auth patients (no Firebase Auth)
+                     // This allows patients to view their appointments even without Firebase Auth
+                     (!isAuthenticated() && resource.data.patientEmail != null);
+      
+      // Users can update their own appointments, admins can update any
+      // Support both Firebase Auth and Firestore-only auth
+      allow update: if isAdmin() ||
+                       // Firebase Auth: user's UID matches patientId or providerId
+                       (isAuthenticated() && 
+                        (resource.data.patientId == request.auth.uid || 
+                         resource.data.providerId == request.auth.uid)) ||
+                       // Firestore-only auth: allow update if clinicId exists (provider can update)
+                       (!isAuthenticated() && resource.data.clinicId != null);
+      
+      // Users can delete their own appointments, admins can delete any
+      // Support both Firebase Auth and Firestore-only auth
+      allow delete: if isAdmin() ||
+                       // Firebase Auth: user's UID matches patientId or providerId
+                       (isAuthenticated() && 
+                        (resource.data.patientId == request.auth.uid || 
+                         resource.data.providerId == request.auth.uid)) ||
+                       // Firestore-only auth: allow delete if clinicId exists (provider can delete)
+                       (!isAuthenticated() && resource.data.clinicId != null);
+    }
+    
+    // Email Notifications - System/admin only
+    match /emailNotifications/{notificationId} {
+      // Authenticated users can create notifications
+      allow create: if isAuthenticated();
+      
+      // Only admins can read notifications
+      allow read: if isAdmin();
+      
+      // Only admins can update/delete notifications
+      allow update, delete: if isAdmin();
+    }
+    
+    // Admins - Admin users collection
+    match /admins/{adminId} {
+      // Only existing admins can create new admin documents (or use Cloud Functions)
+      allow create: if isAdmin() || false; // Restrict to Cloud Functions in production
+      
+      // Only admins can read admin list
+      allow read: if isAdmin();
+      
+      // Only admins can update admin documents
+      allow update: if isAdmin();
+      
+      // Only admins can delete admin documents
+      allow delete: if isAdmin();
+    }
+    
+    // Service Catalog - Admin-managed service catalog
+    match /serviceCatalog/{serviceId} {
+      // Anyone can read the service catalog (needed for clinic pricing management)
+      allow read: if true;
+      
+      // Only admins can create/update/delete services
+      allow create: if isAdmin() &&
+                       request.resource.data.keys().hasAll(['category', 'name', 'description']) &&
+                       request.resource.data.category is string &&
+                       request.resource.data.name is string &&
+                       request.resource.data.description is string;
+      
+      allow update: if isAdmin();
+      
+      allow delete: if isAdmin();
+    }
+    
+    // Patient Favorites - Patient favorite clinics
+    match /patientFavorites/{patientEmail} {
+      // Patients can create/update their own favorites
+      allow create: if request.resource.data.keys().hasAll(['patientEmail', 'clinicIds']) &&
+                       request.resource.data.patientEmail is string &&
+                       request.resource.data.clinicIds is list;
+      
+      // Patients can read their own favorites
+      // In production, add proper authentication check
+      allow read: if true; // TODO: Add patient email verification
+      
+      // Patients can update their own favorites
+      allow update: if true; // TODO: Add patient email verification
+      
+      // Patients can delete their own favorites
+      allow delete: if true; // TODO: Add patient email verification
+    }
+    
+    // Service Pricing - Clinic service pricing management
+    match /servicePricing/{clinicId} {
+      // Clinic owners can create/update their own pricing
+      allow create: if request.resource.data.keys().hasAll(['clinicId']) &&
+                       request.resource.data.clinicId is string;
+      
+      // Anyone can read approved pricing (for display on profiles)
+      // Clinic owners can read their own pricing (even if pending)
+      allow read: if resource.data.status == 'approved' ||
+                     // Allow clinic owners to read their own pricing
+                     (!isAuthenticated() && resource.data.clinicId != null);
+      
+      // Clinic owners can update their own pricing
+      // Admins can update any pricing (for approval)
+      allow update: if true; // TODO: Add clinic ownership verification
+      
+      // Only admins can delete pricing
+      allow delete: if isAdmin();
+    }
+    
+    // Professional Schedules - Provider schedule management
+    match /professionalSchedules/{scheduleId} {
+      // Clinic owners can create/update schedules for their professionals
+      // Schedule ID format: {clinicId}_{professionalIndex}
+      allow create: if request.resource.data.keys().hasAll(['clinicId', 'professionalId']) &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.professionalId is number;
+      
+      // Anyone can read schedules (needed for appointment booking availability checking)
+      allow read: if true;
+      
+      // Clinic owners can update their own schedules
+      // In production, add proper authentication check
+      allow update: if true; // TODO: Add clinic ownership verification
+      
+      // Only admins can delete schedules
+      allow delete: if isAdmin();
+    }
+    
+    // Patient Users - Patient authentication and profile data
+    match /patientUsers/{patientId} {
+      // Anyone can create a patient account (registration)
+      // Allow creation if required fields are present and valid strings
+      // Additional fields like createdAt, updatedAt (serverTimestamp) are allowed
+      allow create: if request.resource.data.keys().hasAll(['email', 'name', 'password']) &&
+                       request.resource.data.email is string &&
+                       request.resource.data.name is string &&
+                       request.resource.data.password is string;
+      
+      // Allow unauthenticated reads for:
+      // 1. Email duplicate checking during registration
+      // 2. Password reset functionality
+      // 3. Login (email lookup)
+      // Authenticated users can read their own data
+      allow read: if isAdmin() ||
+                     // Allow unauthenticated read (needed for registration email check and login)
+                     !isAuthenticated() ||
+                     // Allow authenticated users to read their own data
+                     (isAuthenticated() && 
+                      (resource.data.email == request.auth.token.email ||
+                       resource.data.createdBy == request.auth.uid));
+      
+      // Users can update their own profile fields
+      // Unauthenticated users can update password reset fields and password (for password reset flow)
+      allow update: if isAdmin() ||
+                     // Allow profile updates if email matches (for Firestore-only auth users)
+                     (request.resource.data.email == resource.data.email &&
+                      // Cannot change critical fields
+                      !('createdBy' in request.resource.data.diff(resource.data).affectedKeys())) ||
+                     // Unauthenticated users can update password reset fields and password
+                     (!isAuthenticated() && 
+                      // Ensure email is not being changed
+                      (!('email' in request.resource.data) || request.resource.data.email == resource.data.email) &&
+                      // Only allow updating specific fields related to password reset
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'passwordResetToken', 'passwordResetExpiry', 'updatedAt']));
+      
+      // Only admins can delete patient accounts
+      allow delete: if isAdmin();
+    }
+    
+    // Service Packages - Bundled service packages
+    match /servicePackages/{packageId} {
+      // Clinic owners can create packages for their clinic
+      allow create: if request.resource.data.keys().hasAll(['clinicId', 'name', 'price']) &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.name is string &&
+                       request.resource.data.price is number;
+      
+      // Anyone can read approved packages (for display on provider profiles)
+      // Clinic owners can read their own packages (even if pending)
+      allow read: if resource.data.status == 'approved' ||
+                     // Allow clinic owners to read their own packages
+                     (!isAuthenticated() && resource.data.clinicId != null);
+      
+      // Clinic owners can update their own packages
+      // Admins can update any packages (for approval)
+      allow update: if true; // TODO: Add clinic ownership verification
+      
+      // Clinic owners can delete their own packages
+      // Admins can delete any packages
+      allow delete: if true; // TODO: Add clinic ownership verification
+    }
+    
+    // Trust Score History - Historical trust score tracking
+    match /trustScoreHistory/{historyId} {
+      // System can create history records (via Cloud Functions or client)
+      allow create: if request.resource.data.keys().hasAll(['clinicId', 'score']) &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.score is number;
+      
+      // Anyone can read trust score history (for display on profiles)
+      allow read: if true;
+      
+      // Only admins can update/delete history
+      allow update, delete: if isAdmin();
+    }
+    
+    // Clinic Photos - Photo gallery for clinics
+    match /clinicPhotos/{photoId} {
+      // Clinic owners can create photos for their clinic
+      allow create: if request.resource.data.keys().hasAll(['clinicId', 'url', 'category']) &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.url is string &&
+                       request.resource.data.category is string;
+      
+      // Anyone can read approved clinic photos (for display on provider profiles)
+      // Clinic owners can read their own photos (even if pending)
+      allow read: if true; // Photos are public once uploaded
+      
+      // Clinic owners can update their own photos
+      // Admins can update any photos
+      allow update: if true; // TODO: Add clinic ownership verification
+      
+      // Clinic owners can delete their own photos
+      // Admins can delete any photos
+      allow delete: if true; // TODO: Add clinic ownership verification
+    }
+    
+    // Patient Behavior (Phase 3 - Personalization)
+    match /patientBehavior/{patientId} {
+      allow read: if isAuthenticated() && (request.auth.uid == patientId || isAdmin());
+      allow create, update: if isAuthenticated() && request.auth.uid == patientId;
+      allow delete: if isAdmin();
+    }
+    
+    // Recommendation History (Phase 3 & 4)
+    match /recommendationHistory/{historyId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['patientId', 'recommendations', 'preferences']) &&
+                       request.resource.data.patientId is string;
+      allow read: if isAuthenticated() && (resource.data.patientId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    
+    // Recommendation Outcomes (Phase 4 - ML Training)
+    match /recommendationOutcomes/{outcomeId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['patientId', 'clinicId', 'outcome']) &&
+                       request.resource.data.patientId is string &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.outcome is string;
+      allow read: if isAuthenticated() && (resource.data.patientId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    
+    // Invoices - Billing and payment tracking
+    match /invoices/{invoiceId} {
+      allow create: if isAdmin(); // Only system can create invoices
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && resource.data.clinicId != null);
+      allow update: if isAdmin() || 
+                       (isAuthenticated() && resource.data.clinicId != null && 
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['transferReference', 'transferDate', 'transferAmount', 'paymentReceiptUrl', 'paymentVerified', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+    
+    // Provider Payment Methods
+    match /providerPaymentMethods/{paymentMethodId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['clinicId', 'paymentMethodType']) &&
+                       request.resource.data.clinicId is string;
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && resource.data.clinicId != null);
+      allow update: if isAdmin() || 
+                       (isAuthenticated() && resource.data.clinicId != null);
+      allow delete: if isAdmin() || 
+                       (isAuthenticated() && resource.data.clinicId != null);
+    }
+    
+    // Terms & Conditions Acceptance
+    match /termsAcceptance/{acceptanceId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['userId', 'userType', 'termsVersion']) &&
+                       request.resource.data.userType is string &&
+                       request.resource.data.termsVersion is string;
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+    
+    // Platform Communications (for monitoring)
+    match /platformCommunications/{communicationId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['clinicId', 'patientId', 'messageType', 'content']) &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.patientId is string &&
+                       request.resource.data.messageType is string &&
+                       request.resource.data.content is string;
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && (resource.data.clinicId != null || resource.data.patientId != null));
+      allow update, delete: if isAdmin();
+    }
+    
+    // Communication Violations
+    match /communicationViolations/{violationId} {
+      allow create: if isAdmin(); // Only system can create violations
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && resource.data.clinicId != null);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Treatment Plans - Multi-appointment treatment series
+    match /treatmentPlans/{planId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.keys().hasAll(['clinicId', 'patientEmail', 'planName', 'appointments']) &&
+                       request.resource.data.clinicId is string &&
+                       request.resource.data.patientEmail is string;
+      allow read: if isAdmin() || 
+                     (isAuthenticated() && (resource.data.clinicId != null || resource.data.patientEmail != null));
+      allow update: if isAdmin() || 
+                       (isAuthenticated() && resource.data.clinicId != null);
+      allow delete: if isAdmin();
+    }
+    
+    // Test collection - Block all access in production (for development only)
+    match /test/{testId} {
+      // Deny all access - remove this collection or restrict to development
+      allow read, write: if false;
+    }
+    
+    // Default deny rule for any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firestore Rules Verification - CareLuva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1e40af; }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .pass {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        .fail {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+        .info {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+        button {
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover { background: #2563eb; }
+        pre {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Firestore Rules Verification</h1>
+        <p>This tool helps verify that your Firestore security rules are correctly deployed.</p>
+        
+        <button onclick="testRules()">Test Rules</button>
+        <button onclick="checkRulesInConsole()">Open Firebase Console</button>
+        
+        <div id="results"></div>
+    </div>
+    
+    <script type="module">
+        import firebaseConfig from '../firebase-config.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        
+        window.testRules = async function() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="test-result info">Testing rules...</div>';
+            
+            const tests = [];
+            
+            // Test 1: Write to test collection
+            try {
+                const testData = {
+                    _test: true,
+                    message: 'Rules verification test',
+                    timestamp: new Date().toISOString()
+                };
+                const docRef = await addDoc(collection(db, 'test'), testData);
+                tests.push({
+                    name: 'Write to test collection',
+                    passed: true,
+                    message: `✅ Success! Document created with ID: ${docRef.id}`,
+                    details: 'The test collection rule is working correctly.'
+                });
+                
+                // Test 2: Read from test collection
+                try {
+                    const docSnap = await getDoc(doc(db, 'test', docRef.id));
+                    if (docSnap.exists()) {
+                        tests.push({
+                            name: 'Read from test collection',
+                            passed: true,
+                            message: '✅ Success! Document read successfully.',
+                            details: `Data: ${JSON.stringify(docSnap.data(), null, 2)}`
+                        });
+                    } else {
+                        tests.push({
+                            name: 'Read from test collection',
+                            passed: false,
+                            message: '❌ Document not found after write',
+                            details: 'This is unexpected - document was created but cannot be read.'
+                        });
+                    }
+                } catch (readError) {
+                    tests.push({
+                        name: 'Read from test collection',
+                        passed: false,
+                        message: `❌ Read failed: ${readError.message}`,
+                        details: `Error Code: ${readError.code || 'unknown'}\nFull Error: ${readError.toString()}`
+                    });
+                }
+                
+                // Cleanup
+                try {
+                    const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    await deleteDoc(doc(db, 'test', docRef.id));
+                    tests.push({
+                        name: 'Delete from test collection',
+                        passed: true,
+                        message: '✅ Success! Test document deleted.',
+                        details: 'Cleanup successful.'
+                    });
+                } catch (deleteError) {
+                    tests.push({
+                        name: 'Delete from test collection',
+                        passed: false,
+                        message: `❌ Delete failed: ${deleteError.message}`,
+                        details: `Error Code: ${deleteError.code || 'unknown'}`
+                    });
+                }
+                
+            } catch (writeError) {
+                tests.push({
+                    name: 'Write to test collection',
+                    passed: false,
+                    message: `❌ Write failed: ${writeError.message}`,
+                    details: `Error Code: ${writeError.code || 'unknown'}\n\nPossible causes:\n1. Rules not deployed yet (wait 1-2 minutes)\n2. Browser cache (clear cache and try again)\n3. Rules syntax error (check Firebase Console)\n4. Wrong Firebase project\n\nFull Error: ${writeError.toString()}`
+                });
+            }
+            
+            // Display results
+            let html = '<h2>Test Results</h2>';
+            tests.forEach(test => {
+                html += `
+                    <div class="test-result ${test.passed ? 'pass' : 'fail'}">
+                        <strong>${test.name}</strong><br>
+                        ${test.message}<br>
+                        ${test.details ? `<pre>${test.details}</pre>` : ''}
+                    </div>
+                `;
+            });
+            
+            results.innerHTML = html;
+        };
+        
+        window.checkRulesInConsole = function() {
+            window.open('https://console.firebase.google.com/project/careluva-5635e/firestore/rules', '_blank');
+        };
+    </script>
+</body>
+</html>
+

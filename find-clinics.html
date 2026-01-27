@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Clinics - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e40af;
+        }
+        
+        .search-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .clear-btn {
+            background: #6b7280;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .clear-btn:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Results Section */
+        .results-section {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+        
+        /* Filters Sidebar */
+        .filters-sidebar {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .filters-sidebar h3 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+        
+        .filter-group {
+            margin-bottom: 25px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .filter-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        .filter-group .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .filter-group .checkbox-item label {
+            cursor: pointer;
+            font-weight: 400;
+            margin: 0;
+        }
+        
+        /* Clinic Cards */
+        .clinics-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .clinic-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .clinic-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .clinic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .clinic-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .clinic-specialization {
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .clinic-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .stars {
+            color: #fbbf24;
+        }
+        
+        .rating-number {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .clinic-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .info-item i {
+            color: #1e40af;
+        }
+        
+        .clinic-description {
+            color: #6b7280;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+        
+        .clinic-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .view-btn {
+            background: #1e40af;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .view-btn:hover {
+            background: #1e3a8a;
+        }
+        
+        .book-btn {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .book-btn:hover {
+            background: #059669;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .no-results i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+        
+        .no-results h3 {
+            font-size: 1.5rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .no-results p {
+            color: #9ca3af;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .results-count {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .sort-select {
+            padding: 8px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #1e40af;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-sidebar {
+                position: static;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .clinic-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .clinic-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-search"></i> Find Clinics</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="display: flex; gap: 10px;">
+                    <a href="clinic-recommendations.html" class="back-btn" style="background: #8b5cf6;"><i class="fas fa-magic"></i> Get Recommendations</a>
+                    <a href="price-comparison.html" class="back-btn" style="background: #10b981;"><i class="fas fa-balance-scale"></i> Compare Prices</a>
+                    <a href="patient-dashboard.html" class="back-btn" style="background: #3b82f6;"><i class="fas fa-user"></i> My Dashboard</a>
+                </div>
+                <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="search-section">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="searchTerm">Search by Name or Location</label>
+                    <input type="text" id="searchTerm" placeholder="e.g., Istanbul, Cardiology">
+                </div>
+                <div class="form-group">
+                    <label for="specialization">Specialization</label>
+                    <select id="specialization">
+                        <option value="">All Specializations</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Dentistry">Dentistry</option>
+                        <option value="Hair Transplant">Hair Transplant</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Ophthalmology">Ophthalmology</option>
+                        <option value="Plastic Surgery">Plastic Surgery</option>
+                        <option value="General Medicine">General Medicine</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" placeholder="City or Region">
+                </div>
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option value="">All Languages</option>
+                        <option value="English">English</option>
+                        <option value="Turkish">Turkish</option>
+                        <option value="Arabic">Arabic</option>
+                        <option value="German">German</option>
+                        <option value="French">French</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1; display: flex; gap: 1rem; align-items: flex-end; margin-top: 0.5rem;">
+                    <button type="submit" class="search-btn" style="flex: 1; max-width: 200px;">
+                        <i class="fas fa-search"></i> Search Clinics
+                    </button>
+                    <button type="button" class="clear-btn" onclick="clearSearch()" style="flex: 1; max-width: 200px;">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-section">
+            <!-- Filters Sidebar -->
+            <div class="filters-sidebar">
+                <h3>Filters</h3>
+                
+                <div class="filter-group">
+                    <label>Rating</label>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="rating-4" value="4" onchange="applyFilters()">
+                        <label for="rating-4">4+ Stars</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="rating-3" value="3" onchange="applyFilters()">
+                        <label for="rating-3">3+ Stars</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Verification Badges</label>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="filter-certified" value="certified" onchange="applyFilters()">
+                        <label for="filter-certified">✓ Certified</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="filter-insured" value="insured" onchange="applyFilters()">
+                        <label for="filter-insured">🛡️ Insured</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="filter-experienced" value="experienced" onchange="applyFilters()">
+                        <label for="filter-experienced">⭐ Experienced</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="filter-verified" value="verified" onchange="applyFilters()">
+                        <label for="filter-verified">✓ Fully Verified</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Availability</label>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="available" onchange="applyFilters()">
+                        <label for="available">Available Now</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Clinics Grid -->
+            <div class="clinics-results">
+                <div class="results-header">
+                    <div class="results-count" id="resultsCount">Loading clinics...</div>
+                    <select class="sort-select" id="sortSelect" onchange="applySorting()">
+                        <option value="relevance">Sort by: Relevance</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="name">Name A-Z</option>
+                        <option value="reviews">Most Reviews</option>
+                    </select>
+                </div>
+                
+                <div id="clinicsGrid" class="clinics-grid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading clinics...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    <!-- Verification Badges -->
+    <script src="verification-badges.js"></script>
+    <script src="trust-score-calculator.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, orderBy, doc, getDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let allClinics = [];
+        let filteredClinics = [];
+        let currentSort = 'relevance';
+        let favoriteClinics = new Set();
+        let currentPatientEmail = null;
+
+        // Load all clinics from Firebase
+        async function loadClinics() {
+            try {
+                const clinicsRef = collection(db, 'providerRegistrations');
+                const approvedQuery = query(clinicsRef, where('status', '==', 'approved'));
+                const snapshot = await getDocs(approvedQuery);
+                
+                allClinics = [];
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.status === 'approved') {
+                        allClinics.push({
+                            id: doc.id,
+                            ...data,
+                            // Add mock rating/reviews for now
+                            rating: data.rating || Math.random() * 2 + 3, // 3-5 stars
+                            reviewCount: data.reviewCount || Math.floor(Math.random() * 50 + 5)
+                        });
+                    }
+                });
+                
+                filteredClinics = [...allClinics];
+                displayClinics(filteredClinics);
+                updateFavoriteButtons();
+            } catch (error) {
+                console.error('Error loading clinics:', error);
+                document.getElementById('clinicsGrid').innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Clinics</h3>
+                        <p>Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display clinics
+        function displayClinics(clinics) {
+            const grid = document.getElementById('clinicsGrid');
+            const count = document.getElementById('resultsCount');
+            
+            count.textContent = `${clinics.length} clinic${clinics.length !== 1 ? 's' : ''} found`;
+            
+            if (clinics.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No Clinics Found</h3>
+                        <p>Try adjusting your search criteria or filters.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Initialize verification badges system
+            const badgeSystem = new VerificationBadges();
+            
+            grid.innerHTML = clinics.map(clinic => {
+                const isFavorite = favoriteClinics.has(clinic.id);
+                // Calculate badges for this clinic
+                const badges = badgeSystem.calculateBadges(clinic);
+                const badgesHTML = badgeSystem.generateBadgesHTML(badges, 'small', 'horizontal');
+                
+                return `
+                <div class="clinic-card">
+                    <div class="clinic-header">
+                        <div>
+                            <div class="clinic-name">${clinic.clinicName || clinic.name || 'Clinic'}</div>
+                            <div class="clinic-specialization">${clinic.specialization || 'General Medicine'}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('${clinic.id}')" 
+                                    data-clinic-id="${clinic.id}"
+                                    style="
+                                        background: none;
+                                        border: none;
+                                        font-size: 1.5rem;
+                                        cursor: pointer;
+                                        color: ${isFavorite ? '#ef4444' : '#d1d5db'};
+                                        transition: color 0.3s;
+                                        padding: 5px;
+                                    ">
+                                <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+                            </button>
+                            <div class="clinic-rating">
+                            <div class="stars">
+                                ${'★'.repeat(Math.floor(clinic.rating || 0))}
+                                ${'☆'.repeat(5 - Math.floor(clinic.rating || 0))}
+                            </div>
+                            <span class="rating-number">${(clinic.rating || 0).toFixed(1)}</span>
+                            <span style="color: #9ca3af; margin-left: 5px;">(${clinic.reviewCount || 0})</span>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Verification Badges -->
+                    ${badges.length > 0 ? `
+                    <div style="margin: 10px 0; padding: 10px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                        ${badgesHTML}
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Trust Score -->
+                    ${(() => {
+                        try {
+                            const trustCalculator = new TrustScoreCalculator();
+                            const reviewData = {
+                                averageRating: clinic.rating || 0,
+                                reviewCount: clinic.reviewCount || 0
+                            };
+                            const trustScore = trustCalculator.calculateTrustScore(clinic, reviewData);
+                            
+                            return `
+                                <div style="margin: 10px 0; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid ${trustScore.color};">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="font-weight: 600; color: #1f2937;">Trust Score:</div>
+                                        <div style="font-size: 1.25rem; font-weight: 700; color: ${trustScore.color};">
+                                            ${trustScore.score.toFixed(1)}/10
+                                        </div>
+                                        <div style="font-size: 0.875rem; color: #6b7280;">${trustScore.level}</div>
+                                    </div>
+                                </div>
+                            `;
+                        } catch (e) {
+                            return '';
+                        }
+                    })()}
+                    
+                    <div class="clinic-info">
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${clinic.address || clinic.city || 'Location not specified'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <span>${clinic.phone || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-globe"></i>
+                            <span>${clinic.website || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-comments"></i>
+                            <span>${clinic.languagesSpoken ? clinic.languagesSpoken.join(', ') : 'N/A'}</span>
+                        </div>
+                    </div>
+                    
+                    ${clinic.bio ? `<div class="clinic-description">${clinic.bio.substring(0, 150)}${clinic.bio.length > 150 ? '...' : ''}</div>` : ''}
+                    
+                    <!-- Key Credentials Preview -->
+                    ${(() => {
+                        const hasCredentials = clinic.experienceYears || (clinic.certifications && clinic.certifications.length > 0);
+                        if (!hasCredentials) return '';
+                        
+                        let credentialsHTML = '<div style="margin: 10px 0; padding: 10px; background: #f9fafb; border-radius: 6px; font-size: 13px; color: #6b7280;">';
+                        credentialsHTML += '<div style="font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Key Credentials</div>';
+                        
+                        if (clinic.experienceYears) {
+                            const expStr = typeof clinic.experienceYears === 'string' ? clinic.experienceYears : String(clinic.experienceYears);
+                            credentialsHTML += `<div style="margin-bottom: 4px;"><i class="fas fa-clock" style="color: #f59e0b; margin-right: 6px;"></i><strong>Experience:</strong> ${expStr} years</div>`;
+                        }
+                        
+                        if (clinic.certifications && Array.isArray(clinic.certifications) && clinic.certifications.length > 0) {
+                            credentialsHTML += `<div><i class="fas fa-certificate" style="color: #10b981; margin-right: 6px;"></i><strong>Certifications:</strong> ${clinic.certifications.length} certification${clinic.certifications.length !== 1 ? 's' : ''}</div>`;
+                        }
+                        
+                        credentialsHTML += '</div>';
+                        return credentialsHTML;
+                    })()}
+                    
+                    <div class="clinic-footer">
+                        <a href="provider-directory.html?id=${clinic.id}" class="view-btn">
+                            <i class="fas fa-eye"></i> View Profile
+                        </a>
+                        <button class="book-btn" onclick="event.stopPropagation(); bookAppointment('${clinic.id}')">
+                            <i class="fas fa-calendar-check"></i> Book Appointment
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // Search functionality
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            performSearch();
+        });
+
+        function performSearch() {
+            const searchTerm = document.getElementById('searchTerm').value.toLowerCase();
+            const specialization = document.getElementById('specialization').value;
+            const location = document.getElementById('location').value.toLowerCase();
+            const language = document.getElementById('language').value;
+            
+            filteredClinics = allClinics.filter(clinic => {
+                const matchesSearch = !searchTerm || 
+                    (clinic.clinicName || clinic.name || '').toLowerCase().includes(searchTerm) ||
+                    (clinic.city || clinic.address || '').toLowerCase().includes(searchTerm) ||
+                    (clinic.specialization || '').toLowerCase().includes(searchTerm);
+                
+                const matchesSpecialization = !specialization || clinic.specialization === specialization;
+                
+                const matchesLocation = !location ||
+                    (clinic.city || '').toLowerCase().includes(location) ||
+                    (clinic.address || '').toLowerCase().includes(location);
+                
+                const matchesLanguage = !language ||
+                    (clinic.languagesSpoken && clinic.languagesSpoken.includes(language));
+                
+                return matchesSearch && matchesSpecialization && matchesLocation && matchesLanguage;
+            });
+            
+            applyFilters();
+        }
+
+        // Apply filters
+        window.applyFilters = function() {
+            let filtered = [...filteredClinics];
+            
+            const rating4 = document.getElementById('rating-4').checked;
+            const rating3 = document.getElementById('rating-3').checked;
+            const available = document.getElementById('available').checked;
+            
+            // Badge filters
+            const filterCertified = document.getElementById('filter-certified')?.checked || false;
+            const filterInsured = document.getElementById('filter-insured')?.checked || false;
+            const filterExperienced = document.getElementById('filter-experienced')?.checked || false;
+            const filterVerified = document.getElementById('filter-verified')?.checked || false;
+            
+            // Initialize badge system for filtering
+            const badgeSystem = new VerificationBadges();
+            
+            if (rating4) {
+                filtered = filtered.filter(c => (c.rating || 0) >= 4);
+            } else if (rating3) {
+                filtered = filtered.filter(c => (c.rating || 0) >= 3);
+            }
+            
+            // Apply badge filters
+            if (filterCertified || filterInsured || filterExperienced || filterVerified) {
+                filtered = filtered.filter(clinic => {
+                    const badges = badgeSystem.calculateBadges(clinic);
+                    
+                    if (filterCertified && !badges.includes('certified')) return false;
+                    if (filterInsured && !badges.includes('insured')) return false;
+                    if (filterExperienced && !badges.includes('experienced')) return false;
+                    if (filterVerified && !badges.includes('verified')) return false;
+                    
+                    return true;
+                });
+            }
+            
+            // Sort
+            applySorting(filtered);
+        };
+
+        // Apply sorting
+        window.applySorting = function(clinics = filteredClinics) {
+            const sortValue = document.getElementById('sortSelect').value;
+            
+            switch(sortValue) {
+                case 'rating':
+                    clinics.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                    break;
+                case 'name':
+                    clinics.sort((a, b) => (a.clinicName || a.name || '').localeCompare(b.clinicName || b.name || ''));
+                    break;
+                case 'reviews':
+                    clinics.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+                    break;
+                default:
+                    // Relevance - keep original order
+                    break;
+            }
+            
+            filteredClinics = clinics;
+            displayClinics(filteredClinics);
+        };
+
+        // Clear search
+        window.clearSearch = function() {
+            document.getElementById('searchForm').reset();
+            document.querySelectorAll('.filter-group input[type="checkbox"]').forEach(cb => cb.checked = false);
+            filteredClinics = [...allClinics];
+            applySorting();
+        };
+
+        // View clinic
+        window.viewClinic = function(clinicId) {
+            window.location.href = `provider-directory.html?id=${clinicId}`;
+        };
+
+        // Book appointment
+        window.bookAppointment = function(clinicId) {
+            window.location.href = `appointment-booking.html?clinic=${clinicId}`;
+        };
+
+        // Check authentication before allowing access
+        function checkPatientAuthentication() {
+            // Check if patient is authenticated using auth-utils
+            if (window.authUtils) {
+                const session = window.authUtils.getSession();
+                if (!session || !session.session || !session.session.uid) {
+                    // Not authenticated, redirect to patient auth page
+                    window.location.href = 'patient-auth.html';
+                    return false;
+                }
+                // Check if it's a patient session (not provider)
+                const sessionData = window.authUtils.getSessionData();
+                if (sessionData && sessionData.email) {
+                    // Check if this is a patient user (not provider)
+                    // For now, we'll allow if session exists - can refine later
+                    return true;
+                }
+            } else {
+                // Fallback: check localStorage/sessionStorage
+                const patientSession = localStorage.getItem('patientSession') || sessionStorage.getItem('patientSession');
+                const patientUser = localStorage.getItem('patientUser') || sessionStorage.getItem('patientUser');
+                if (!patientSession && !patientUser) {
+                    window.location.href = 'patient-auth.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Load patient favorites
+        async function loadFavorites() {
+            try {
+                if (!currentPatientEmail) return;
+                
+                const favoritesRef = doc(db, 'patientFavorites', currentPatientEmail);
+                const favoritesSnap = await getDoc(favoritesRef);
+                
+                if (favoritesSnap.exists()) {
+                    const favoritesData = favoritesSnap.data();
+                    favoriteClinics = new Set(favoritesData.clinicIds || []);
+                }
+                
+                updateFavoriteButtons();
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+            }
+        }
+
+        // Toggle favorite
+        async function toggleFavorite(clinicId) {
+            if (!currentPatientEmail) {
+                alert('Please log in to save favorites');
+                return;
+            }
+
+            try {
+                const favoritesRef = doc(db, 'patientFavorites', currentPatientEmail);
+                
+                if (favoriteClinics.has(clinicId)) {
+                    // Remove from favorites
+                    favoriteClinics.delete(clinicId);
+                    const favoritesData = {
+                        patientEmail: currentPatientEmail,
+                        clinicIds: Array.from(favoriteClinics),
+                        updatedAt: new Date().toISOString()
+                    };
+                    await setDoc(favoritesRef, favoritesData);
+                } else {
+                    // Add to favorites
+                    favoriteClinics.add(clinicId);
+                    const favoritesData = {
+                        patientEmail: currentPatientEmail,
+                        clinicIds: Array.from(favoriteClinics),
+                        updatedAt: new Date().toISOString()
+                    };
+                    await setDoc(favoritesRef, favoritesData);
+                }
+                
+                updateFavoriteButtons();
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                alert('Error saving favorite. Please try again.');
+            }
+        }
+
+        // Update favorite button states
+        function updateFavoriteButtons() {
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const clinicId = btn.dataset.clinicId;
+                const icon = btn.querySelector('i');
+                
+                if (favoriteClinics.has(clinicId)) {
+                    icon.className = 'fas fa-heart';
+                    btn.style.color = '#ef4444';
+                } else {
+                    icon.className = 'far fa-heart';
+                    btn.style.color = '#d1d5db';
+                }
+            });
+        }
+
+        // Make functions globally accessible
+        window.toggleFavorite = toggleFavorite;
+
+        // Initialize - check authentication first
+        if (checkPatientAuthentication()) {
+            // Get patient email from session
+            if (window.authUtils) {
+                const session = window.authUtils.getSession();
+                if (session && session.registrationData) {
+                    currentPatientEmail = session.registrationData.email;
+                } else if (session && session.sessionData) {
+                    currentPatientEmail = session.sessionData.email;
+                }
+            }
+            loadFavorites();
+            loadClinics();
+        }
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Utils Test Suite - CareLuva</title>
+    <link rel="stylesheet" href="../src/css/base/reset.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #1e40af;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6b7280;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .test-results {
+            margin-top: 20px;
+        }
+        
+        .test-result {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: start;
+            gap: 15px;
+        }
+        
+        .test-result.pass {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+        
+        .test-result.fail {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .test-result.running {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .test-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .test-content {
+            flex: 1;
+        }
+        
+        .test-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #1f2937;
+        }
+        
+        .test-message {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .test-details {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #374151;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .summary {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card.total {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        
+        .stat-card.passed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .stat-card.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Auth Utils Test Suite</h1>
+            <p>Comprehensive testing for authentication utilities including password hashing and session management</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>Password Hashing Tests</h2>
+            <div class="test-controls">
+                <button class="btn btn-primary" onclick="runPasswordTests()">Run Password Tests</button>
+                <button class="btn btn-secondary" onclick="clearResults('password-results')">Clear Results</button>
+            </div>
+            <div id="password-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Session Management Tests</h2>
+            <div class="test-controls">
+                <button class="btn btn-primary" onclick="runSessionTests()">Run Session Tests</button>
+                <button class="btn btn-secondary" onclick="clearResults('session-results')">Clear Results</button>
+            </div>
+            <div id="session-results" class="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Integration Tests</h2>
+            <div class="test-controls">
+                <button class="btn btn-primary" onclick="runIntegrationTests()">Run Integration Tests</button>
+                <button class="btn btn-success" onclick="runAllTests()">Run All Tests</button>
+                <button class="btn btn-secondary" onclick="clearAllResults()">Clear All Results</button>
+            </div>
+            <div id="integration-results" class="test-results"></div>
+        </div>
+        
+        <div class="summary">
+            <h2>Test Summary</h2>
+            <div class="summary-stats">
+                <div class="stat-card total">
+                    <div class="stat-number" id="total-tests">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-card passed">
+                    <div class="stat-number" id="passed-tests">0</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-card failed">
+                    <div class="stat-number" id="failed-tests">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load auth-utils.js -->
+    <script src="../auth-utils.js"></script>
+    
+    <!-- Test Runner -->
+    <script src="test-runner.js"></script>
+    
+    <!-- Auth Utils Tests -->
+    <script src="test-auth-functions.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Recommendations - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .preferences-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .preferences-section h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        
+        .preferences-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="range"] {
+            padding: 0;
+        }
+        
+        .range-display {
+            font-weight: 600;
+            color: #3b82f6;
+            font-size: 1.125rem;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .recommendations-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .recommendation-card {
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .match-score {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .match-score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .match-score-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .clinic-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .clinic-specialization {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .reasons-list {
+            background: #eff6ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .reasons-list h4 {
+            font-size: 0.875rem;
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .reason-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .reason-item i {
+            color: #10b981;
+        }
+        
+        .breakdown-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .breakdown-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .breakdown-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .breakdown-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .clinic-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .ml-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-magic"></i> Personalized Recommendations</h1>
+            <a href="find-clinics.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Search</a>
+        </div>
+        
+        <!-- Preference Form -->
+        <div class="preferences-section">
+            <h2><i class="fas fa-sliders-h"></i> Tell us what you're looking for</h2>
+            <form id="preferencesForm" class="preferences-form">
+                <div class="form-group">
+                    <label for="serviceSelect">What service do you need? *</label>
+                    <select id="serviceSelect" required>
+                        <option value="">Select service...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="preferredDate">Preferred appointment date</label>
+                    <input type="date" id="preferredDate" min="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="preferredTime">Preferred time</label>
+                    <select id="preferredTime">
+                        <option value="">Any time</option>
+                        <option value="09:00">Morning (9:00 AM - 12:00 PM)</option>
+                        <option value="13:00">Afternoon (1:00 PM - 5:00 PM)</option>
+                        <option value="17:00">Evening (5:00 PM - 8:00 PM)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="patientLocation">Your location (city)</label>
+                    <input type="text" id="patientLocation" placeholder="e.g., Istanbul">
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialization">Specialization</label>
+                    <select id="specialization">
+                        <option value="">Any specialization</option>
+                        <option value="Dentistry">Dentistry</option>
+                        <option value="Hair Transplant">Hair Transplant</option>
+                        <option value="Cosmetic Surgery">Cosmetic Surgery</option>
+                        <option value="General Medicine">General Medicine</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxBudget">Maximum budget ($)</label>
+                    <input type="number" id="maxBudget" min="0" step="0.01" placeholder="e.g., 5000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="preferredBudget">Preferred budget ($)</label>
+                    <input type="number" id="preferredBudget" min="0" step="0.01" placeholder="e.g., 3000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="minTrustScore">Minimum Trust Score: <span class="range-display" id="minTrustScoreDisplay">6.0</span></label>
+                    <input type="range" id="minTrustScore" min="0" max="10" step="0.5" value="6">
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <button type="submit" class="btn btn-primary" id="getRecommendationsBtn">
+                        <i class="fas fa-search"></i> Get Personalized Recommendations
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Recommendations Display -->
+        <div id="recommendationsSection" class="recommendations-section" style="display: none;">
+            <h2 style="margin-bottom: 20px; color: #1f2937;">
+                <i class="fas fa-star"></i> Recommended Clinics for You
+            </h2>
+            <div id="recommendationsList"></div>
+        </div>
+        
+        <div id="loadingState" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyzing clinics and finding the best matches for you...</p>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    <script src="clinic-recommendations.js"></script>
+    <script src="trust-score-calculator.js"></script>
+    <script src="verification-badges.js"></script>
+    <script src="service-catalog.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        let currentPatientId = null;
+        const recommendationEngine = new ClinicRecommendationEngine();
+
+        // Check authentication
+        if (!window.authUtils || !window.authUtils.getSession()) {
+            alert('Please log in to get personalized recommendations.');
+            window.location.href = 'patient-auth.html';
+        } else {
+            const session = window.authUtils.getSession();
+            if (session && session.registrationData) {
+                currentPatientId = session.registrationData.email;
+            }
+        }
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('preferredDate').min = today;
+
+        // Update Trust Score display
+        document.getElementById('minTrustScore').addEventListener('input', (e) => {
+            document.getElementById('minTrustScoreDisplay').textContent = parseFloat(e.target.value).toFixed(1);
+        });
+
+        // Load services
+        async function loadServices() {
+            const serviceSelect = document.getElementById('serviceSelect');
+            serviceSelect.innerHTML = '<option value="">Select service...</option>';
+            
+            if (window.getAllCategories && window.getServicesForCategory) {
+                const categories = window.getAllCategories();
+                const categoryNames = {
+                    'dentistry': 'Dentistry',
+                    'hair-transplant': 'Hair Transplant',
+                    'cosmetic-surgery': 'Cosmetic Surgery',
+                    'general-medicine': 'General Medicine'
+                };
+                
+                categories.forEach(cat => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = categoryNames[cat] || cat;
+                    
+                    const services = window.getServicesForCategory(cat);
+                    services.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.id;
+                        option.textContent = service.name;
+                        option.dataset.category = cat;
+                        optgroup.appendChild(option);
+                    });
+                    
+                    serviceSelect.appendChild(optgroup);
+                });
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('preferencesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await generateRecommendations();
+        });
+
+        // Generate recommendations
+        async function generateRecommendations() {
+            const loadingState = document.getElementById('loadingState');
+            const recommendationsSection = document.getElementById('recommendationsSection');
+            const recommendationsList = document.getElementById('recommendationsList');
+            const submitBtn = document.getElementById('getRecommendationsBtn');
+            
+            loadingState.style.display = 'block';
+            recommendationsSection.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            try {
+                // Collect preferences
+                const preferences = {
+                    serviceId: document.getElementById('serviceSelect').value,
+                    preferredDate: document.getElementById('preferredDate').value,
+                    preferredTime: document.getElementById('preferredTime').value,
+                    location: document.getElementById('patientLocation').value,
+                    specialization: document.getElementById('specialization').value,
+                    maxBudget: parseFloat(document.getElementById('maxBudget').value) || null,
+                    preferredBudget: parseFloat(document.getElementById('preferredBudget').value) || null,
+                    minTrustScore: parseFloat(document.getElementById('minTrustScore').value)
+                };
+                
+                if (!preferences.serviceId) {
+                    alert('Please select a service.');
+                    loadingState.style.display = 'none';
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // Load all approved clinics
+                const clinicsRef = collection(db, 'providerRegistrations');
+                const approvedQuery = query(clinicsRef, where('status', '==', 'approved'));
+                const snapshot = await getDocs(approvedQuery);
+                
+                const clinics = [];
+                const trustCalculator = new TrustScoreCalculator();
+                
+                for (const docSnap of snapshot.docs) {
+                    const clinicData = docSnap.data();
+                    
+                    // Calculate Trust Score for each clinic
+                    const reviewData = {
+                        averageRating: clinicData.averageRating || 0,
+                        reviewCount: clinicData.reviewCount || 0
+                    };
+                    
+                    const pricingData = await recommendationEngine.loadClinicPricing(docSnap.id);
+                    const appointmentData = {
+                        averageResponseTime: clinicData.averageResponseTime || null
+                    };
+                    
+                    const trustScore = trustCalculator.calculateTrustScore(
+                        clinicData,
+                        reviewData,
+                        pricingData,
+                        appointmentData
+                    );
+                    
+                    clinics.push({
+                        id: docSnap.id,
+                        ...clinicData,
+                        trustScore: trustScore.score
+                    });
+                }
+                
+                // Get recommendations
+                const context = {
+                    serviceId: preferences.serviceId,
+                    preferredDate: preferences.preferredDate,
+                    preferredTime: preferences.preferredTime
+                };
+                
+                const recommendations = await recommendationEngine.getRecommendations(
+                    preferences,
+                    clinics,
+                    context,
+                    currentPatientId
+                );
+                
+                // Display recommendations
+                displayRecommendations(recommendations);
+                
+                loadingState.style.display = 'none';
+                recommendationsSection.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error generating recommendations:', error);
+                loadingState.style.display = 'none';
+                recommendationsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <h3>Error Loading Recommendations</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                recommendationsSection.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Display recommendations
+        function displayRecommendations(recommendations) {
+            const container = document.getElementById('recommendationsList');
+            
+            if (recommendations.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
+                        <i class="fas fa-search" style="font-size: 4rem; margin-bottom: 20px; color: #d1d5db;"></i>
+                        <h3>No Recommendations Found</h3>
+                        <p>Try adjusting your preferences to find more clinics.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const badgeSystem = new VerificationBadges();
+            
+            container.innerHTML = recommendations.map((rec, index) => {
+                const clinic = rec.clinic;
+                const badges = badgeSystem.calculateBadges(clinic);
+                const badgesHTML = badgeSystem.generateBadgesHTML(badges, 'small', 'horizontal');
+                
+                return `
+                    <div class="recommendation-card" onclick="viewClinic('${clinic.id}')">
+                        <div class="recommendation-header">
+                            <div style="flex: 1;">
+                                <div class="clinic-name">
+                                    ${clinic.clinicName || clinic.name || 'Clinic'}
+                                    ${index === 0 ? '<span class="ml-badge">TOP MATCH</span>' : ''}
+                                    ${rec.mlAdjustedScore ? '<span class="ml-badge">AI ENHANCED</span>' : ''}
+                                </div>
+                                <div class="clinic-specialization">${clinic.specialization || 'General Medicine'}</div>
+                            </div>
+                            <div class="match-score">
+                                <div class="match-score-value">${(rec.score * 100).toFixed(0)}%</div>
+                                <div class="match-score-label">Match</div>
+                            </div>
+                        </div>
+                        
+                        ${badges.length > 0 ? `
+                            <div style="margin: 15px 0;">
+                                ${badgesHTML}
+                            </div>
+                        ` : ''}
+                        
+                        ${rec.reasons.length > 0 ? `
+                            <div class="reasons-list">
+                                <h4><i class="fas fa-check-circle"></i> Why we recommend this clinic:</h4>
+                                ${rec.reasons.map(reason => `
+                                    <div class="reason-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>${reason}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="breakdown-section">
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Trust Score</div>
+                                <div class="breakdown-value">${(rec.breakdown.trustScore * 100).toFixed(0)}%</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Price Match</div>
+                                <div class="breakdown-value">${(rec.breakdown.price * 100).toFixed(0)}%</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Availability</div>
+                                <div class="breakdown-value">${(rec.breakdown.availability * 100).toFixed(0)}%</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Location</div>
+                                <div class="breakdown-value">${(rec.breakdown.location * 100).toFixed(0)}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="clinic-actions">
+                            <a href="provider-directory.html?id=${clinic.id}" 
+                               class="btn btn-secondary" 
+                               onclick="event.stopPropagation(); trackOutcome('${clinic.id}', ${rec.score}, 'viewed')">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </a>
+                            <a href="appointment-booking.html?clinic=${clinic.id}" 
+                               class="btn btn-success" 
+                               onclick="event.stopPropagation(); trackOutcome('${clinic.id}', ${rec.score}, 'booked')">
+                                <i class="fas fa-calendar-check"></i> Book Appointment
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Track recommendation outcome (Phase 4)
+        window.trackOutcome = function(clinicId, score, outcome) {
+            if (currentPatientId) {
+                recommendationEngine.recordOutcome(currentPatientId, clinicId, score, outcome);
+            }
+        };
+
+        window.viewClinic = function(clinicId) {
+            trackOutcome(clinicId, 0, 'viewed');
+            window.location.href = `provider-directory.html?id=${clinicId}`;
+        };
+
+        // Initialize
+        await window.initializeServiceCatalog();
+        loadServices();
+    </script>
+</body>
+</html>
+

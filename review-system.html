@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave a Review - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Review Form */
+        .review-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .clinic-info {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #1e40af;
+        }
+        
+        .clinic-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .clinic-specialization {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e40af;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        /* Rating Stars */
+        .rating-section {
+            margin-bottom: 30px;
+        }
+        
+        .rating-label {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #374151;
+            font-size: 16px;
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .star {
+            font-size: 2.5rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+        }
+        
+        .rating-text {
+            margin-left: 15px;
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 18px;
+        }
+        
+        .rating-text.excellent {
+            color: #10b981;
+        }
+        
+        .rating-text.very-good {
+            color: #34d399;
+        }
+        
+        .rating-text.good {
+            color: #fbbf24;
+        }
+        
+        .rating-text.fair {
+            color: #f59e0b;
+        }
+        
+        .rating-text.poor {
+            color: #ef4444;
+        }
+        
+        /* Rating Categories */
+        .rating-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .rating-category {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .rating-category label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .category-stars {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .category-star {
+            font-size: 1.25rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .category-star:hover,
+        .category-star.active {
+            color: #fbbf24;
+        }
+        
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 30px;
+        }
+        
+        .submit-btn:hover {
+            background: #059669;
+        }
+        
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        /* Success Message */
+        .success-message {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            color: #065f46;
+        }
+        
+        .success-message i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #10b981;
+        }
+        
+        .success-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-star"></i> Leave a Review</h1>
+            <a href="provider-directory.html" id="backLink" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+        
+        <!-- Review Form -->
+        <div class="review-form">
+            <form id="reviewForm">
+                <!-- Clinic Info -->
+                <div class="clinic-info" id="clinicInfo">
+                    <div class="clinic-name">Loading clinic information...</div>
+                    <div class="clinic-specialization">-</div>
+                </div>
+                
+                <!-- Overall Rating -->
+                <div class="rating-section">
+                    <div class="rating-label">Overall Rating *</div>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-rating="1">☆</span>
+                        <span class="star" data-rating="2">☆</span>
+                        <span class="star" data-rating="3">☆</span>
+                        <span class="star" data-rating="4">☆</span>
+                        <span class="star" data-rating="5">☆</span>
+                        <span class="rating-text" id="ratingText">Select a rating</span>
+                    </div>
+                </div>
+                
+                <!-- Rating Categories -->
+                <div class="form-section">
+                    <h2>Rate Different Aspects</h2>
+                    <div class="rating-categories">
+                        <div class="rating-category">
+                            <label>Service Quality</label>
+                            <div class="category-stars" data-category="service">
+                                <span class="category-star" data-rating="1">☆</span>
+                                <span class="category-star" data-rating="2">☆</span>
+                                <span class="category-star" data-rating="3">☆</span>
+                                <span class="category-star" data-rating="4">☆</span>
+                                <span class="category-star" data-rating="5">☆</span>
+                            </div>
+                        </div>
+                        <div class="rating-category">
+                            <label>Cleanliness</label>
+                            <div class="category-stars" data-category="cleanliness">
+                                <span class="category-star" data-rating="1">☆</span>
+                                <span class="category-star" data-rating="2">☆</span>
+                                <span class="category-star" data-rating="3">☆</span>
+                                <span class="category-star" data-rating="4">☆</span>
+                                <span class="category-star" data-rating="5">☆</span>
+                            </div>
+                        </div>
+                        <div class="rating-category">
+                            <label>Staff Friendliness</label>
+                            <div class="category-stars" data-category="staff">
+                                <span class="category-star" data-rating="1">☆</span>
+                                <span class="category-star" data-rating="2">☆</span>
+                                <span class="category-star" data-rating="3">☆</span>
+                                <span class="category-star" data-rating="4">☆</span>
+                                <span class="category-star" data-rating="5">☆</span>
+                            </div>
+                        </div>
+                        <div class="rating-category">
+                            <label>Value for Money</label>
+                            <div class="category-stars" data-category="value">
+                                <span class="category-star" data-rating="1">☆</span>
+                                <span class="category-star" data-rating="2">☆</span>
+                                <span class="category-star" data-rating="3">☆</span>
+                                <span class="category-star" data-rating="4">☆</span>
+                                <span class="category-star" data-rating="5">☆</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Review Form -->
+                <div class="form-section">
+                    <h2>Your Review</h2>
+                    <div class="form-group">
+                        <label for="reviewerName">Your Name *</label>
+                        <input type="text" id="reviewerName" required placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewTitle">Review Title</label>
+                        <input type="text" id="reviewTitle" placeholder="e.g., Great experience, Highly recommend">
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewText">Your Review *</label>
+                        <textarea id="reviewText" required placeholder="Share your experience with this clinic..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-check"></i> Submit Review
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbSxm6yDqa25lxOuynlZV7icrcb_Os27A",
+            authDomain: "careluva-5635e.firebaseapp.com",
+            projectId: "careluva-5635e",
+            storageBucket: "careluva-5635e.firebasestorage.app",
+            messagingSenderId: "819482287777",
+            appId: "1:819482287777:web:7587b10272cacc0e655ae0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get clinic ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const clinicId = urlParams.get('clinic') || urlParams.get('id');
+        
+        let clinicData = null;
+        let overallRating = 0;
+        let categoryRatings = {
+            service: 0,
+            cleanliness: 0,
+            staff: 0,
+            value: 0
+        };
+
+        // Load clinic information
+        async function loadClinicInfo() {
+            if (!clinicId) {
+                document.getElementById('clinicInfo').innerHTML = `
+                    <div class="error-message">
+                        <p>Clinic not specified.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const clinicRef = doc(db, 'providerRegistrations', clinicId);
+                const clinicSnap = await getDoc(clinicRef);
+
+                if (!clinicSnap.exists()) {
+                    document.getElementById('clinicInfo').innerHTML = `
+                        <div class="error-message">
+                            <p>Clinic not found.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                clinicData = clinicSnap.data();
+                document.getElementById('clinicInfo').innerHTML = `
+                    <div class="clinic-name">${clinicData.clinicName || clinicData.name || 'Clinic'}</div>
+                    <div class="clinic-specialization">${clinicData.specialization || 'General Medicine'}</div>
+                `;
+            } catch (error) {
+                console.error('Error loading clinic info:', error);
+            }
+        }
+
+        // Setup star rating
+        document.querySelectorAll('#starRating .star').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                overallRating = rating;
+                
+                // Update stars
+                document.querySelectorAll('#starRating .star').forEach((s, index) => {
+                    if (index < rating) {
+                        s.textContent = '★';
+                        s.classList.add('active');
+                    } else {
+                        s.textContent = '☆';
+                        s.classList.remove('active');
+                    }
+                });
+                
+                // Update rating text
+                const ratingText = document.getElementById('ratingText');
+                const texts = {
+                    1: 'Poor',
+                    2: 'Fair',
+                    3: 'Good',
+                    4: 'Very Good',
+                    5: 'Excellent'
+                };
+                ratingText.textContent = texts[rating];
+                ratingText.className = 'rating-text ' + texts[rating].toLowerCase().replace(' ', '-');
+            });
+            
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                document.querySelectorAll('#starRating .star').forEach((s, index) => {
+                    if (index < rating) {
+                        s.style.color = '#fbbf24';
+                    } else {
+                        s.style.color = '#d1d5db';
+                    }
+                });
+            });
+        });
+
+        // Reset stars on mouse leave
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            document.querySelectorAll('#starRating .star').forEach((s, index) => {
+                if (index < overallRating) {
+                    s.style.color = '#fbbf24';
+                } else {
+                    s.style.color = '#d1d5db';
+                }
+            });
+        });
+
+        // Setup category star ratings
+        document.querySelectorAll('.category-stars').forEach(category => {
+            const categoryName = category.dataset.category;
+            category.querySelectorAll('.category-star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    categoryRatings[categoryName] = rating;
+                    
+                    // Update stars
+                    category.querySelectorAll('.category-star').forEach((s, index) => {
+                        if (index < rating) {
+                            s.textContent = '★';
+                            s.classList.add('active');
+                        } else {
+                            s.textContent = '☆';
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!overallRating) {
+                alert('Please select an overall rating.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                const reviewData = {
+                    clinicId: clinicId,
+                    clinicName: clinicData.clinicName || clinicData.name,
+                    specialization: clinicData.specialization,
+                    overallRating: overallRating,
+                    categoryRatings: categoryRatings,
+                    reviewerName: document.getElementById('reviewerName').value,
+                    reviewTitle: document.getElementById('reviewTitle').value || '',
+                    reviewText: document.getElementById('reviewText').value,
+                    status: 'approved', // In production, you'd have admin approval
+                    createdAt: new Date().toISOString(),
+                    verified: false
+                };
+
+                const reviewsRef = collection(db, 'reviews');
+                await addDoc(reviewsRef, reviewData);
+
+                // Show success message
+                document.getElementById('reviewForm').innerHTML = `
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Thank You!</h3>
+                        <p>Your review has been submitted successfully. It will be visible on the clinic's profile shortly.</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                alert('Error submitting review. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Submit Review';
+            }
+        });
+
+        // Update back link
+        if (clinicId) {
+            document.getElementById('backLink').href = `provider-directory.html?id=${clinicId}`;
+        }
+
+        // Initialize
+        loadClinicInfo();
+    </script>
+</body>
+</html>
+
+
+

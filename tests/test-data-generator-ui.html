@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Data Generator - CareLuva</title>
+    <link rel="stylesheet" href="../src/css/base/reset.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #1e40af;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6b7280;
+        }
+        
+        .warning-banner {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #92400e;
+        }
+        
+        .generator-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .generator-section h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .output-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .output-section h3 {
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .output-code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            padding: 15px;
+            background: #eff6ff;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Test Data Generator</h1>
+            <p>Generate test data for CareLuva entities (Provider Registrations, Patients, Appointments, Reviews)</p>
+        </div>
+        
+        <div class="warning-banner">
+            <strong>⚠️ Warning:</strong> This tool generates test data. Use responsibly and only in test/development environments.
+        </div>
+        
+        <div class="generator-section">
+            <h2>Provider Registration Generator</h2>
+            <div class="form-group">
+                <label for="provider-count">Number of Registrations:</label>
+                <input type="number" id="provider-count" value="5" min="1" max="100">
+            </div>
+            <div class="form-group">
+                <label for="provider-status">Default Status:</label>
+                <select id="provider-status">
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="generateProviderRegistrations()">Generate Provider Registrations</button>
+            <button class="btn btn-success" onclick="saveToFirestore('providerRegistrations')">Save to Firestore</button>
+            <div id="provider-output" class="output-section" style="display: none;">
+                <h3>Generated Data:</h3>
+                <div id="provider-data" class="output-code"></div>
+                <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('provider-data')">Copy JSON</button>
+            </div>
+        </div>
+        
+        <div class="generator-section">
+            <h2>Patient Registration Generator</h2>
+            <div class="form-group">
+                <label for="patient-count">Number of Patients:</label>
+                <input type="number" id="patient-count" value="10" min="1" max="100">
+            </div>
+            <button class="btn btn-primary" onclick="generatePatientRegistrations()">Generate Patient Registrations</button>
+            <button class="btn btn-success" onclick="saveToFirestore('patientUsers')">Save to Firestore</button>
+            <div id="patient-output" class="output-section" style="display: none;">
+                <h3>Generated Data:</h3>
+                <div id="patient-data" class="output-code"></div>
+                <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('patient-data')">Copy JSON</button>
+            </div>
+        </div>
+        
+        <div class="generator-section">
+            <h2>Appointment Generator</h2>
+            <div style="background: #d1fae5; border: 2px solid #10b981; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #065f46;">
+                <strong>✅ Updated:</strong> Appointments can now be saved directly to the appointments collection!
+                <br><br>
+                <strong>How it works:</strong> The Firestore rules now support Firestore-only auth with <code>clinicId</code> + <code>patientEmail</code>.
+                <br><br>
+                <strong>Requirements:</strong> Generated appointments must have:
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li><code>clinicId</code> (string, non-empty)</li>
+                    <li><code>patientEmail</code> (string, non-empty)</li>
+                </ul>
+                <br>
+                <strong>Note:</strong> The test data generator automatically includes these fields, so "Save to Firestore" should work directly.
+            </div>
+            <div class="form-group">
+                <label for="appointment-count">Number of Appointments:</label>
+                <input type="number" id="appointment-count" value="20" min="1" max="100">
+            </div>
+            <div class="form-group">
+                <label for="appointment-provider-id">Provider ID (optional):</label>
+                <input type="text" id="appointment-provider-id" placeholder="Leave empty for random">
+            </div>
+            <div class="form-group">
+                <label for="appointment-patient-id">Patient ID (optional):</label>
+                <input type="text" id="appointment-patient-id" placeholder="Leave empty for random">
+            </div>
+            <button class="btn btn-primary" onclick="generateAppointments()">Generate Appointments</button>
+            <button class="btn btn-success" onclick="saveToFirestore('appointments')">Save to Firestore</button>
+            <button class="btn btn-secondary" onclick="saveToTestCollection()">Save to Test Collection</button>
+            <div id="appointment-output" class="output-section" style="display: none;">
+                <h3>Generated Data:</h3>
+                <div id="appointment-data" class="output-code"></div>
+                <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('appointment-data')">Copy JSON</button>
+            </div>
+        </div>
+        
+        <div class="generator-section">
+            <h2>Review Generator</h2>
+            <div class="form-group">
+                <label for="review-count">Number of Reviews:</label>
+                <input type="number" id="review-count" value="15" min="1" max="100">
+            </div>
+            <div class="form-group">
+                <label for="review-clinic-id">Clinic ID (optional):</label>
+                <input type="text" id="review-clinic-id" placeholder="Leave empty to use real clinic IDs or random">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="use-real-clinic-ids" checked> Use real clinic IDs from Firestore
+                </label>
+            </div>
+            <button class="btn btn-primary" onclick="generateReviews()">Generate Reviews</button>
+            <button class="btn btn-success" onclick="saveToFirestore('reviews')">Save to Firestore</button>
+            <div id="review-output" class="output-section" style="display: none;">
+                <h3>Generated Data:</h3>
+                <div id="review-data" class="output-code"></div>
+                <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('review-data')">Copy JSON</button>
+            </div>
+        </div>
+        
+        <div class="generator-section">
+            <h2>Statistics</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-generated">0</div>
+                    <div class="stat-label">Total Generated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="providers-generated">0</div>
+                    <div class="stat-label">Providers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="patients-generated">0</div>
+                    <div class="stat-label">Patients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="appointments-generated">0</div>
+                    <div class="stat-label">Appointments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="reviews-generated">0</div>
+                    <div class="stat-label">Reviews</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load test data generator -->
+    <script src="test-data-generators.js"></script>
+    
+    <!-- Generator UI Script -->
+    <script>
+        let generatedData = {
+            providers: [],
+            patients: [],
+            appointments: [],
+            reviews: []
+        };
+        
+        function generateProviderRegistrations() {
+            const count = parseInt(document.getElementById('provider-count').value);
+            const status = document.getElementById('provider-status').value;
+            
+            generatedData.providers = window.TestDataGenerator.generateProviderRegistrations(count, { status });
+            
+            document.getElementById('provider-data').textContent = JSON.stringify(generatedData.providers, null, 2);
+            document.getElementById('provider-output').style.display = 'block';
+            
+            updateStats();
+        }
+        
+        function generatePatientRegistrations() {
+            try {
+                if (!window.TestDataGenerator) {
+                    alert('TestDataGenerator not loaded! Please refresh the page.');
+                    console.error('TestDataGenerator not found');
+                    return;
+                }
+                
+                const count = parseInt(document.getElementById('patient-count').value);
+                
+                if (isNaN(count) || count < 1) {
+                    alert('Please enter a valid number (1-100)');
+                    return;
+                }
+                
+                generatedData.patients = [];
+                for (let i = 0; i < count; i++) {
+                    generatedData.patients.push(window.TestDataGenerator.generatePatientRegistration());
+                }
+                
+                document.getElementById('patient-data').textContent = JSON.stringify(generatedData.patients, null, 2);
+                document.getElementById('patient-output').style.display = 'block';
+                
+                updateStats();
+                console.log(`Generated ${count} patient registrations`);
+            } catch (error) {
+                alert('Error generating patient registrations: ' + error.message);
+                console.error('Error in generatePatientRegistrations:', error);
+            }
+        }
+        
+        function generateAppointments() {
+            try {
+                if (!window.TestDataGenerator) {
+                    alert('TestDataGenerator not loaded! Please refresh the page.');
+                    console.error('TestDataGenerator not found');
+                    return;
+                }
+                
+                const count = parseInt(document.getElementById('appointment-count').value);
+                
+                if (isNaN(count) || count < 1) {
+                    alert('Please enter a valid number (1-100)');
+                    return;
+                }
+                
+                const providerId = document.getElementById('appointment-provider-id').value.trim();
+                const patientId = document.getElementById('appointment-patient-id').value.trim();
+                
+                const overrides = {};
+                if (providerId) overrides.providerId = providerId;
+                if (patientId) overrides.patientId = patientId;
+                
+                generatedData.appointments = window.TestDataGenerator.generateAppointments(count, overrides);
+                
+                document.getElementById('appointment-data').textContent = JSON.stringify(generatedData.appointments, null, 2);
+                document.getElementById('appointment-output').style.display = 'block';
+                
+                updateStats();
+                console.log(`Generated ${count} appointments`);
+            } catch (error) {
+                alert('Error generating appointments: ' + error.message);
+                console.error('Error in generateAppointments:', error);
+            }
+        }
+        
+        async function generateReviews() {
+            try {
+                if (!window.TestDataGenerator) {
+                    alert('TestDataGenerator not loaded! Please refresh the page.');
+                    console.error('TestDataGenerator not found');
+                    return;
+                }
+                
+                const count = parseInt(document.getElementById('review-count').value);
+                
+                if (isNaN(count) || count < 1) {
+                    alert('Please enter a valid number (1-100)');
+                    return;
+                }
+                
+                const clinicId = document.getElementById('review-clinic-id').value.trim();
+                const useRealIds = document.getElementById('use-real-clinic-ids').checked;
+                
+                const overrides = {};
+                if (clinicId) {
+                    overrides.clinicId = clinicId;
+                }
+                
+                let availableClinicIds = null;
+                if (useRealIds && !clinicId && window.firebase && window.firebase.db) {
+                    // Fetch real clinic IDs from Firestore
+                    console.log('Fetching real clinic IDs from Firestore...');
+                    availableClinicIds = await window.TestDataGenerator.fetchRealClinicIds(window.firebase.db, 100);
+                    if (availableClinicIds.length === 0) {
+                        console.warn('⚠️ No clinic IDs found in Firestore. Will use random IDs (may not exist).');
+                    }
+                }
+                
+                generatedData.reviews = window.TestDataGenerator.generateReviews(count, overrides, availableClinicIds);
+                
+                document.getElementById('review-data').textContent = JSON.stringify(generatedData.reviews, null, 2);
+                document.getElementById('review-output').style.display = 'block';
+                
+                updateStats();
+                console.log(`Generated ${count} reviews`);
+            } catch (error) {
+                alert('Error generating reviews: ' + error.message);
+                console.error('Error in generateReviews:', error);
+            }
+        }
+        
+        async function saveToFirestore(collection) {
+            if (!window.firebase || !window.firebase.db) {
+                alert('Firebase not initialized. Please initialize Firebase first.');
+                return;
+            }
+            
+            let dataToSave = [];
+            let collectionName = collection;
+            let requiresAuth = false;
+            let canUseTestCollection = false;
+            
+            switch (collection) {
+                case 'providerRegistrations':
+                    dataToSave = generatedData.providers;
+                    break;
+                case 'patientUsers':
+                    dataToSave = generatedData.patients;
+                    break;
+                case 'appointments':
+                    dataToSave = generatedData.appointments;
+                    requiresAuth = false; // Appointments now work with Firestore-only auth (clinicId + patientEmail)
+                    canUseTestCollection = true; // Can still save to test collection if needed
+                    break;
+                case 'reviews':
+                    dataToSave = generatedData.reviews;
+                    break;
+                default:
+                    alert('Unknown collection');
+                    return;
+            }
+            
+            if (dataToSave.length === 0) {
+                alert('No data generated. Please generate data first.');
+                return;
+            }
+            
+            // Validate appointments have required fields
+            if (collection === 'appointments') {
+                // Check if appointments have required fields for Firestore-only auth
+                const invalidAppointments = dataToSave.filter(apt => 
+                    !apt.clinicId || apt.clinicId.trim() === '' || 
+                    !apt.patientEmail || apt.patientEmail.trim() === ''
+                );
+                
+                if (invalidAppointments.length > 0) {
+                    alert(
+                        `⚠️ Error: ${invalidAppointments.length} appointment(s) are missing required fields.\n\n` +
+                        `Required: clinicId (non-empty string) and patientEmail (non-empty string)\n\n` +
+                        `Would you like to save to 'test' collection instead?`
+                    );
+                    const useTest = confirm('Save to test collection?');
+                    if (useTest) {
+                        collectionName = 'test';
+                        dataToSave = dataToSave.map(item => ({
+                            ...item,
+                            _test: true,
+                            _originalCollection: 'appointments',
+                            _testType: 'appointment'
+                        }));
+                    } else {
+                        return; // User cancelled
+                    }
+                }
+            }
+            
+            // Check Firebase Auth for collections that require it (if any)
+            if (requiresAuth) {
+                let hasFirebaseAuth = false;
+                try {
+                    const { getAuth } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                    const auth = getAuth(window.firebase.app);
+                    hasFirebaseAuth = auth.currentUser !== null;
+                } catch (e) {
+                    // Auth not available
+                }
+                
+                if (!hasFirebaseAuth) {
+                    const choice = confirm(
+                        `⚠️ WARNING: ${collectionName} requires Firebase Auth to create.\n\n` +
+                        `You are not authenticated with Firebase Auth.\n\n` +
+                        `Options:\n` +
+                        `OK = Save to 'test' collection instead (for testing structure)\n` +
+                        `Cancel = Cancel operation`
+                    );
+                    
+                    if (choice) {
+                        collectionName = 'test';
+                        dataToSave = dataToSave.map(item => ({
+                            ...item,
+                            _test: true,
+                            _originalCollection: collection,
+                            _testType: collection
+                        }));
+                    } else {
+                        return;
+                    }
+                }
+            }
+            
+            if (!confirm(`Save ${dataToSave.length} documents to ${collectionName}?`)) {
+                return;
+            }
+            
+            try {
+                const { collection: getCollection, addDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                let savedCount = 0;
+                let errorCount = 0;
+                const errors = [];
+                
+                for (let i = 0; i < dataToSave.length; i++) {
+                    const data = dataToSave[i];
+                    try {
+                        await addDoc(getCollection(window.firebase.db, collectionName), data);
+                        savedCount++;
+                    } catch (error) {
+                        console.error(`Error saving document ${i + 1}:`, error);
+                        errors.push(`Document ${i + 1}: ${error.code || 'unknown'} - ${error.message}`);
+                        errorCount++;
+                    }
+                }
+                
+                let message = `Saved ${savedCount} documents to ${collectionName}`;
+                if (collectionName === 'test') {
+                    message += `\n\n💡 Note: Saved to 'test' collection (for testing purposes)`;
+                }
+                if (errorCount > 0) {
+                    message += `\n\n${errorCount} errors occurred`;
+                    if (errors.length > 0 && errors.length <= 5) {
+                        message += `:\n${errors.join('\n')}`;
+                    } else if (errors.length > 5) {
+                        message += `:\n${errors.slice(0, 5).join('\n')}\n... and ${errors.length - 5} more`;
+                    }
+                }
+                alert(message);
+            } catch (error) {
+                alert('Error saving to Firestore: ' + error.message + '\n\nCode: ' + (error.code || 'unknown'));
+            }
+        }
+        
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+        
+        async function saveToTestCollection() {
+            if (generatedData.appointments.length === 0) {
+                alert('No appointments generated. Please generate appointments first.');
+                return;
+            }
+            
+            if (!confirm(`Save ${generatedData.appointments.length} appointments to 'test' collection?\n\nThis allows testing without Firebase Auth.`)) {
+                return;
+            }
+            
+            if (!window.firebase || !window.firebase.db) {
+                alert('Firebase not initialized. Please initialize Firebase first.');
+                return;
+            }
+            
+            try {
+                const { collection: getCollection, addDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                let savedCount = 0;
+                let errorCount = 0;
+                
+                for (const appointment of generatedData.appointments) {
+                    try {
+                        await addDoc(getCollection(window.firebase.db, 'test'), {
+                            ...appointment,
+                            _test: true,
+                            _originalCollection: 'appointments',
+                            _testType: 'appointment',
+                            _savedAt: new Date().toISOString()
+                        });
+                        savedCount++;
+                    } catch (error) {
+                        console.error('Error saving appointment:', error);
+                        errorCount++;
+                    }
+                }
+                
+                alert(`Saved ${savedCount} appointments to 'test' collection${errorCount > 0 ? `, ${errorCount} errors` : ''}\n\nNote: These are in the test collection, not the real appointments collection.`);
+            } catch (error) {
+                alert('Error saving to test collection: ' + error.message);
+            }
+        }
+        
+        function updateStats() {
+            const total = generatedData.providers.length + generatedData.patients.length + 
+                         generatedData.appointments.length + generatedData.reviews.length;
+            
+            document.getElementById('total-generated').textContent = total;
+            document.getElementById('providers-generated').textContent = generatedData.providers.length;
+            document.getElementById('patients-generated').textContent = generatedData.patients.length;
+            document.getElementById('appointments-generated').textContent = generatedData.appointments.length;
+            document.getElementById('reviews-generated').textContent = generatedData.reviews.length;
+        }
+        
+        // Initialize Firebase if available
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check if TestDataGenerator is loaded
+            if (!window.TestDataGenerator) {
+                console.error('TestDataGenerator not loaded! Check if test-data-generators.js is loaded correctly.');
+                alert('Error: TestDataGenerator not loaded. Please refresh the page.');
+            } else {
+                console.log('TestDataGenerator loaded successfully');
+            }
+            
+            if (window.firebaseReady) {
+                console.log('Firebase ready for test data generation');
+            } else {
+                console.log('Firebase not initialized yet (will auto-initialize if needed)');
+            }
+        });
+    </script>
+    
+    <!-- Firebase Configuration (if needed) -->
+    <script type="module">
+        // Try to initialize Firebase if not already initialized
+        if (!window.firebase || !window.firebase.db) {
+            try {
+                import('../firebase-config.js').then(firebaseConfig => {
+                    import('https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js').then(({ initializeApp }) => {
+                        import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js').then(({ getFirestore }) => {
+                            const app = initializeApp(firebaseConfig.default);
+                            const db = getFirestore(app);
+                            window.firebase = { app, db };
+                            window.firebaseReady = true;
+                            console.log('Firebase initialized for test data generation');
+                        });
+                    });
+                });
+            } catch (error) {
+                console.warn('Firebase initialization failed:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+

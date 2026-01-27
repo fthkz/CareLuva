@@ -110,11 +110,17 @@
             border: 1px solid #e5e7eb !important;
             text-align: center !important;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-            transition: transform 0.3s ease !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transform: none !important;
         }
         
         .features .feature-card:hover {
-            transform: translateY(-5px) !important;
+            transform: scale(1.02) !important;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15) !important;
+        }
+        
+        .features .features-grid .feature-card:hover {
+            transform: scale(1.02) !important;
         }
         
         .features .feature-icon {
@@ -848,11 +854,21 @@
             border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            line-height: 1.4;
+            min-width: 120px;
+            text-align: center;
         }
 
         .btn-primary:hover {
             background: #2563eb;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37, 100, 235, 0.3);
         }
 
         .btn-secondary {
@@ -863,11 +879,24 @@
             border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            font-size: 14px;
+            line-height: 1.4;
+            min-width: 120px;
+            text-align: center;
         }
 
         .btn-secondary:hover {
-            background: #4b5563;
+            background: #111827 !important;
+            color: white !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(17, 24, 39, 0.4);
+        }
+        
+        /* Force override for navigation button */
+        .nav-cta .btn-secondary:hover {
+            background: #111827 !important;
+            color: white !important;
         }
 
         .checkbox-label {
@@ -922,6 +951,8 @@
     </style>
 </head>
 <body>
+        <!-- Authentication Utilities -->
+        <script src="auth-utils.js"></script>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -936,8 +967,8 @@
                 <li><a href="#contact">Contact</a></li>
             </ul>
             <div class="nav-cta">
-                <button class="btn-secondary">Find Clinics</button>
-                <a href="provider-auth.html" class="btn-primary" style="text-decoration: none; display: inline-block;">For Providers</a>
+                <a href="patient-auth.html" class="btn-secondary" style="background: #6b7280; color: white; text-decoration: none; display: inline-block;" onmouseover="this.style.background='#111827'; this.style.color='white';" onmouseout="this.style.background='#6b7280'; this.style.color='white';">Find Clinics</a>
+                <a href="provider-auth.html" class="btn-primary">For Providers</a>
             </div>
             <div class="hamburger">
                 <span></span>
@@ -1005,7 +1036,7 @@
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-shield-check"></i>
+                        <i class="fas fa-shield-halved"></i>
                     </div>
                     <h3>Verified Providers</h3>
                     <p>Only licensed clinics with certifications, malpractice insurance, and proven experience make it to our platform.</p>
@@ -1217,7 +1248,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer id="contact" class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
@@ -1236,7 +1267,7 @@
                 <div class="footer-section">
                     <h4>For Patients</h4>
                     <ul>
-                        <li><a href="#">Find Clinics</a></li>
+                        <li><a href="patient-auth.html">Find Clinics</a></li>
                         <li><a href="#">Browse Procedures</a></li>
                         <li><a href="#">Patient Stories</a></li>
                         <li><a href="#">Support</a></li>
@@ -1986,72 +2017,77 @@
                             console.log('Attempting provider login...');
                             
                             // Check if Firebase is available
-                            if (window.firebase && window.firebase.auth && window.firebaseReady) {
-                                // Use Firebase Authentication
-                                const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                            if (window.firebase && window.firebase.db && window.firebaseReady) {
+                                // Use Firestore-based authentication (providers are stored in Firestore, not Firebase Auth)
+                                const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                                 
-                                const userCredential = await signInWithEmailAndPassword(window.firebase.auth, email, password);
-                                const user = userCredential.user;
+                                // Find provider registration by email
+                                const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
+                                const emailQuery = query(registrationsRef, where('email', '==', email));
+                                const snapshot = await getDocs(emailQuery);
                                 
-                                console.log('Firebase login successful:', user.uid);
+                                if (snapshot.empty) {
+                                    throw new Error('No account found with this email address. Please check your email or complete registration.');
+                                }
                                 
-                                // Store login session
-                                if (rememberMe) {
-                                    localStorage.setItem('providerSession', JSON.stringify({
-                                        uid: user.uid,
-                                        email: user.email,
-                                        loginTime: new Date().toISOString()
-                                    }));
+                                // Get the registration document
+                                const registrationDoc = snapshot.docs[0];
+                                const registrationData = registrationDoc.data();
+                                
+                // Verify password (supports both hashed and plain text for migration)
+                if (!registrationData.password) {
+                                    throw new Error('Incorrect password. Please try again.');
+                                }
+                                
+                                // Use authUtils to verify password (handles both hashed and plain text)
+                                let passwordValid = false;
+                                if (window.authUtils) {
+                                    passwordValid = await window.authUtils.verifyPassword(password, registrationData.password);
+                            } else {
+                                    // Fallback: direct comparison (for legacy plain text passwords)
+                                    passwordValid = registrationData.password === password;
+                                }
+                                
+                                if (!passwordValid) {
+                                    throw new Error('Incorrect password. Please try again.');
+                                }
+                                
+                                // Check registration status
+                                if (registrationData.status === 'rejected') {
+                                    throw new Error('Your registration has been rejected. Please contact support.');
+                                }
+                                
+                                console.log('Firestore login successful:', registrationDoc.id);
+                                
+                                // Use improved session management
+                                if (window.authUtils) {
+                                    const session = window.authUtils.createSession(
+                                        registrationDoc.id,
+                                        registrationData.email,
+                                        registrationData,
+                                        rememberMe
+                                    );
+                                    window.authUtils.saveSession(session, registrationData, rememberMe);
                                 } else {
-                                    sessionStorage.setItem('providerSession', JSON.stringify({
-                                        uid: user.uid,
-                                        email: user.email,
-                                        loginTime: new Date().toISOString()
-                                    }));
+                                    // Fallback: basic session storage
+                                const sessionData = {
+                                        uid: registrationDoc.id,
+                                        email: registrationData.email,
+                                    loginTime: new Date().toISOString()
+                                };
+                                    const storage = rememberMe ? localStorage : sessionStorage;
+                                    storage.setItem('providerSession', JSON.stringify(sessionData));
+                                    // Don't store password in session
+                                    const safeData = { ...registrationData };
+                                    delete safeData.password;
+                                    storage.setItem('providerRegistration', JSON.stringify(safeData));
                                 }
                                 
                                 // Redirect to provider dashboard
                                 window.location.href = 'provider-dashboard.html';
                                 
                             } else {
-                                // Fallback: Check against registered providers
-                                console.log('Firebase not available, checking against registered providers...');
-                                
-                                const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
-                                
-                                const q = query(collection(window.firebase.db, 'providerRegistrations'), where('email', '==', email));
-                                const querySnapshot = await getDocs(q);
-                                
-                                if (querySnapshot.empty) {
-                                    throw new Error('No registration found with this email address');
-                                }
-                                
-                                const registration = querySnapshot.docs[0].data();
-                                
-                                // Simple password check (in production, use proper authentication)
-                                if (registration.password !== password) {
-                                    throw new Error('Invalid password');
-                                }
-                                
-                                // Store session
-                                const sessionData = {
-                                    registrationId: querySnapshot.docs[0].id,
-                                    email: email,
-                                    clinicName: registration.clinicName,
-                                    status: registration.status,
-                                    loginTime: new Date().toISOString()
-                                };
-                                
-                                if (rememberMe) {
-                                    localStorage.setItem('providerSession', JSON.stringify(sessionData));
-                                } else {
-                                    sessionStorage.setItem('providerSession', JSON.stringify(sessionData));
-                                }
-                                
-                                console.log('Provider login successful');
-                                
-                                // Redirect to provider dashboard
-                                window.location.href = 'provider-dashboard.html';
+                                throw new Error('Firebase is not available. Please ensure Firebase is properly configured and try again.');
                             }
                             
                         } catch (error) {

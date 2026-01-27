@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Records - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .info-banner {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .info-banner p {
+            color: #1e40af;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+        
+        .records-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .appointment-record {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .appointment-record:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .record-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .record-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .record-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .record-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .detail-value {
+            font-size: 0.875rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.25rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .filter-tab {
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .filter-tab:hover {
+            color: #3b82f6;
+        }
+        
+        .filter-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">CareLuva</div>
+        <a href="patient-account.html" class="back-btn">Back to Account</a>
+    </div>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Medical Records</h1>
+            <p>View your appointment history and treatment records</p>
+        </div>
+        
+        <div class="info-banner">
+            <p><strong>Note:</strong> This page displays your appointment history only. Detailed medical records are maintained by your healthcare providers. For complete medical records, please contact your clinic directly.</p>
+        </div>
+        
+        <div class="records-section">
+            <div class="section-title">Appointment History</div>
+            
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All</button>
+                <button class="filter-tab" data-filter="completed">Completed</button>
+                <button class="filter-tab" data-filter="pending">Pending</button>
+                <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+            </div>
+            
+            <div id="recordsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading records...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth-utils.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        let patientData = null;
+        let allAppointments = [];
+        let currentFilter = 'all';
+
+        // Check authentication
+        if (!window.authUtils || !window.authUtils.getSession()) {
+            alert('Please log in to view your medical records.');
+            window.location.href = 'patient-auth.html';
+        } else {
+            const session = window.authUtils.getSession();
+            if (session && session.registrationData) {
+                patientData = session.registrationData;
+                loadRecords();
+            } else {
+                alert('Unable to load patient data. Please log in again.');
+                window.location.href = 'patient-auth.html';
+            }
+        }
+
+        // Load records
+        async function loadRecords() {
+            if (!patientData || !patientData.email) {
+                document.getElementById('recordsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠</div>
+                        <h3>Unable to Load Records</h3>
+                        <p>Please log in again to view your medical records.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const appointmentsRef = collection(db, 'appointments');
+                const appointmentsQuery = query(
+                    appointmentsRef,
+                    where('patientEmail', '==', patientData.email),
+                    orderBy('createdAt', 'desc')
+                );
+
+                let snapshot;
+                try {
+                    snapshot = await getDocs(appointmentsQuery);
+                } catch (error) {
+                    console.warn('Index not ready, querying without orderBy:', error);
+                    const simpleQuery = query(
+                        appointmentsRef,
+                        where('patientEmail', '==', patientData.email)
+                    );
+                    snapshot = await getDocs(simpleQuery);
+                }
+
+                allAppointments = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    allAppointments.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+
+                // Sort manually if needed
+                allAppointments.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+                    return dateB - dateA;
+                });
+
+                displayRecords();
+            } catch (error) {
+                console.error('Error loading records:', error);
+                document.getElementById('recordsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠</div>
+                        <h3>Error Loading Records</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display records
+        function displayRecords() {
+            const container = document.getElementById('recordsList');
+            
+            let filtered = allAppointments;
+            if (currentFilter !== 'all') {
+                filtered = allAppointments.filter(apt => apt.status === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No Records Found</h3>
+                        <p>${currentFilter === 'all' ? 'You don\'t have any appointment records yet.' : `No ${currentFilter} appointments found.`}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(appointment => {
+                const appointmentDate = appointment.date ? new Date(appointment.date).toLocaleDateString() : 'N/A';
+                const appointmentTime = appointment.time || 'N/A';
+                const createdDate = appointment.createdAt ? (appointment.createdAt.toDate ? appointment.createdAt.toDate().toLocaleDateString() : new Date(appointment.createdAt).toLocaleDateString()) : 'N/A';
+
+                return `
+                    <div class="appointment-record">
+                        <div class="record-header">
+                            <div>
+                                <div class="record-title">${appointment.service || 'General Consultation'}</div>
+                                <div class="record-date">Appointment Date: ${appointmentDate} at ${appointmentTime}</div>
+                            </div>
+                            <div class="record-status status-${appointment.status}">${appointment.status}</div>
+                        </div>
+                        
+                        <div class="record-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Clinic</div>
+                                <div class="detail-value">${appointment.clinicName || 'N/A'}</div>
+                            </div>
+                            ${appointment.professionalName ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Professional</div>
+                                <div class="detail-value">${appointment.professionalName}</div>
+                            </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <div class="detail-label">Booked On</div>
+                                <div class="detail-value">${createdDate}</div>
+                            </div>
+                            ${appointment.reason ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Reason</div>
+                                <div class="detail-value">${appointment.reason}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                displayRecords();
+            });
+        });
+    </script>
+</body>
+</html>
+

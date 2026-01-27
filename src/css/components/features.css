@@ -16,13 +16,13 @@
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
-    transition: var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
 }
 
 .feature-icon {

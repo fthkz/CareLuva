@@ -27,14 +27,85 @@
         }
         .progress-bar {
             background: #e5e7eb;
-            height: 4px;
+            height: 8px;
             margin: 0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
         }
         .progress-fill {
-            background: #3b82f6;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
             height: 100%;
             width: 20%;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Step Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            gap: 1rem;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .step.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .step.active .step-number {
+            background: white;
+            color: #3b82f6;
+        }
+        .step.completed {
+            background: #10b981;
+            color: white;
+        }
+        .step.completed .step-number {
+            background: white;
+            color: #10b981;
+        }
+        .step.pending {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        .step.pending .step-number {
+            background: #d1d5db;
+            color: #6b7280;
         }
         .form-container {
             padding: 40px;
@@ -49,6 +120,43 @@
         .form-step.active {
             display: block !important;
             border-color: #3b82f6;
+        }
+        
+        /* Force visibility for all form elements */
+        .form-step.active,
+        .form-step.active *,
+        .form-step.active .form-group,
+        .form-step.active .form-grid,
+        .form-step.active input,
+        .form-step.active select,
+        .form-step.active textarea,
+        .form-step.active label,
+        .form-step.active h3 {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        
+        /* Specific rules for form elements */
+        .form-step.active input[type="text"],
+        .form-step.active input[type="email"],
+        .form-step.active input[type="password"],
+        .form-step.active select {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 40px !important;
+        }
+        
+        /* Force grid display */
+        .form-step.active .form-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 20px !important;
         }
         .form-grid {
             display: grid;
@@ -80,35 +188,242 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Real-time Validation Styles */
+        .form-group input.valid,
+        .form-group select.valid,
+        .form-group textarea.valid {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        
+        .form-group input.invalid,
+        .form-group select.invalid,
+        .form-group textarea.invalid {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        
+        .validation-message {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .validation-message.error {
+            color: #dc2626;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+        
+        .validation-message.success {
+            color: #059669;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .field-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+        }
+        
+        .field-icon.valid {
+            color: #10b981;
+        }
+        
+        .field-icon.invalid {
+            color: #ef4444;
+        }
+        
+        /* File Upload Styles */
+        .file-upload-container {
+            margin-top: 1rem;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text strong {
+            display: block;
+            font-size: 1.125rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-text p {
+            color: #6b7280;
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+        }
+        
+        .upload-hint {
+            color: #9ca3af !important;
+            font-size: 0.75rem !important;
+        }
+        
+        .uploaded-files {
+            margin-top: 1rem;
+        }
+        
+        .uploaded-file {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: #f3f4f6;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .file-icon {
+            color: #3b82f6;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .file-size {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .remove-file:hover {
+            background: #dc2626;
         }
         .full-width {
             grid-column: 1 / -1;
         }
         
         .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            gap: 20px !important;
             margin-top: 8px;
+            align-items: flex-start !important;
         }
         
         .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
             cursor: pointer;
             font-size: 14px;
             color: #374151;
+            line-height: 1.4;
+            padding: 8px 0;
+            flex-direction: row !important;
         }
         
         .checkbox-label input[type="checkbox"] {
             width: auto;
             margin: 0;
             cursor: pointer;
+            margin-top: 2px;
+            flex-shrink: 0;
         }
         
         .checkbox-label span {
+            flex: 1;
             user-select: none;
+        }
+        
+        /* Force checkbox alignment for all steps */
+        .form-step .checkbox-label {
+            display: flex !important;
+            align-items: center !important;
+            flex-direction: row !important;
+            gap: 10px !important;
+        }
+        
+        .form-step .checkbox-label input[type="checkbox"] {
+            margin: 0 !important;
+            margin-top: 0 !important;
+            flex-shrink: 0 !important;
+        }
+        
+        /* Special rules for terms checkbox to prevent wrapping */
+        #terms-accepted {
+            flex-shrink: 0 !important;
+            width: auto !important;
+        }
+        
+        #terms-accepted + span {
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            display: inline !important;
+            width: auto !important;
+        }
+        
+        #terms-accepted + span a {
+            white-space: nowrap !important;
+        }
+        
+        /* Force terms form group to be wide enough */
+        .form-group:has(#terms-accepted) {
+            width: 100% !important;
+            min-width: 600px !important;
+            overflow: visible !important;
+        }
+        
+        /* Prevent links from causing text wrapping */
+        #terms-accepted + span a {
+            display: inline !important;
+            white-space: nowrap !important;
+            text-decoration: none !important;
+        }
+        
+        #terms-accepted + span a:hover {
+            text-decoration: underline !important;
         }
         
         .error-message {
@@ -222,7 +537,44 @@
             <div class="progress-fill" id="progress-fill"></div>
         </div>
         
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <span>Basic Info</span>
+            </div>
+            <div class="step pending" data-step="2">
+                <div class="step-number">2</div>
+                <span>Contact</span>
+            </div>
+            <div class="step pending" data-step="3">
+                <div class="step-number">3</div>
+                <span>Professional</span>
+            </div>
+            <div class="step pending" data-step="4">
+                <div class="step-number">4</div>
+                <span>Location</span>
+            </div>
+            <div class="step pending" data-step="5">
+                <div class="step-number">5</div>
+                <span>Review</span>
+            </div>
+        </div>
+        
         <div class="form-container">
+            <!-- Debug Panel -->
+            <div style="background: #f0f9ff; border: 1px solid #3b82f6; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                <strong>Debug Panel:</strong>
+                <button onclick="debugFormVisibility()" style="margin-left: 10px; padding: 5px 10px; background: #3b82f6; color: white; border: none; border-radius: 3px; cursor: pointer;">Check Visibility</button>
+                <button onclick="forceShowFields()" style="margin-left: 5px; padding: 5px 10px; background: #10b981; color: white; border: none; border-radius: 3px; cursor: pointer;">Force Show Fields</button>
+                <button onclick="initializeForm()" style="margin-left: 5px; padding: 5px 10px; background: #f59e0b; color: white; border: none; border-radius: 3px; cursor: pointer;">Initialize Form</button>
+                <button onclick="clearForm()" style="margin-left: 5px; padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Clear Form</button>
+                <button onclick="testEmailCheck()" style="margin-left: 5px; padding: 5px 10px; background: #8b5cf6; color: white; border: none; border-radius: 3px; cursor: pointer;">Test Email Check</button>
+                <button onclick="forceCheckboxAlignment()" style="margin-left: 5px; padding: 5px 10px; background: #f59e0b; color: white; border: none; border-radius: 3px; cursor: pointer;">Fix Checkboxes</button>
+                <button onclick="debugCheckboxStyles()" style="margin-left: 5px; padding: 5px 10px; background: #10b981; color: white; border: none; border-radius: 3px; cursor: pointer;">Debug Styles</button>
+                <button onclick="clearGoogleIndicators()" style="margin-left: 5px; padding: 5px 10px; background: #dc2626; color: white; border: none; border-radius: 3px; cursor: pointer;">Clear Google</button>
+                <div id="debug-info" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
+            </div>
             
             <!-- Step 1: Basic Information -->
             <div class="form-step active" data-step="1">
@@ -281,37 +633,22 @@
                 </div>
             </div>
             
-            <!-- Step 2: Medical Credentials -->
+            <!-- Step 2: Clinic Credentials & Professionals -->
             <div class="form-step" data-step="2">
-                <h3>Step 2: Medical Credentials</h3>
-                <div class="form-group">
-                    <label for="medical-license">Medical License Number *</label>
-                    <input type="text" id="medical-license" placeholder="Enter your medical license number" required>
-                </div>
+                <h3>Step 2: Clinic Credentials & Professionals</h3>
                 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="specialization">Specialization *</label>
-                        <select id="specialization" required>
-                            <option value="">Select specialization</option>
-                            <option value="general-practice">General Practice</option>
-                            <option value="cardiology">Cardiology</option>
-                            <option value="dermatology">Dermatology</option>
-                            <option value="dentistry">Dentistry</option>
-                            <option value="orthopedics">Orthopedics</option>
-                            <option value="pediatrics">Pediatrics</option>
-                            <option value="gynecology">Gynecology</option>
-                            <option value="neurology">Neurology</option>
-                            <option value="oncology">Oncology</option>
-                            <option value="psychiatry">Psychiatry</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
+                <!-- Clinic-Level Credentials Section -->
+                <div style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                    <h4 style="color: #1e40af; margin-bottom: 15px; font-size: 18px;">
+                        <i class="fas fa-hospital" style="margin-right: 8px;"></i>Clinic/Hospital Credentials
+                    </h4>
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 20px;">These credentials apply to your clinic or hospital as an organization</p>
                     
+                    <!-- Clinic Experience -->
                     <div class="form-group">
-                        <label for="experience-years">Years of Experience *</label>
-                        <select id="experience-years" required>
-                            <option value="">Select experience</option>
+                        <label for="clinic-experience-years">Years Providing Health Services *</label>
+                        <select id="clinic-experience-years" required>
+                            <option value="">Select years</option>
                             <option value="0-2">0-2 years</option>
                             <option value="3-5">3-5 years</option>
                             <option value="6-10">6-10 years</option>
@@ -319,13 +656,213 @@
                             <option value="16-20">16-20 years</option>
                             <option value="20+">20+ years</option>
                         </select>
+                        <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">How long has your clinic/hospital been providing health services?</p>
                     </div>
+                    
+                    <!-- Clinic Certifications -->
+                    <div class="form-group">
+                        <label>Clinic/Hospital Certifications (Optional)</label>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Add certifications, accreditations, or awards received by your clinic/hospital</p>
+                        <div id="clinic-certifications-container">
+                            <div class="certification-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <input type="text" class="certification-name" placeholder="Certification name (e.g., JCI Accredited)" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <input type="text" class="certification-number" placeholder="Certification #" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <input type="date" class="certification-date" placeholder="Issue Date" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <button type="button" class="remove-certification" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; display: none;">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" id="add-clinic-certification" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem;">
+                            + Add Clinic Certification
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Professionals Section -->
+                <div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                    <h4 style="color: #065f46; margin-bottom: 15px; font-size: 18px;">
+                        <i class="fas fa-user-md" style="margin-right: 8px;"></i>Professionals Working at Your Clinic/Hospital
+                    </h4>
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 20px;">Add the doctors and healthcare professionals who work at your clinic/hospital. <strong>Note:</strong> Full professional credentials (education, medical licenses) will be added in Phase 2.</p>
+                    
+                    <div id="professionals-container">
+                        <div class="professional-item" style="background: white; border: 1px solid #d1d5db; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h5 style="color: #1f2937; font-size: 16px; margin: 0;">Professional #1</h5>
+                                <button type="button" class="remove-professional" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; display: none;">Remove</button>
+                            </div>
+                            
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Professional Name *</label>
+                                    <input type="text" class="professional-name" placeholder="Dr. John Doe" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Specialization *</label>
+                                    <select class="professional-specialization" required>
+                                        <option value="">Select specialization</option>
+                                        <option value="general-practice">General Practice</option>
+                                        <option value="cardiology">Cardiology</option>
+                                        <option value="dermatology">Dermatology</option>
+                                        <option value="dentistry">Dentistry</option>
+                                        <option value="orthopedics">Orthopedics</option>
+                                        <option value="pediatrics">Pediatrics</option>
+                                        <option value="gynecology">Gynecology</option>
+                                        <option value="neurology">Neurology</option>
+                                        <option value="oncology">Oncology</option>
+                                        <option value="psychiatry">Psychiatry</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Years of Experience *</label>
+                                    <select class="professional-experience" required>
+                                        <option value="">Select experience</option>
+                                        <option value="0-2">0-2 years</option>
+                                        <option value="3-5">3-5 years</option>
+                                        <option value="6-10">6-10 years</option>
+                                        <option value="11-15">11-15 years</option>
+                                        <option value="16-20">16-20 years</option>
+                                        <option value="20+">20+ years</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Medical License Number *</label>
+                                    <input type="text" class="professional-license" placeholder="Enter medical license number" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Professional Education History -->
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>Education History *</label>
+                                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Add educational background (degrees, universities, graduation years)</p>
+                                <div class="professional-education-container">
+                                    <div class="education-item" style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 0.5rem; margin-bottom: 0.75rem; align-items: end;">
+                                        <input type="text" class="education-degree" placeholder="Degree (e.g., M.D., D.D.S.)" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="text" class="education-institution" placeholder="Institution/University" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="number" class="education-year" placeholder="Year" min="1950" max="2030" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <button type="button" class="remove-education" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="add-professional-education" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem;">
+                                    + Add Education
+                                </button>
+                            </div>
+                            
+                            <!-- Professional Certifications -->
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>Professional Certifications *</label>
+                                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Add all relevant professional certifications</p>
+                                <div class="professional-certifications-container">
+                                    <div class="certification-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                        <input type="text" class="certification-name" placeholder="Certification name" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="text" class="certification-number" placeholder="Certification #" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="date" class="certification-date" placeholder="Issue Date" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <button type="button" class="remove-certification" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; display: none;">Remove</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="add-professional-certification" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem;">
+                                    + Add Certification
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="add-professional" style="background: #10b981; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500;">
+                        + Add Another Professional
+                    </button>
+                </div>
+                
+                <!-- Primary Specialization (for clinic) -->
+                <div class="form-group">
+                    <label for="specialization">Primary Specialization *</label>
+                    <select id="specialization" required>
+                        <option value="">Select primary specialization</option>
+                        <option value="general-practice">General Practice</option>
+                        <option value="cardiology">Cardiology</option>
+                        <option value="dermatology">Dermatology</option>
+                        <option value="dentistry">Dentistry</option>
+                        <option value="orthopedics">Orthopedics</option>
+                        <option value="pediatrics">Pediatrics</option>
+                        <option value="gynecology">Gynecology</option>
+                        <option value="neurology">Neurology</option>
+                        <option value="oncology">Oncology</option>
+                        <option value="psychiatry">Psychiatry</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Main area of focus for your clinic/hospital</p>
                 </div>
             </div>
             
-            <!-- Step 3: Verification -->
+            <!-- Step 3: Verification & Insurance -->
             <div class="form-step" data-step="3">
-                <h3>Step 3: Verification</h3>
+                <h3>Step 3: Verification & Insurance</h3>
+                
+                <!-- Malpractice Insurance Section -->
+                <div class="form-group">
+                    <label>Malpractice Insurance *</label>
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Malpractice insurance is required for all healthcare providers on CareLuva</p>
+                    
+                    <div class="form-grid" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label for="insurance-provider">Insurance Provider *</label>
+                            <input type="text" id="insurance-provider" placeholder="Insurance company name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="insurance-policy-number">Policy Number *</label>
+                            <input type="text" id="insurance-policy-number" placeholder="Policy number" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label for="insurance-start-date">Coverage Start Date *</label>
+                            <input type="date" id="insurance-start-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="insurance-end-date">Coverage End Date *</label>
+                            <input type="date" id="insurance-end-date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Insurance Certificate Document *</label>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Upload your malpractice insurance certificate</p>
+                        <div class="file-upload-container">
+                            <div class="file-upload-area" id="insurance-upload-area">
+                                <div class="upload-icon">📄</div>
+                                <div class="upload-text">
+                                    <strong>Upload Insurance Certificate</strong>
+                                    <p>PDF, JPG, PNG (Max 10MB)</p>
+                                    <p class="upload-hint">Drag & drop file here or click to browse</p>
+                                </div>
+                                <input type="file" id="insurance-document" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                            </div>
+                            <div class="uploaded-files" id="insurance-uploaded-files"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Business License (Optional) -->
+                <div class="form-group">
+                    <label>Business License (Optional)</label>
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">If applicable, upload your business license</p>
+                    <div class="file-upload-container">
+                        <div class="file-upload-area" id="business-license-upload-area">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">
+                                <strong>Upload Business License</strong>
+                                <p>PDF, JPG, PNG (Max 10MB)</p>
+                                <p class="upload-hint">Drag & drop file here or click to browse</p>
+                            </div>
+                            <input type="file" id="business-license-document" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                        </div>
+                        <div class="uploaded-files" id="business-license-uploaded-files"></div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label for="website">Website (Optional)</label>
                     <input type="url" id="website" placeholder="https://your-clinic.com">
@@ -333,37 +870,37 @@
                 
                 <div class="form-group">
                     <label>Languages Spoken *</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="Turkish">
+                    <div class="checkbox-group" style="display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 20px !important;">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="Turkish" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>Turkish</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="English">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="English" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>English</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="Arabic">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="Arabic" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>Arabic</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="German">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="German" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>German</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="French">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="French" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>French</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="Russian">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="Russian" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>Russian</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="Spanish">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="Spanish" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>Spanish</span>
                         </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="languages" value="Italian">
+                        <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                            <input type="checkbox" name="languages" value="Italian" style="margin: 0 !important; flex-shrink: 0 !important;">
                             <span>Italian</span>
                         </label>
                     </div>
@@ -405,15 +942,15 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="terms-accepted" required>
-                        <span>I accept the <a href="#" style="color: #3b82f6;">Terms of Service</a> and <a href="#" style="color: #3b82f6;">Privacy Policy</a> *</span>
+                    <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                        <input type="checkbox" id="terms-accepted" required style="margin: 0 !important; flex-shrink: 0 !important;">
+                        <span>I accept the <a href="#" style="color: #3b82f6; display: inline !important; white-space: nowrap !important;">Terms of Service</a> and <a href="#" style="color: #3b82f6; display: inline !important; white-space: nowrap !important;">Privacy Policy</a> *</span>
                     </label>
                 </div>
                 
                 <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="marketing-consent">
+                    <label class="checkbox-label" style="display: flex !important; align-items: center !important; flex-direction: row !important; gap: 10px !important;">
+                        <input type="checkbox" id="marketing-consent" style="margin: 0 !important; flex-shrink: 0 !important;">
                         <span>I would like to receive marketing communications</span>
                     </label>
                 </div>
@@ -425,6 +962,21 @@
                 <div id="review-content">
                     <p>Review your information here...</p>
                 </div>
+                
+                <!-- Terms & Conditions Acceptance -->
+                <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 8px; border: 2px solid #e5e7eb;">
+                    <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 15px;">
+                        <input type="checkbox" id="terms-accepted" required style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer;">
+                        <label for="terms-accepted" style="cursor: pointer; flex: 1; line-height: 1.6;">
+                            <strong style="color: #1f2937;">I have read and agree to the <a href="provider-terms-and-conditions.html" target="_blank" style="color: #3b82f6; text-decoration: underline;">Provider Terms & Conditions</a></strong>
+                            <span style="color: #ef4444;">*</span>
+                        </label>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-left: 32px; margin-top: 8px;">
+                        By checking this box, you acknowledge that you have read, understood, and agree to be bound by CareLuva's Terms & Conditions, including the requirement to conduct all patient communication through the CareLuva platform.
+                    </p>
+                    <div id="terms-error" style="display: none; color: #ef4444; font-size: 0.875rem; margin-top: 10px; margin-left: 32px;"></div>
+                </div>
             </div>
             
             <div class="buttons">
@@ -434,6 +986,9 @@
         </div>
     </div>
 
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    
     <!-- Firebase Configuration -->
     <script type="module">
         // Import Firebase configuration from external file
@@ -441,15 +996,37 @@
 
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, setDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        import { getAuth, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
         try {
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+            const auth = getAuth(app);
+            const storage = getStorage(app);
 
             // Make available globally
-            window.firebase = { app, db };
+            window.firebase = { 
+                app, 
+                db, 
+                auth,
+                storage,
+                // Make Firebase functions available globally
+                collection,
+                query,
+                where,
+                getDocs,
+                addDoc,
+                doc,
+                getDoc,
+                setDoc,
+                fetchSignInMethodsForEmail,
+                ref,
+                uploadBytes,
+                getDownloadURL
+            };
             window.firebaseReady = true;
 
             console.log('✅ Firebase initialized successfully!');
@@ -556,23 +1133,87 @@
                     updatedAt: new Date().toISOString(),
                     // Add Google user info if applicable
                     isGoogleUser: isGoogleUser,
-                    authProvider: isGoogleUser ? 'google' : 'email'
+                    authProvider: isGoogleUser ? 'google' : 'email',
+                    // Terms & Conditions acceptance
+                    termsAccepted: registrationData.termsAccepted || false,
+                    termsAcceptedAt: registrationData.termsAccepted ? new Date().toISOString() : null,
+                    termsVersion: '1.0'
                 };
                 
                 // Keep password for authentication (remove confirmPassword only)
                 delete firebaseData.confirmPassword;
                 
+                // Hash password before storing (security)
+                if (firebaseData.password && window.authUtils) {
+                    try {
+                        firebaseData.password = await window.authUtils.hashPassword(firebaseData.password);
+                        console.log('✅ Password hashed before storage');
+                    } catch (hashError) {
+                        console.error('Error hashing password:', hashError);
+                        throw new Error('Failed to secure password. Please try again.');
+                    }
+                }
+                
                 // Import Firebase functions
-                const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                const { collection, addDoc, doc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                // Create a temporary document ID for file uploads
+                const tempDocRef = doc(collection(window.firebase.db, 'providerRegistrations'));
+                const registrationId = tempDocRef.id;
+                
+                // Upload files to Firebase Storage before saving to Firestore
+                let uploadedFiles = null;
+                try {
+                    console.log('📤 Uploading files to Firebase Storage...');
+                    uploadedFiles = await uploadAllFiles(registrationId);
+                    console.log('✅ All files uploaded successfully');
+                    
+                    // Add file URLs to firebaseData
+                    firebaseData.documents = {
+                        license: uploadedFiles.license,
+                        insurance: uploadedFiles.insurance,
+                        businessLicense: uploadedFiles.businessLicense,
+                        medicalDocuments: uploadedFiles.medicalDocs
+                    };
+                } catch (uploadError) {
+                    console.warn('⚠️ File upload failed, continuing without files:', uploadError);
+                    // Continue with registration even if file upload fails
+                    firebaseData.documents = {
+                        uploadError: uploadError.message
+                    };
+                }
                 
                 // Save to Firestore
                 const docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), firebaseData);
                 
                 console.log('✅ Registration saved to Firebase with ID:', docRef.id);
                 
+                // Save Terms & Conditions acceptance separately
+                if (registrationData.termsAccepted) {
+                    try {
+                        const { collection: col, addDoc: add, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                        await add(col(window.firebase.db, 'termsAcceptance'), {
+                            userId: docRef.id,
+                            userType: 'provider',
+                            userEmail: registrationData.email,
+                            termsVersion: '1.0',
+                            acceptedAt: serverTimestamp(),
+                            ipAddress: null, // Can be added if needed
+                            userAgent: navigator.userAgent
+                        });
+                        console.log('✅ Terms acceptance recorded');
+                    } catch (termsError) {
+                        console.error('Error recording terms acceptance:', termsError);
+                        // Continue even if terms recording fails
+                    }
+                }
+                
                 // Store the document ID for later reference
                 localStorage.setItem('providerRegistrationId', docRef.id);
                 localStorage.setItem('providerRegistration', JSON.stringify(firebaseData));
+                
+                // Complete form analytics
+                completeFormAnalytics();
                 
                 // Show success message and navigate
                 alert('Registration completed successfully! Redirecting to your dashboard...');
@@ -636,19 +1277,86 @@
                             return false;
                         }
                     }
+                    
+                    // Validate email format
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(data.email)) {
+                        alert('Please enter a valid email address');
+                        return false;
+                    }
+                    
                     return true;
                     
                 case 2:
-                    const required2 = ['medicalLicense', 'specialization', 'experienceYears'];
-                    for (let field of required2) {
-                        if (!data[field]) {
-                            alert(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+                    // Validate clinic-level requirements
+                    if (!data.clinicExperienceYears) {
+                        alert('Please select years of experience for your clinic/hospital');
+                        return false;
+                    }
+                    
+                    if (!data.specialization) {
+                        alert('Please select primary specialization for your clinic/hospital');
+                        return false;
+                    }
+                    
+                    // Validate at least one professional
+                    if (!data.professionals || data.professionals.length === 0) {
+                        alert('Please add at least one professional working at your clinic/hospital');
+                        return false;
+                    }
+                    
+                    // Validate each professional has required fields
+                    for (let i = 0; i < data.professionals.length; i++) {
+                        const prof = data.professionals[i];
+                        if (!prof.name || !prof.specialization || !prof.experienceYears || !prof.medicalLicense) {
+                            alert(`Please complete all required fields for Professional #${i + 1} (name, specialization, experience, medical license)`);
+                            return false;
+                        }
+                        if (!prof.educationHistory || prof.educationHistory.length === 0) {
+                            alert(`Please add at least one education entry for Professional #${i + 1}`);
+                            return false;
+                        }
+                        if (!prof.certifications || prof.certifications.length === 0) {
+                            alert(`Please add at least one certification for Professional #${i + 1}`);
                             return false;
                         }
                     }
+                    
                     return true;
                     
                 case 3:
+                    // Validate insurance information
+                    const required3 = ['insuranceProvider', 'insurancePolicyNumber', 'insuranceStartDate', 'insuranceEndDate'];
+                    for (let field of required3) {
+                        if (!data[field]) {
+                            alert(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').replace('insurance', 'insurance ').toLowerCase()}`);
+                            return false;
+                        }
+                    }
+                    
+                    // Validate insurance dates
+                    if (data.insuranceStartDate && data.insuranceEndDate) {
+                        const startDate = new Date(data.insuranceStartDate);
+                        const endDate = new Date(data.insuranceEndDate);
+                        const today = new Date();
+                        
+                        if (endDate <= startDate) {
+                            alert('Insurance end date must be after start date');
+                            return false;
+                        }
+                        
+                        if (endDate < today) {
+                            alert('Insurance coverage has expired. Please provide current insurance.');
+                            return false;
+                        }
+                    }
+                    
+                    // Validate insurance document upload
+                    if (data.insuranceDocumentCount === 0) {
+                        alert('Please upload your malpractice insurance certificate');
+                        return false;
+                    }
+                    
                     if (data.languages.length === 0) {
                         alert('Please select at least one language');
                         return false;
@@ -658,8 +1366,15 @@
                 case 4:
                     // Skip password validation for Google users
                     if (isGoogleUser) {
-                        if (!data.termsAccepted) {
-                            alert('Please accept the Terms of Service');
+                        // Validate Terms & Conditions acceptance
+                        const termsCheckbox = document.getElementById('terms-accepted');
+                        if (!termsCheckbox || !termsCheckbox.checked) {
+                            const termsError = document.getElementById('terms-error');
+                            if (termsError) {
+                                termsError.textContent = 'You must accept the Terms & Conditions to proceed.';
+                                termsError.style.display = 'block';
+                            }
+                            termsCheckbox?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             return false;
                         }
                         return true;
@@ -702,18 +1417,231 @@
         }
         
         function showStep(step) {
+            console.log('🔄 Switching to step:', step);
+            
             // Hide all steps
             document.querySelectorAll('.form-step').forEach(stepEl => {
                 stepEl.classList.remove('active');
-                stepEl.style.display = 'none';
+                console.log('❌ Hiding step:', stepEl.dataset.step);
             });
             
-            // Show current step
-            const currentStepEl = document.querySelector(`[data-step="${step}"]`);
+            // Show current step - use .form-step selector
+            const currentStepEl = document.querySelector(`.form-step[data-step="${step}"]`);
             if (currentStepEl) {
                 currentStepEl.classList.add('active');
-                currentStepEl.style.display = 'block';
+                console.log('✅ Showing step:', step);
+                console.log('📋 Step element:', currentStepEl);
+                console.log('📋 Step classes:', currentStepEl.className);
+                console.log('📋 Step display:', window.getComputedStyle(currentStepEl).display);
+                
+                // Check form fields visibility
+                const formFields = currentStepEl.querySelectorAll('input, select, textarea');
+                console.log('📋 Form fields found:', formFields.length);
+                formFields.forEach((field, index) => {
+                    console.log(`📋 Field ${index + 1}:`, field.id, 'display:', window.getComputedStyle(field).display);
+                });
+                
+                // Force show form fields if they're not visible
+                if (formFields.length === 0) {
+                    console.log('⚠️ No form fields found, forcing visibility...');
+                    const allElements = currentStepEl.querySelectorAll('*');
+                    allElements.forEach(el => {
+                        el.style.display = 'block';
+                        el.style.visibility = 'visible';
+                        el.style.opacity = '1';
+                    });
+                }
+            } else {
+                console.error('❌ Step element not found:', step);
             }
+            
+            // Update step indicator
+            updateStepIndicator(step);
+            
+            // Update progress bar
+            updateProgressBar(step);
+            
+            // Auto-save current form data
+            autoSaveFormData();
+        }
+        
+        function updateStepIndicator(currentStep) {
+            document.querySelectorAll('.step').forEach((stepEl, index) => {
+                const stepNumber = index + 1;
+                stepEl.classList.remove('active', 'completed', 'pending');
+                
+                if (stepNumber < currentStep) {
+                    stepEl.classList.add('completed');
+                } else if (stepNumber === currentStep) {
+                    stepEl.classList.add('active');
+                } else {
+                    stepEl.classList.add('pending');
+                }
+            });
+        }
+        
+        function updateProgressBar(step) {
+            const progressFill = document.getElementById('progress-fill');
+            const percentage = (step / totalSteps) * 100;
+            progressFill.style.width = `${percentage}%`;
+        }
+        
+        function autoSaveFormData() {
+            try {
+                const formData = collectData();
+                formData.currentStep = currentStep;
+                formData.lastSaved = new Date().toISOString();
+                formData.autoSaved = true;
+                
+                localStorage.setItem('providerRegistrationDraft', JSON.stringify(formData));
+                console.log('📝 Form data auto-saved');
+            } catch (error) {
+                console.error('Error auto-saving form data:', error);
+            }
+        }
+        
+        // Real-time Validation Functions
+        function setupRealTimeValidation() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                // Skip confirm-password field as it has its own dedicated handler
+                if (input.id !== 'confirm-password') {
+                    input.addEventListener('input', () => validateField(input));
+                    input.addEventListener('blur', () => validateField(input));
+                }
+            });
+        }
+        
+        function validateField(field) {
+            const value = field.value.trim();
+            const fieldName = field.name || field.id;
+            const validationMessage = getOrCreateValidationMessage(field);
+            
+            // Clear previous validation
+            field.classList.remove('valid', 'invalid');
+            validationMessage.style.display = 'none';
+            
+            // Validate based on field type
+            let isValid = true;
+            let message = '';
+            
+            if (field.required && !value) {
+                isValid = false;
+                message = `${getFieldLabel(field)} is required`;
+            } else if (value) {
+                switch (fieldName) {
+                    case 'email':
+                        isValid = isValidEmail(value);
+                        // Don't show any message for email - let duplicate checking handle all messages
+                        message = '';
+                        break;
+                    case 'phone':
+                        isValid = isValidPhone(value);
+                        message = isValid ? 'Valid phone number' : 'Please enter a valid phone number';
+                        break;
+                    case 'password':
+                        const strength = checkPasswordStrength(value);
+                        isValid = strength.score >= 2;
+                        message = strength.message;
+                        break;
+                    case 'confirm-password':
+                        const password = document.getElementById('password').value;
+                        isValid = value === password;
+                        // Don't show message for confirm-password - let the dedicated handler manage it
+                        message = '';
+                        break;
+                    case 'website':
+                        if (value) {
+                            isValid = isValidUrl(value);
+                            message = isValid ? 'Valid website URL' : 'Please enter a valid website URL';
+                        }
+                        break;
+                }
+            }
+            
+            // Update field appearance
+            if (value) {
+                field.classList.add(isValid ? 'valid' : 'invalid');
+            }
+            
+            // Show validation message
+            if (message) {
+                validationMessage.textContent = message;
+                validationMessage.className = `validation-message ${isValid ? 'success' : 'error'}`;
+                validationMessage.style.display = 'block';
+            }
+            
+            return isValid;
+        }
+        
+        function getOrCreateValidationMessage(field) {
+            let messageEl = field.parentNode.querySelector('.validation-message');
+            if (!messageEl) {
+                messageEl = document.createElement('div');
+                messageEl.className = 'validation-message';
+                field.parentNode.appendChild(messageEl);
+            }
+            return messageEl;
+        }
+        
+        function getFieldLabel(field) {
+            const label = field.parentNode.querySelector('label');
+            return label ? label.textContent.replace('*', '').trim() : field.name || field.id;
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function isValidPhone(phone) {
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+        }
+        
+        function isValidUrl(url) {
+            try {
+                // If URL doesn't start with protocol, add https://
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                new URL(url);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+        
+        function checkPasswordStrength(password) {
+            let score = 0;
+            let message = '';
+            
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            
+            switch (score) {
+                case 0:
+                case 1:
+                    message = 'Very weak password';
+                    break;
+                case 2:
+                    message = 'Weak password';
+                    break;
+                case 3:
+                    message = 'Fair password';
+                    break;
+                case 4:
+                    message = 'Good password';
+                    break;
+                case 5:
+                    message = 'Strong password';
+                    break;
+            }
+            
+            return { score, message };
         }
         
         function updateButtons() {
@@ -734,6 +1662,16 @@
             const languageCheckboxes = document.querySelectorAll('input[name="languages"]:checked');
             const languages = Array.from(languageCheckboxes).map(cb => cb.value);
             
+            // Collect certifications
+            const clinicCertifications = getClinicCertifications();
+            const professionals = getProfessionals();
+            
+            // Collect file uploads (file names only for now - actual upload to storage will be handled separately)
+            const licenseFiles = document.getElementById('license-uploaded-files')?.querySelectorAll('.uploaded-file') || [];
+            const insuranceFiles = document.getElementById('insurance-uploaded-files')?.querySelectorAll('.uploaded-file') || [];
+            const businessLicenseFiles = document.getElementById('business-license-uploaded-files')?.querySelectorAll('.uploaded-file') || [];
+            const medicalDocsFiles = document.getElementById('medical-docs-uploaded-files')?.querySelectorAll('.uploaded-file') || [];
+            
             return {
                 providerType: document.getElementById('provider-type').value,
                 clinicName: document.getElementById('clinic-name').value,
@@ -743,9 +1681,22 @@
                 city: document.getElementById('city').value,
                 address: document.getElementById('address').value,
                 country: document.getElementById('country').value,
-                medicalLicense: document.getElementById('medical-license').value,
+                // Clinic-level credentials
+                clinicExperienceYears: document.getElementById('clinic-experience-years').value,
+                clinicCertifications: clinicCertifications,
                 specialization: document.getElementById('specialization').value,
-                experienceYears: document.getElementById('experience-years').value,
+                // Professionals
+                professionals: professionals,
+                // Insurance information
+                insuranceProvider: document.getElementById('insurance-provider')?.value || '',
+                insurancePolicyNumber: document.getElementById('insurance-policy-number')?.value || '',
+                insuranceStartDate: document.getElementById('insurance-start-date')?.value || '',
+                insuranceEndDate: document.getElementById('insurance-end-date')?.value || '',
+                // File uploads (counts for now)
+                licenseDocumentCount: licenseFiles.length,
+                insuranceDocumentCount: insuranceFiles.length,
+                businessLicenseDocumentCount: businessLicenseFiles.length,
+                medicalDocumentsCount: medicalDocsFiles.length,
                 website: document.getElementById('website').value,
                 languages: languages,
                 password: document.getElementById('password').value,
@@ -758,32 +1709,116 @@
         function populateReview() {
             const data = collectData();
             const review = document.getElementById('review-content');
+            
+            // Format clinic certifications
+            const clinicCertificationsHtml = data.clinicCertifications && data.clinicCertifications.length > 0
+                ? data.clinicCertifications.map(cert => 
+                    `<li>${cert.name}${cert.number ? ' (#' + cert.number + ')' : ''}${cert.issueDate ? ' - Issued: ' + new Date(cert.issueDate).toLocaleDateString() : ''}</li>`
+                ).join('')
+                : '<li>No clinic certifications added</li>';
+            
+            // Format professionals
+            const professionalsHtml = data.professionals && data.professionals.length > 0
+                ? data.professionals.map((prof, index) => {
+                    const educationHtml = prof.educationHistory && prof.educationHistory.length > 0
+                        ? prof.educationHistory.map(edu => 
+                            `<li>${edu.degree || 'Degree'}${edu.institution ? ' - ' + edu.institution : ''}${edu.year ? ' (' + edu.year + ')' : ''}</li>`
+                        ).join('')
+                        : '<li>No education added</li>';
+                    
+                    const certsHtml = prof.certifications && prof.certifications.length > 0
+                        ? prof.certifications.map(cert => 
+                            `<li>${cert.name}${cert.number ? ' (#' + cert.number + ')' : ''}${cert.issueDate ? ' - ' + new Date(cert.issueDate).toLocaleDateString() : ''}</li>`
+                        ).join('')
+                        : '<li>No certifications added</li>';
+                    
+                    return `
+                        <li style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border-left: 3px solid #10b981;">
+                            <strong style="font-size: 16px; color: #1f2937;">${prof.name}</strong><br>
+                            <div style="margin-top: 0.75rem; font-size: 14px;">
+                                <div><strong>Specialization:</strong> ${prof.specialization || 'Not provided'}</div>
+                                <div><strong>Experience:</strong> ${prof.experienceYears || 'Not provided'}</div>
+                                <div><strong>Medical License:</strong> ${prof.medicalLicense || 'Not provided'}</div>
+                                <div style="margin-top: 0.5rem;"><strong>Education:</strong></div>
+                                <ul style="margin: 0.25rem 0 0.5rem 1.5rem; padding: 0;">${educationHtml}</ul>
+                                <div><strong>Certifications:</strong></div>
+                                <ul style="margin: 0.25rem 0 0 1.5rem; padding: 0;">${certsHtml}</ul>
+                            </div>
+                        </li>
+                    `;
+                }).join('')
+                : '<li>No professionals added</li>';
+            
             review.innerHTML = `
-                <h4>Your Information:</h4>
-                <p><strong>Provider Type:</strong> ${data.providerType || 'Not provided'}</p>
-                <p><strong>Clinic Name:</strong> ${data.clinicName || 'Not provided'}</p>
-                <p><strong>Contact Person:</strong> ${data.contactPerson || 'Not provided'}</p>
-                <p><strong>Email:</strong> ${data.email || 'Not provided'}</p>
-                <p><strong>Phone:</strong> ${data.phone || 'Not provided'}</p>
-                <p><strong>City:</strong> ${data.city || 'Not provided'}</p>
-                <p><strong>Address:</strong> ${data.address || 'Not provided'}</p>
-                <p><strong>Country:</strong> ${data.country || 'Not provided'}</p>
-                <p><strong>Medical License:</strong> ${data.medicalLicense || 'Not provided'}</p>
-                <p><strong>Specialization:</strong> ${data.specialization || 'Not provided'}</p>
-                <p><strong>Experience:</strong> ${data.experienceYears || 'Not provided'}</p>
-                <p><strong>Website:</strong> ${data.website || 'Not provided'}</p>
-                <p><strong>Languages:</strong> ${data.languages.length > 0 ? data.languages.join(', ') : 'Not provided'}</p>
-                <p><strong>Terms Accepted:</strong> ${data.termsAccepted ? 'Yes' : 'No'}</p>
-                <p><strong>Marketing Consent:</strong> ${data.marketingConsent ? 'Yes' : 'No'}</p>
+                <div style="max-height: 500px; overflow-y: auto; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+                    <h4 style="margin-top: 0;">Your Information:</h4>
+                    <div style="display: grid; gap: 0.75rem;">
+                        <h5 style="color: #1e40af; margin-bottom: 0.5rem;">Basic Information</h5>
+                        <p><strong>Provider Type:</strong> ${data.providerType || 'Not provided'}</p>
+                        <p><strong>Clinic Name:</strong> ${data.clinicName || 'Not provided'}</p>
+                        <p><strong>Contact Person:</strong> ${data.contactPerson || 'Not provided'}</p>
+                        <p><strong>Email:</strong> ${data.email || 'Not provided'}</p>
+                        <p><strong>Phone:</strong> ${data.phone || 'Not provided'}</p>
+                        <p><strong>City:</strong> ${data.city || 'Not provided'}</p>
+                        <p><strong>Address:</strong> ${data.address || 'Not provided'}</p>
+                        <p><strong>Country:</strong> ${data.country || 'Not provided'}</p>
+                        
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0;">
+                        <h5 style="color: #1e40af; margin-bottom: 0.5rem;">Clinic/Hospital Credentials</h5>
+                        <p><strong>Years Providing Health Services:</strong> ${data.clinicExperienceYears || 'Not provided'}</p>
+                        <p><strong>Primary Specialization:</strong> ${data.specialization || 'Not provided'}</p>
+                        <p><strong>Clinic Certifications:</strong></p>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">${clinicCertificationsHtml}</ul>
+                        
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0;">
+                        <h5 style="color: #1e40af; margin-bottom: 0.5rem;">Professionals (${data.professionals ? data.professionals.length : 0})</h5>
+                        <ul style="margin: 0.5rem 0; padding-left: 0; list-style: none;">${professionalsHtml}</ul>
+                        
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0;">
+                        <h5 style="color: #1e40af; margin-bottom: 0.5rem;">Malpractice Insurance</h5>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li>Provider: ${data.insuranceProvider || 'Not provided'}</li>
+                            <li>Policy Number: ${data.insurancePolicyNumber || 'Not provided'}</li>
+                            <li>Coverage: ${data.insuranceStartDate ? new Date(data.insuranceStartDate).toLocaleDateString() : 'Not provided'} - ${data.insuranceEndDate ? new Date(data.insuranceEndDate).toLocaleDateString() : 'Not provided'}</li>
+                            <li>Certificate: ${data.insuranceDocumentCount > 0 ? data.insuranceDocumentCount + ' file(s) uploaded' : 'Not uploaded'}</li>
+                        </ul>
+                        <p><strong>Documents:</strong></p>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li>License Document: ${data.licenseDocumentCount > 0 ? data.licenseDocumentCount + ' file(s)' : 'Not uploaded'}</li>
+                            <li>Business License: ${data.businessLicenseDocumentCount > 0 ? data.businessLicenseDocumentCount + ' file(s)' : 'Not uploaded (optional)'}</li>
+                            <li>Additional Medical Documents: ${data.medicalDocumentsCount > 0 ? data.medicalDocumentsCount + ' file(s)' : 'Not uploaded (optional)'}</li>
+                        </ul>
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0;">
+                        <p><strong>Website:</strong> ${data.website || 'Not provided'}</p>
+                        <p><strong>Languages:</strong> ${data.languages.length > 0 ? data.languages.join(', ') : 'Not provided'}</p>
+                        <p><strong>Terms & Conditions Accepted:</strong> <span style="color: ${data.termsAccepted ? '#10b981' : '#ef4444'}; font-weight: 600;">${data.termsAccepted ? '✓ Yes' : '✗ No - Required'}</span></p>
+                        <p><strong>Marketing Consent:</strong> ${data.marketingConsent ? 'Yes' : 'No'}</p>
+                    </div>
+                </div>
             `;
         }
         
         // Event listeners
-        document.getElementById('next-step').addEventListener('click', () => {
+        document.getElementById('next-step').addEventListener('click', async () => {
             if (currentStep < totalSteps) {
                 // Validate current step before proceeding
                 if (!validateStep(currentStep)) {
                     return;
+                }
+                
+                // Additional email check for Step 1
+                if (currentStep === 1) {
+                    const email = document.getElementById('email').value;
+                    const isGoogleUser = new URLSearchParams(window.location.search).get('google') === 'true';
+                    
+                    if (!isGoogleUser) {
+                        const emailExists = await checkEmailExists(email);
+                        if (emailExists) {
+                            showEmailError('This email address is already registered. Please use a different email or try logging in.');
+                            return;
+                        }
+                        clearEmailError();
+                    }
                 }
                 
                 currentStep++;
@@ -796,7 +1831,26 @@
                 updateProgress();
                 updateButtons();
             } else {
-                // Final submission
+                // Final submission - Step 5
+                // Validate Terms & Conditions acceptance
+                const termsAccepted = document.getElementById('terms-accepted')?.checked || false;
+                const termsError = document.getElementById('terms-error');
+                
+                if (!termsAccepted) {
+                    if (termsError) {
+                        termsError.textContent = 'You must accept the Terms & Conditions to proceed.';
+                        termsError.style.display = 'block';
+                    }
+                    // Scroll to terms section
+                    document.getElementById('terms-accepted')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+                
+                // Clear error if terms are accepted
+                if (termsError) {
+                    termsError.style.display = 'none';
+                }
+                
                 const registrationData = collectData();
                 console.log('Final data:', registrationData);
                 
@@ -823,8 +1877,18 @@
         // Password confirmation checking
         document.getElementById('confirm-password').addEventListener('input', (e) => {
             const password = document.getElementById('password').value;
-            if (e.target.value && password !== e.target.value) {
-                showError('confirm-password-error', 'Passwords do not match');
+            const confirmPassword = e.target.value;
+            
+            if (confirmPassword && password) {
+                if (password === confirmPassword) {
+                    // Show success message (green text)
+                    const errorElement = document.getElementById('confirm-password-error');
+                    errorElement.textContent = 'Passwords match';
+                    errorElement.style.color = '#10b981';
+                    errorElement.classList.add('show');
+                } else {
+                    showError('confirm-password-error', 'Passwords do not match');
+                }
             } else {
                 hideError('confirm-password-error');
             }
@@ -832,22 +1896,1445 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            showStep(1);
-            updateProgress();
-            updateButtons();
+            console.log('🚀 DOM Content Loaded - Initializing form...');
+            
+            // Force initialize the form
+            initializeForm();
+            
+            // Setup real-time validation
+            setupRealTimeValidation();
+            
+            // Setup email duplicate checking
+            setupEmailChecking();
+            
+            // Force checkbox alignment
+            forceCheckboxAlignment();
+            
+            // Clear any existing Google indicators (temporarily disabled)
+            // clearGoogleIndicators();
+            
+            // Setup file upload
+            setupFileUpload();
+            
+            // Setup certifications management
+            setupClinicCertifications();
+            setupProfessionals();
+            
+            // Setup additional file uploads
+            setupAdditionalFileUploads();
             
             // Check for Google Sign-In data
             handleGoogleSignIn();
+            
+            // Load draft data if available (commented out for clean start)
+            // loadDraftData();
+            
+            // Initialize form analytics
+            initializeFormAnalytics();
         });
         
-        function handleGoogleSignIn() {
+        function loadDraftData() {
+            try {
+                const draftData = localStorage.getItem('providerRegistrationDraft');
+                if (draftData) {
+                    const data = JSON.parse(draftData);
+                    console.log('📝 Loading draft data:', data);
+                    
+                    // Restore form data
+                    Object.keys(data).forEach(key => {
+                        const field = document.getElementById(key);
+                        if (field && field.type !== 'checkbox') {
+                            field.value = data[key];
+                        } else if (field && field.type === 'checkbox') {
+                            field.checked = data[key];
+                        }
+                    });
+                    
+                    // Restore current step
+                    if (data.currentStep) {
+                        currentStep = data.currentStep;
+                        // Don't call showStep here as it interferes with initialization
+                        console.log('📝 Draft data has currentStep:', data.currentStep, 'but not switching yet');
+                    }
+                    
+                    // Show draft indicator
+                    showDraftIndicator(data.lastSaved);
+                }
+            } catch (error) {
+                console.error('Error loading draft data:', error);
+            }
+        }
+        
+        function showDraftIndicator(lastSaved) {
+            const header = document.querySelector('.header');
+            const indicator = document.createElement('div');
+            indicator.style.cssText = `
+                background: #dbeafe;
+                border: 1px solid #3b82f6;
+                border-radius: 8px;
+                padding: 12px;
+                margin: 1rem 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+            `;
+            
+            indicator.innerHTML = `
+                <div style="color: #3b82f6; font-size: 16px;">💾</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #1f2937;">Draft Restored</div>
+                    <div style="font-size: 12px; color: #6b7280;">Last saved: ${new Date(lastSaved).toLocaleString()}</div>
+                </div>
+                <button onclick="clearDraft()" style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">Clear</button>
+            `;
+            
+            header.appendChild(indicator);
+        }
+        
+        function clearDraft() {
+            localStorage.removeItem('providerRegistrationDraft');
+            location.reload();
+        }
+        
+        // File Upload Functions
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('file-upload-area');
+            const fileInput = document.getElementById('medical-documents');
+            const uploadedFiles = document.getElementById('uploaded-files');
+            
+            // Click to upload
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+        
+        function handleFiles(files) {
+            const uploadedFiles = document.getElementById('uploaded-files');
+            
+            Array.from(files).forEach(file => {
+                // Validate file type
+                const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(fileExtension)) {
+                    alert(`File type ${fileExtension} is not allowed. Please upload PDF, JPG, PNG, or DOC files.`);
+                    return;
+                }
+                
+                // Validate file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    return;
+                }
+                
+                // Create file element
+                const fileElement = createFileElement(file);
+                uploadedFiles.appendChild(fileElement);
+            });
+        }
+        
+        function createFileElement(file) {
+            const fileElement = document.createElement('div');
+            fileElement.className = 'uploaded-file';
+            fileElement.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon">📄</div>
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                </div>
+                <button class="remove-file" onclick="removeFile(this)">Remove</button>
+            `;
+            
+            return fileElement;
+        }
+        
+        function removeFile(button) {
+            button.parentElement.remove();
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Clinic Certifications Management
+        function setupClinicCertifications() {
+            const addBtn = document.getElementById('add-clinic-certification');
+            const container = document.getElementById('clinic-certifications-container');
+            
+            if (!addBtn || !container) return;
+            
+            updateClinicCertificationRemoveButtons();
+            
+            addBtn.addEventListener('click', () => {
+                const newCert = document.createElement('div');
+                newCert.className = 'certification-item';
+                newCert.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.75rem;';
+                newCert.innerHTML = `
+                    <input type="text" class="certification-name" placeholder="Certification name (e.g., JCI Accredited)" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="text" class="certification-number" placeholder="Certification #" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="date" class="certification-date" placeholder="Issue Date" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <button type="button" class="remove-certification" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer;">Remove</button>
+                `;
+                container.appendChild(newCert);
+                updateClinicCertificationRemoveButtons();
+                
+                newCert.querySelector('.remove-certification').addEventListener('click', () => {
+                    newCert.remove();
+                    updateClinicCertificationRemoveButtons();
+                });
+            });
+            
+            container.querySelectorAll('.remove-certification').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.certification-item').remove();
+                    updateClinicCertificationRemoveButtons();
+                });
+            });
+        }
+        
+        function updateClinicCertificationRemoveButtons() {
+            const container = document.getElementById('clinic-certifications-container');
+            if (!container) return;
+            
+            const items = container.querySelectorAll('.certification-item');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-certification');
+                if (removeBtn) {
+                    removeBtn.style.display = items.length > 1 ? 'block' : 'none';
+                }
+            });
+        }
+        
+        function getClinicCertifications() {
+            const container = document.getElementById('clinic-certifications-container');
+            if (!container) return [];
+            
+            const certifications = [];
+            container.querySelectorAll('.certification-item').forEach(item => {
+                const name = item.querySelector('.certification-name')?.value.trim();
+                const number = item.querySelector('.certification-number')?.value.trim();
+                const date = item.querySelector('.certification-date')?.value;
+                
+                if (name) {
+                    certifications.push({
+                        name: name,
+                        number: number || null,
+                        issueDate: date || null
+                    });
+                }
+            });
+            
+            return certifications;
+        }
+        
+        // Professionals Management
+        function setupProfessionals() {
+            const addBtn = document.getElementById('add-professional');
+            const container = document.getElementById('professionals-container');
+            
+            if (!addBtn || !container) return;
+            
+            updateProfessionalRemoveButtons();
+            
+            addBtn.addEventListener('click', () => {
+                const professionalCount = container.querySelectorAll('.professional-item').length + 1;
+                const newProfessional = document.createElement('div');
+                newProfessional.className = 'professional-item';
+                newProfessional.style.cssText = 'background: white; border: 1px solid #d1d5db; border-radius: 8px; padding: 20px; margin-bottom: 15px;';
+                newProfessional.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h5 style="color: #1f2937; font-size: 16px; margin: 0;">Professional #${professionalCount}</h5>
+                        <button type="button" class="remove-professional" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Remove</button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Professional Name *</label>
+                            <input type="text" class="professional-name" placeholder="Dr. John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Specialization *</label>
+                            <select class="professional-specialization" required>
+                                <option value="">Select specialization</option>
+                                <option value="general-practice">General Practice</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="dermatology">Dermatology</option>
+                                <option value="dentistry">Dentistry</option>
+                                <option value="orthopedics">Orthopedics</option>
+                                <option value="pediatrics">Pediatrics</option>
+                                <option value="gynecology">Gynecology</option>
+                                <option value="neurology">Neurology</option>
+                                <option value="oncology">Oncology</option>
+                                <option value="psychiatry">Psychiatry</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Years of Experience *</label>
+                            <select class="professional-experience" required>
+                                <option value="">Select experience</option>
+                                <option value="0-2">0-2 years</option>
+                                <option value="3-5">3-5 years</option>
+                                <option value="6-10">6-10 years</option>
+                                <option value="11-15">11-15 years</option>
+                                <option value="16-20">16-20 years</option>
+                                <option value="20+">20+ years</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Medical License Number *</label>
+                            <input type="text" class="professional-license" placeholder="Enter medical license number" required>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Education History *</label>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Add educational background (degrees, universities, graduation years)</p>
+                        <div class="professional-education-container">
+                            <div class="education-item" style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 0.5rem; margin-bottom: 0.75rem; align-items: end;">
+                                <input type="text" class="education-degree" placeholder="Degree (e.g., M.D., D.D.S.)" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <input type="text" class="education-institution" placeholder="Institution/University" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <input type="number" class="education-year" placeholder="Year" min="1950" max="2030" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <button type="button" class="remove-education" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; display: none;">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-professional-education" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem;">
+                            + Add Education
+                        </button>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Professional Certifications *</label>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.75rem;">Add all relevant professional certifications</p>
+                        <div class="professional-certifications-container">
+                            <div class="certification-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <input type="text" class="certification-name" placeholder="Certification name" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <input type="text" class="certification-number" placeholder="Certification #" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <input type="date" class="certification-date" placeholder="Issue Date" style="width: 150px; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <button type="button" class="remove-certification" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; display: none;">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-professional-certification" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem;">
+                            + Add Certification
+                        </button>
+                    </div>
+                `;
+                container.appendChild(newProfessional);
+                updateProfessionalRemoveButtons();
+                
+                // Setup education and certification handlers for new professional
+                setupProfessionalEducation(newProfessional);
+                setupProfessionalCertifications(newProfessional);
+                
+                newProfessional.querySelector('.remove-professional').addEventListener('click', () => {
+                    newProfessional.remove();
+                    updateProfessionalRemoveButtons();
+                });
+            });
+            
+            // Setup handlers for existing professionals
+            container.querySelectorAll('.professional-item').forEach(profItem => {
+                setupProfessionalEducation(profItem);
+                setupProfessionalCertifications(profItem);
+            });
+            
+            container.querySelectorAll('.remove-professional').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.professional-item').remove();
+                    updateProfessionalRemoveButtons();
+                });
+            });
+        }
+        
+        function updateProfessionalRemoveButtons() {
+            const container = document.getElementById('professionals-container');
+            if (!container) return;
+            
+            const items = container.querySelectorAll('.professional-item');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-professional');
+                if (removeBtn) {
+                    removeBtn.style.display = items.length > 1 ? 'block' : 'none';
+                    // Update professional number
+                    const title = item.querySelector('h5');
+                    if (title) {
+                        title.textContent = `Professional #${index + 1}`;
+                    }
+                }
+            });
+        }
+        
+        function getProfessionals() {
+            const container = document.getElementById('professionals-container');
+            if (!container) return [];
+            
+            const professionals = [];
+            container.querySelectorAll('.professional-item').forEach(item => {
+                const name = item.querySelector('.professional-name')?.value.trim();
+                const specialization = item.querySelector('.professional-specialization')?.value;
+                const experience = item.querySelector('.professional-experience')?.value;
+                const license = item.querySelector('.professional-license')?.value.trim();
+                
+                // Get education history for this professional
+                const educationContainer = item.querySelector('.professional-education-container');
+                const educationHistory = [];
+                if (educationContainer) {
+                    educationContainer.querySelectorAll('.education-item').forEach(eduItem => {
+                        const degree = eduItem.querySelector('.education-degree')?.value.trim();
+                        const institution = eduItem.querySelector('.education-institution')?.value.trim();
+                        const year = eduItem.querySelector('.education-year')?.value.trim();
+                        
+                        if (degree || institution) {
+                            educationHistory.push({
+                                degree: degree || null,
+                                institution: institution || null,
+                                year: year || null
+                            });
+                        }
+                    });
+                }
+                
+                // Get certifications for this professional
+                const certContainer = item.querySelector('.professional-certifications-container');
+                const certifications = [];
+                if (certContainer) {
+                    certContainer.querySelectorAll('.certification-item').forEach(certItem => {
+                        const certName = certItem.querySelector('.certification-name')?.value.trim();
+                        const certNumber = certItem.querySelector('.certification-number')?.value.trim();
+                        const certDate = certItem.querySelector('.certification-date')?.value;
+                        
+                        if (certName) {
+                            certifications.push({
+                                name: certName,
+                                number: certNumber || null,
+                                issueDate: certDate || null
+                            });
+                        }
+                    });
+                }
+                
+                if (name && specialization && experience && license) {
+                    professionals.push({
+                        name: name,
+                        specialization: specialization,
+                        experienceYears: experience,
+                        medicalLicense: license,
+                        educationHistory: educationHistory,
+                        certifications: certifications
+                    });
+                }
+            });
+            
+            return professionals;
+        }
+        
+        function setupEducation() {
+            const addEducationBtn = document.getElementById('add-education');
+            const educationContainer = document.getElementById('education-container');
+            
+            if (!addEducationBtn || !educationContainer) return;
+            
+            const updateEducationRemoveButtons = () => {
+                const items = educationContainer.querySelectorAll('.education-item');
+                items.forEach((item, index) => {
+                    const removeBtn = item.querySelector('.remove-education');
+                    if (removeBtn) {
+                        removeBtn.style.display = items.length > 1 ? 'block' : 'none';
+                    }
+                });
+            };
+            
+            updateEducationRemoveButtons();
+            
+            addEducationBtn.addEventListener('click', () => {
+                const newEducation = document.createElement('div');
+                newEducation.className = 'education-item';
+                newEducation.style.cssText = 'display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 0.5rem; margin-bottom: 0.75rem; align-items: end;';
+                newEducation.innerHTML = `
+                    <input type="text" class="education-degree" placeholder="Degree (e.g., M.D., D.D.S.)" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="text" class="education-institution" placeholder="Institution/University" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="number" class="education-year" placeholder="Year" min="1950" max="2030" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <button type="button" class="remove-education" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer;">Remove</button>
+                `;
+                educationContainer.appendChild(newEducation);
+                updateEducationRemoveButtons();
+                
+                newEducation.querySelector('.remove-education').addEventListener('click', () => {
+                    newEducation.remove();
+                    updateEducationRemoveButtons();
+                });
+            });
+            
+            educationContainer.querySelectorAll('.remove-education').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.education-item').remove();
+                    updateEducationRemoveButtons();
+                });
+            });
+        }
+        
+        function getEducationHistory() {
+            const container = document.getElementById('education-container');
+            if (!container) return [];
+            
+            const education = [];
+            container.querySelectorAll('.education-item').forEach(item => {
+                const degree = item.querySelector('.education-degree')?.value.trim();
+                const institution = item.querySelector('.education-institution')?.value.trim();
+                const year = item.querySelector('.education-year')?.value.trim();
+                
+                if (degree || institution) {
+                    education.push({
+                        degree: degree || null,
+                        institution: institution || null,
+                        year: year || null
+                    });
+                }
+            });
+            
+            return education;
+        }
+        
+        // Experience Validation
+        function validateExperience() {
+            const experienceSelect = document.getElementById('experience-years');
+            const validationDiv = document.getElementById('experience-validation');
+            
+            if (!experienceSelect || !validationDiv) return true;
+            
+            const selectedValue = experienceSelect.value;
+            const minYears = 3; // Minimum requirement
+            
+            // Parse experience range
+            let hasMinExperience = false;
+            if (selectedValue === '0-2') {
+                hasMinExperience = false;
+            } else if (selectedValue === '3-5' || selectedValue === '6-10' || 
+                      selectedValue === '11-15' || selectedValue === '16-20' || 
+                      selectedValue === '20+') {
+                hasMinExperience = true;
+            }
+            
+            if (!hasMinExperience && selectedValue) {
+                validationDiv.textContent = `⚠️ Minimum ${minYears} years of experience required for CareLuva`;
+                validationDiv.className = 'validation-message error';
+                validationDiv.style.display = 'block';
+                return false;
+            } else {
+                validationDiv.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Setup additional file uploads
+        function setupAdditionalFileUploads() {
+            // License document upload
+            setupFileUploadArea('license-upload-area', 'license-document', 'license-uploaded-files');
+            
+            // Insurance document upload
+            setupFileUploadArea('insurance-upload-area', 'insurance-document', 'insurance-uploaded-files');
+            
+            // Business license upload
+            setupFileUploadArea('business-license-upload-area', 'business-license-document', 'business-license-uploaded-files');
+            
+            // Medical documents upload (existing, but update container ID)
+            setupFileUploadArea('medical-docs-upload-area', 'medical-documents', 'medical-docs-uploaded-files', true);
+        }
+        
+        function setupFileUploadArea(areaId, inputId, filesContainerId, multiple = false) {
+            const uploadArea = document.getElementById(areaId);
+            const fileInput = document.getElementById(inputId);
+            const uploadedFiles = document.getElementById(filesContainerId);
+            
+            if (!uploadArea || !fileInput || !uploadedFiles) return;
+            
+            // Click to upload
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFilesForArea(e.dataTransfer.files, uploadedFiles, inputId, multiple);
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFilesForArea(e.target.files, uploadedFiles, inputId, multiple);
+            });
+        }
+        
+        // Store file objects for upload
+        const fileStorage = {
+            license: null,
+            insurance: null,
+            businessLicense: null,
+            medicalDocs: []
+        };
+        
+        function handleFilesForArea(files, container, inputId, multiple = false) {
+            if (!multiple && files.length > 1) {
+                alert('Please upload only one file for this field.');
+                return;
+            }
+            
+            // Clear existing files if not multiple
+            if (!multiple) {
+                container.innerHTML = '';
+            }
+            
+            Array.from(files).forEach(file => {
+                // Validate file type
+                const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+                if (inputId === 'medical-documents') {
+                    allowedTypes.push('.doc', '.docx');
+                }
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(fileExtension)) {
+                    alert(`File type ${fileExtension} is not allowed. Please upload PDF, JPG, PNG${inputId === 'medical-documents' ? ', DOC, or DOCX' : ''} files.`);
+                    return;
+                }
+                
+                // Validate file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    return;
+                }
+                
+                // Store file object for later upload
+                if (inputId === 'license-document') {
+                    fileStorage.license = file;
+                } else if (inputId === 'insurance-document') {
+                    fileStorage.insurance = file;
+                } else if (inputId === 'business-license-document') {
+                    fileStorage.businessLicense = file;
+                } else if (inputId === 'medical-documents') {
+                    if (multiple) {
+                        fileStorage.medicalDocs.push(file);
+                    } else {
+                        fileStorage.medicalDocs = [file];
+                    }
+                }
+                
+                // Create file element
+                const fileElement = createFileElement(file);
+                container.appendChild(fileElement);
+            });
+        }
+        
+        // Upload file to Firebase Storage
+        async function uploadFileToStorage(file, path) {
+            try {
+                if (!window.firebase || !window.firebase.storage) {
+                    throw new Error('Firebase Storage not initialized');
+                }
+                
+                const { ref, uploadBytes, getDownloadURL } = window.firebase;
+                const storageRef = ref(window.firebase.storage, path);
+                
+                // Upload file
+                const snapshot = await uploadBytes(storageRef, file);
+                console.log('✅ File uploaded:', snapshot.metadata.fullPath);
+                
+                // Get download URL
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                console.log('✅ Download URL:', downloadURL);
+                
+                return {
+                    url: downloadURL,
+                    path: snapshot.metadata.fullPath,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                };
+            } catch (error) {
+                console.error('❌ Error uploading file:', error);
+                throw error;
+            }
+        }
+        
+        // Upload all files to Firebase Storage
+        async function uploadAllFiles(registrationId) {
+            const uploadedFiles = {
+                license: null,
+                insurance: null,
+                businessLicense: null,
+                medicalDocs: []
+            };
+            
+            const timestamp = Date.now();
+            const basePath = `provider-registrations/${registrationId}`;
+            
+            try {
+                // Upload license document
+                if (fileStorage.license) {
+                    const licensePath = `${basePath}/license-${timestamp}-${fileStorage.license.name}`;
+                    uploadedFiles.license = await uploadFileToStorage(fileStorage.license, licensePath);
+                }
+                
+                // Upload insurance document
+                if (fileStorage.insurance) {
+                    const insurancePath = `${basePath}/insurance-${timestamp}-${fileStorage.insurance.name}`;
+                    uploadedFiles.insurance = await uploadFileToStorage(fileStorage.insurance, insurancePath);
+                }
+                
+                // Upload business license (optional)
+                if (fileStorage.businessLicense) {
+                    const businessLicensePath = `${basePath}/business-license-${timestamp}-${fileStorage.businessLicense.name}`;
+                    uploadedFiles.businessLicense = await uploadFileToStorage(fileStorage.businessLicense, businessLicensePath);
+                }
+                
+                // Upload medical documents (multiple)
+                if (fileStorage.medicalDocs && fileStorage.medicalDocs.length > 0) {
+                    for (let i = 0; i < fileStorage.medicalDocs.length; i++) {
+                        const file = fileStorage.medicalDocs[i];
+                        const medicalDocPath = `${basePath}/medical-doc-${timestamp}-${i}-${file.name}`;
+                        const uploaded = await uploadFileToStorage(file, medicalDocPath);
+                        uploadedFiles.medicalDocs.push(uploaded);
+                    }
+                }
+                
+                return uploadedFiles;
+            } catch (error) {
+                console.error('❌ Error uploading files:', error);
+                throw error;
+            }
+        }
+        
+        // Experience validation on change
+        document.addEventListener('DOMContentLoaded', () => {
+            const experienceSelect = document.getElementById('experience-years');
+            if (experienceSelect) {
+                experienceSelect.addEventListener('change', validateExperience);
+            }
+        });
+        
+        // Form Analytics Functions
+        function initializeFormAnalytics() {
+            const analytics = {
+                sessionId: generateSessionId(),
+                startTime: new Date().toISOString(),
+                stepTimes: {},
+                fieldInteractions: {},
+                validationErrors: {},
+                dropOffPoints: [],
+                completionRate: 0
+            };
+            
+            // Store analytics in session storage
+            sessionStorage.setItem('formAnalytics', JSON.stringify(analytics));
+            
+            // Track step navigation
+            trackStepNavigation();
+            
+            // Track field interactions
+            trackFieldInteractions();
+            
+            // Track validation errors
+            trackValidationErrors();
+            
+            // Track page visibility changes (potential drop-offs)
+            trackPageVisibility();
+        }
+        
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        function trackStepNavigation() {
+            const originalShowStep = showStep;
+            showStep = function(step) {
+                const analytics = getAnalytics();
+                const currentTime = new Date().toISOString();
+                
+                // Record time spent on previous step
+                if (analytics.currentStep) {
+                    analytics.stepTimes[analytics.currentStep] = {
+                        startTime: analytics.stepTimes[analytics.currentStep]?.startTime || analytics.startTime,
+                        endTime: currentTime,
+                        duration: new Date(currentTime) - new Date(analytics.stepTimes[analytics.currentStep]?.startTime || analytics.startTime)
+                    };
+                }
+                
+                // Record new step start
+                analytics.currentStep = step;
+                analytics.stepTimes[step] = {
+                    startTime: currentTime
+                };
+                
+                saveAnalytics(analytics);
+                
+                // Call original function
+                originalShowStep(step);
+            };
+        }
+        
+        function trackFieldInteractions() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    const analytics = getAnalytics();
+                    const fieldName = input.name || input.id;
+                    analytics.fieldInteractions[fieldName] = {
+                        ...analytics.fieldInteractions[fieldName],
+                        focusCount: (analytics.fieldInteractions[fieldName]?.focusCount || 0) + 1,
+                        firstFocus: analytics.fieldInteractions[fieldName]?.firstFocus || new Date().toISOString()
+                    };
+                    saveAnalytics(analytics);
+                });
+                
+                input.addEventListener('blur', () => {
+                    const analytics = getAnalytics();
+                    const fieldName = input.name || input.id;
+                    analytics.fieldInteractions[fieldName] = {
+                        ...analytics.fieldInteractions[fieldName],
+                        blurCount: (analytics.fieldInteractions[fieldName]?.blurCount || 0) + 1,
+                        lastBlur: new Date().toISOString()
+                    };
+                    saveAnalytics(analytics);
+                });
+            });
+        }
+        
+        function trackValidationErrors() {
+            const originalValidateField = validateField;
+            validateField = function(field) {
+                const result = originalValidateField(field);
+                const analytics = getAnalytics();
+                const fieldName = field.name || field.id;
+                
+                if (!result) {
+                    analytics.validationErrors[fieldName] = {
+                        ...analytics.validationErrors[fieldName],
+                        errorCount: (analytics.validationErrors[fieldName]?.errorCount || 0) + 1,
+                        lastError: new Date().toISOString()
+                    };
+                    saveAnalytics(analytics);
+                }
+                
+                return result;
+            };
+        }
+        
+        function trackPageVisibility() {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    const analytics = getAnalytics();
+                    analytics.dropOffPoints.push({
+                        step: analytics.currentStep,
+                        timestamp: new Date().toISOString(),
+                        reason: 'page_hidden'
+                    });
+                    saveAnalytics(analytics);
+                }
+            });
+            
+            // Track beforeunload (user leaving page)
+            window.addEventListener('beforeunload', () => {
+                const analytics = getAnalytics();
+                analytics.dropOffPoints.push({
+                    step: analytics.currentStep,
+                    timestamp: new Date().toISOString(),
+                    reason: 'page_unload'
+                });
+                saveAnalytics(analytics);
+            });
+        }
+        
+        function getAnalytics() {
+            const analytics = sessionStorage.getItem('formAnalytics');
+            return analytics ? JSON.parse(analytics) : {};
+        }
+        
+        function saveAnalytics(analytics) {
+            sessionStorage.setItem('formAnalytics', JSON.stringify(analytics));
+        }
+        
+        function completeFormAnalytics() {
+            const analytics = getAnalytics();
+            analytics.completionRate = 100;
+            analytics.endTime = new Date().toISOString();
+            analytics.totalDuration = new Date(analytics.endTime) - new Date(analytics.startTime);
+            
+            // Save to localStorage for admin review
+            const completedAnalytics = localStorage.getItem('formAnalyticsCompleted') || '[]';
+            const completedArray = JSON.parse(completedAnalytics);
+            completedArray.push(analytics);
+            localStorage.setItem('formAnalyticsCompleted', JSON.stringify(completedArray));
+            
+            console.log('📊 Form analytics completed:', analytics);
+        }
+        
+        // Debug Functions
+        function debugFormVisibility() {
+            const debugInfo = document.getElementById('debug-info');
+            
+            // Check all form steps
+            const allSteps = document.querySelectorAll('.form-step');
+            let info = `All Form Steps Found: ${allSteps.length}<br>`;
+            
+            allSteps.forEach((step, index) => {
+                const stepNumber = step.dataset.step;
+                const hasActiveClass = step.classList.contains('active');
+                const display = window.getComputedStyle(step).display;
+                info += `Step ${stepNumber}: active=${hasActiveClass}, display=${display}<br>`;
+            });
+            
+            const currentStep = document.querySelector('.form-step.active');
+            
+            if (!currentStep) {
+                info += '<br>❌ No active step found - trying to fix...<br>';
+                // Try to fix by manually setting step 1 as active
+                const step1 = document.querySelector('[data-step="1"]');
+                if (step1) {
+                    step1.classList.add('active');
+                    info += '✅ Manually set step 1 as active<br>';
+                } else {
+                    info += '❌ Step 1 element not found<br>';
+                }
+            } else {
+                const stepNumber = currentStep.dataset.step;
+                const formFields = currentStep.querySelectorAll('input, select, textarea');
+                
+                info += `<br>Step ${stepNumber} Debug Info:<br>`;
+                info += `Step display: ${window.getComputedStyle(currentStep).display}<br>`;
+                info += `Step visibility: ${window.getComputedStyle(currentStep).visibility}<br>`;
+                info += `Step opacity: ${window.getComputedStyle(currentStep).opacity}<br>`;
+                info += `Form fields found: ${formFields.length}<br>`;
+                
+                formFields.forEach((field, index) => {
+                    const display = window.getComputedStyle(field).display;
+                    const visibility = window.getComputedStyle(field).visibility;
+                    info += `Field ${index + 1} (${field.id}): display=${display}, visibility=${visibility}<br>`;
+                });
+            }
+            
+            debugInfo.innerHTML = info;
+        }
+        
+        function forceShowFields() {
+            console.log('🔧 Force showing fields...');
+            
+            // First, ensure step 1 is active - use .form-step selector
+            const step1 = document.querySelector('.form-step[data-step="1"]');
+            if (!step1) {
+                console.error('❌ Step 1 not found');
+                return;
+            }
+            
+            // Set step 1 as active
+            step1.classList.add('active');
+            console.log('✅ Set step 1 as active');
+            
+            // Force show all form elements
+            const allElements = step1.querySelectorAll('*');
+            allElements.forEach(el => {
+                el.style.display = 'block';
+                el.style.visibility = 'visible';
+                el.style.opacity = '1';
+            });
+            
+            // Force show form fields specifically
+            const formFields = step1.querySelectorAll('input, select, textarea, label');
+            formFields.forEach(field => {
+                field.style.display = 'block';
+                field.style.visibility = 'visible';
+                field.style.opacity = '1';
+                field.style.width = '100%';
+                field.style.height = 'auto';
+                field.style.minHeight = '40px';
+            });
+            
+            console.log('🔧 Forced visibility for all form elements');
+            debugFormVisibility();
+        }
+        
+        function initializeForm() {
+            console.log('🔧 Initializing form...');
+            
+            // Reset all steps
+            document.querySelectorAll('.form-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Set step 1 as active - use .form-step selector
+            const step1 = document.querySelector('.form-step[data-step="1"]');
+            if (step1) {
+                step1.classList.add('active');
+                console.log('✅ Set step 1 as active');
+                
+                // Force show all elements in step 1
+                const allElements = step1.querySelectorAll('*');
+                allElements.forEach(el => {
+                    el.style.display = 'block';
+                    el.style.visibility = 'visible';
+                    el.style.opacity = '1';
+                });
+                
+                // Force show form fields
+                const formFields = step1.querySelectorAll('input, select, textarea, label');
+                console.log('📋 Form fields found in step 1:', formFields.length);
+                formFields.forEach(field => {
+                    field.style.display = 'block';
+                    field.style.visibility = 'visible';
+                    field.style.opacity = '1';
+                    field.style.width = '100%';
+                    field.style.height = 'auto';
+                    field.style.minHeight = '40px';
+                });
+                
+                console.log('✅ Forced visibility for step 1 elements');
+            } else {
+                console.error('❌ Step 1 element not found');
+            }
+            
+            // Update progress and buttons
+            updateProgress();
+            updateButtons();
+            
+            debugFormVisibility();
+        }
+        
+        function clearForm() {
+            console.log('🧹 Clearing form...');
+            
+            // Clear all form fields
+            const allInputs = document.querySelectorAll('input, select, textarea');
+            allInputs.forEach(field => {
+                if (field.type === 'checkbox') {
+                    field.checked = false;
+                } else {
+                    field.value = '';
+                }
+                // Remove readonly and styling from Google pre-filled fields
+                field.readOnly = false;
+                field.style.backgroundColor = '';
+            });
+            
+            // Clear draft data
+            localStorage.removeItem('providerRegistrationDraft');
+            console.log('✅ Cleared draft data');
+            
+            // Reset to step 1
+            currentStep = 1;
+            showStep(1);
+            
+            // Clear any draft indicators
+            const draftIndicator = document.querySelector('[style*="background: #dbeafe"]');
+            if (draftIndicator) {
+                draftIndicator.remove();
+            }
+            
+            console.log('✅ Form cleared successfully');
+            debugFormVisibility();
+        }
+        
+        async function testEmailCheck() {
+            const emailField = document.getElementById('email');
+            if (!emailField) {
+                console.log('❌ Email field not found');
+                return;
+            }
+            
+            const email = emailField.value.trim();
+            if (!email) {
+                console.log('❌ No email entered');
+                alert('Please enter an email address first');
+                return;
+            }
+            
+            console.log('🧪 Testing email check for:', email);
+            console.log('🧪 Firebase available:', !!window.firebase);
+            console.log('🧪 Firestore available:', !!window.firebase?.firestore);
+            
+            const exists = await checkEmailExists(email);
+            console.log('🧪 Test result - Email exists:', exists);
+            
+            if (exists) {
+                showEmailError('This email address is already registered. Please use a different email or try logging in.');
+            } else {
+                clearEmailError();
+                alert('Email is available!');
+            }
+        }
+        
+        async function checkEmailExists(email) {
+            try {
+                console.log('🔍 Starting email check for:', email);
+                console.log('🔍 Firebase object:', window.firebase);
+                console.log('🔍 Firestore available:', !!window.firebase?.firestore);
+                console.log('🔍 Auth available:', !!window.firebase?.auth);
+                
+                // Wait a bit for Firebase to load if not immediately available
+                if (!window.firebase) {
+                    console.log('⏳ Firebase not loaded yet, waiting...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                if (!window.firebase || !window.firebase.auth) {
+                    console.log('⚠️ Firebase Auth not available for email check');
+                    console.log('🔍 Available window properties:', Object.keys(window).filter(key => key.includes('firebase')));
+                    return false; // Allow registration if check cannot be performed
+                }
+                
+                console.log('✅ Firebase Auth available, checking email...');
+                
+                // Check if email exists in Firebase Auth
+                // This is the proper way to check for existing emails without requiring admin access
+                try {
+                    const auth = window.firebase.auth;
+                    const signInMethods = await window.firebase.fetchSignInMethodsForEmail(auth, email);
+                    console.log('📊 Auth methods found:', signInMethods);
+                    
+                    if (signInMethods && signInMethods.length > 0) {
+                        console.log('❌ Email already exists in Firebase Auth');
+                        return true; // Email is already registered
+                }
+                
+                console.log('✅ Email is available');
+                    return false; // Email is not registered
+                } catch (authError) {
+                    console.log('⚠️ Could not check Firebase Auth:', authError);
+                    // If check fails, allow registration to proceed
+                    // The email validation will happen during account creation
+                return false;
+                }
+            } catch (error) {
+                console.error('❌ Error checking email:', error);
+                return false; // Allow registration if check fails
+            }
+        }
+        
+        function showEmailError(message) {
+            const emailField = document.getElementById('email');
+            const existingError = emailField.parentNode.querySelector('.email-error');
+            
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'email-error';
+            errorDiv.style.color = '#ef4444';
+            errorDiv.style.fontSize = '12px';
+            errorDiv.style.marginTop = '5px';
+            errorDiv.textContent = message;
+            
+            emailField.parentNode.appendChild(errorDiv);
+            emailField.style.borderColor = '#ef4444';
+        }
+        
+        function clearEmailError() {
+            const emailField = document.getElementById('email');
+            const existingError = emailField.parentNode.querySelector('.email-error');
+            
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            emailField.style.borderColor = '';
+        }
+        
+        function setupEmailChecking() {
+            const emailField = document.getElementById('email');
+            if (!emailField) {
+                console.log('❌ Email field not found for setupEmailChecking');
+                return;
+            }
+            
+            console.log('✅ Setting up email checking for field:', emailField);
+            
+            let emailCheckTimeout;
+            
+            emailField.addEventListener('input', () => {
+                console.log('📧 Email input detected');
+                // Clear any existing timeout
+                clearTimeout(emailCheckTimeout);
+                
+                // Clear any existing error
+                clearEmailError();
+                
+                // Set a timeout to check email after user stops typing
+                emailCheckTimeout = setTimeout(async () => {
+                    const email = emailField.value.trim();
+                    const isGoogleUser = new URLSearchParams(window.location.search).get('google') === 'true';
+                    
+                    console.log('🔍 Checking email:', email, 'isGoogleUser:', isGoogleUser);
+                    
+                    if (email && !isGoogleUser) {
+                        // Basic email format check first
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (emailRegex.test(email)) {
+                            console.log('✅ Email format valid, checking for duplicates...');
+                            // Clear any format validation errors first
+                            clearEmailError();
+                            const emailExists = await checkEmailExists(email);
+                            if (emailExists) {
+                                console.log('❌ Email already exists');
+                                showEmailError('This email address is already registered. Please use a different email or try logging in.');
+                            } else {
+                                console.log('✅ Email is available');
+                                // Clear any existing errors when email is available
+                                clearEmailError();
+                            }
+                        } else if (email.length > 0) {
+                            // Email format is invalid, show format error
+                            console.log('❌ Email format invalid');
+                            showEmailError('Please enter a valid email address');
+                        } else {
+                            // Email is empty, clear any existing errors
+                            clearEmailError();
+                        }
+                    }
+                }, 1000); // Wait 1 second after user stops typing
+            });
+        }
+        
+        function forceCheckboxAlignment() {
+            console.log('🔧 Forcing checkbox alignment...');
+            
+            // Force all checkbox groups to be horizontal
+            const checkboxGroups = document.querySelectorAll('.checkbox-group');
+            console.log('📊 Found checkbox groups:', checkboxGroups.length);
+            checkboxGroups.forEach((group, index) => {
+                group.style.setProperty('display', 'flex', 'important');
+                group.style.setProperty('flex-direction', 'row', 'important');
+                group.style.setProperty('flex-wrap', 'wrap', 'important');
+                group.style.setProperty('gap', '20px', 'important');
+                group.style.setProperty('align-items', 'flex-start', 'important');
+                console.log(`✅ Applied styles to checkbox group ${index}:`, group);
+            });
+            
+            // Force all checkbox labels to be inline
+            const checkboxLabels = document.querySelectorAll('.checkbox-label');
+            console.log('📊 Found checkbox labels:', checkboxLabels.length);
+            checkboxLabels.forEach((label, index) => {
+                label.style.setProperty('display', 'flex', 'important');
+                label.style.setProperty('align-items', 'center', 'important');
+                label.style.setProperty('flex-direction', 'row', 'important');
+                label.style.setProperty('gap', '10px', 'important');
+                label.style.setProperty('margin', '0', 'important');
+                console.log(`✅ Applied styles to checkbox label ${index}:`, label);
+            });
+            
+            // Force all checkboxes to have proper margins
+            const checkboxes = document.querySelectorAll('.checkbox-label input[type="checkbox"]');
+            console.log('📊 Found checkboxes:', checkboxes.length);
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.style.setProperty('margin', '0', 'important');
+                checkbox.style.setProperty('flex-shrink', '0', 'important');
+                checkbox.style.setProperty('width', 'auto', 'important');
+                console.log(`✅ Applied styles to checkbox ${index}:`, checkbox);
+            });
+            
+            // Also try to find checkboxes in Step 3 and 4 specifically
+            const step3Checkboxes = document.querySelectorAll('[data-step="3"] .checkbox-label');
+            const step4Checkboxes = document.querySelectorAll('[data-step="4"] .checkbox-label');
+            console.log('📊 Step 3 checkboxes:', step3Checkboxes.length);
+            console.log('📊 Step 4 checkboxes:', step4Checkboxes.length);
+            
+            // Force styles on all found elements
+            [...step3Checkboxes, ...step4Checkboxes].forEach((label, index) => {
+                label.style.setProperty('display', 'flex', 'important');
+                label.style.setProperty('align-items', 'center', 'important');
+                label.style.setProperty('flex-direction', 'row', 'important');
+                label.style.setProperty('gap', '10px', 'important');
+                
+                // Special handling for terms checkbox to prevent text wrapping
+                const termsCheckbox = label.querySelector('#terms-accepted');
+                if (termsCheckbox) {
+                    label.style.setProperty('white-space', 'nowrap', 'important');
+                    label.style.setProperty('width', '100%', 'important');
+                    label.style.setProperty('min-width', '600px', 'important');
+                    label.style.setProperty('overflow', 'visible', 'important');
+                    
+                    const span = label.querySelector('span');
+                    if (span) {
+                        span.style.setProperty('white-space', 'nowrap', 'important');
+                        span.style.setProperty('flex-shrink', '0', 'important');
+                        span.style.setProperty('display', 'inline', 'important');
+                        span.style.setProperty('width', 'auto', 'important');
+                    }
+                    
+                    const links = label.querySelectorAll('a');
+                    links.forEach(link => {
+                        link.style.setProperty('white-space', 'nowrap', 'important');
+                        link.style.setProperty('display', 'inline', 'important');
+                        link.style.setProperty('text-decoration', 'none', 'important');
+                    });
+                    
+                    // Also set the parent form-group
+                    const formGroup = label.closest('.form-group');
+                    if (formGroup) {
+                        formGroup.style.setProperty('width', '100%', 'important');
+                        formGroup.style.setProperty('min-width', '600px', 'important');
+                        formGroup.style.setProperty('overflow', 'visible', 'important');
+                    }
+                }
+                
+                console.log(`✅ Applied styles to step checkbox ${index}:`, label);
+            });
+            
+            console.log('✅ Checkbox alignment forced for all elements');
+        }
+        
+        function clearGoogleIndicators() {
+            console.log('🧹 Clearing all Google indicators...');
+            
+            try {
+                // Hide the static Google section
+                const googleSection = document.getElementById('google-user-section');
+                if (googleSection) {
+                    googleSection.style.display = 'none';
+                    console.log('✅ Hidden static Google section');
+                }
+                
+                // Simple approach: hide any element containing Google text
+                const elements = document.querySelectorAll('*');
+                let hiddenCount = 0;
+                elements.forEach(element => {
+                    if (element.textContent && element.textContent.includes('Google Account Connected')) {
+                        element.style.display = 'none';
+                        hiddenCount++;
+                    }
+                });
+                
+                console.log(`✅ Hidden ${hiddenCount} Google elements`);
+            } catch (error) {
+                console.error('Error clearing Google indicators:', error);
+            }
+        }
+        
+        function debugCheckboxStyles() {
+            console.log('🔍 Debugging checkbox styles...');
+            
+            // Check all checkbox groups
+            const checkboxGroups = document.querySelectorAll('.checkbox-group');
+            console.log('📊 Checkbox groups found:', checkboxGroups.length);
+            checkboxGroups.forEach((group, index) => {
+                const computedStyle = window.getComputedStyle(group);
+                console.log(`Group ${index}:`, {
+                    element: group,
+                    display: computedStyle.display,
+                    flexDirection: computedStyle.flexDirection,
+                    flexWrap: computedStyle.flexWrap,
+                    gap: computedStyle.gap,
+                    alignItems: computedStyle.alignItems
+                });
+            });
+            
+            // Check all checkbox labels
+            const checkboxLabels = document.querySelectorAll('.checkbox-label');
+            console.log('📊 Checkbox labels found:', checkboxLabels.length);
+            checkboxLabels.forEach((label, index) => {
+                const computedStyle = window.getComputedStyle(label);
+                console.log(`Label ${index}:`, {
+                    element: label,
+                    display: computedStyle.display,
+                    alignItems: computedStyle.alignItems,
+                    flexDirection: computedStyle.flexDirection,
+                    gap: computedStyle.gap,
+                    margin: computedStyle.margin
+                });
+            });
+            
+            // Check all checkboxes
+            const checkboxes = document.querySelectorAll('.checkbox-label input[type="checkbox"]');
+            console.log('📊 Checkboxes found:', checkboxes.length);
+            checkboxes.forEach((checkbox, index) => {
+                const computedStyle = window.getComputedStyle(checkbox);
+                console.log(`Checkbox ${index}:`, {
+                    element: checkbox,
+                    margin: computedStyle.margin,
+                    flexShrink: computedStyle.flexShrink,
+                    width: computedStyle.width
+                });
+            });
+            
+            // Check specific steps
+            const step3 = document.querySelector('[data-step="3"]');
+            const step4 = document.querySelector('[data-step="4"]');
+            console.log('📊 Step 3 element:', step3);
+            console.log('📊 Step 4 element:', step4);
+            
+            if (step3) {
+                const step3Checkboxes = step3.querySelectorAll('.checkbox-label');
+                console.log('📊 Step 3 checkboxes:', step3Checkboxes.length);
+            }
+            
+            if (step4) {
+                const step4Checkboxes = step4.querySelectorAll('.checkbox-label');
+                console.log('📊 Step 4 checkboxes:', step4Checkboxes.length);
+            }
+        }
+        
+        async function handleGoogleSignIn() {
             const urlParams = new URLSearchParams(window.location.search);
             const isGoogleSignIn = urlParams.get('google') === 'true';
             const googleEmail = urlParams.get('email');
             const googleName = urlParams.get('name');
             
+            console.log('🔍 Google Sign-In Check:', { isGoogleSignIn, googleEmail, googleName });
+            
+            // Ensure Google section is hidden by default
+            const googleSection = document.getElementById('google-user-section');
+            if (googleSection) {
+                googleSection.style.display = 'none';
+            }
+            
+            // Remove any existing Google indicators that might have been created dynamically
+            const existingIndicators = document.querySelectorAll('[style*="background: #dbeafe"]');
+            existingIndicators.forEach(indicator => {
+                if (indicator.innerHTML.includes('Google') || indicator.innerHTML.includes('🔐')) {
+                    console.log('🗑️ Removing existing Google indicator');
+                    indicator.remove();
+                }
+            });
+            
             if (isGoogleSignIn && googleEmail && googleName) {
                 console.log('Google Sign-In detected:', { email: googleEmail, name: googleName });
+                
+                // Check if email already exists
+                const emailExists = await checkEmailExists(decodeURIComponent(googleEmail));
+                if (emailExists) {
+                    showEmailError('This email address is already registered. Please use a different email or try logging in.');
+                    return;
+                }
                 
                 // Pre-fill form with Google data
                 const emailField = document.getElementById('email');

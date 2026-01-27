@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Management - CareLuva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        /* Patient Cards */
+        .patients-section {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .patient-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .patient-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .patient-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .patient-contact {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .appointment-count {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .appointments-list {
+            margin-top: 15px;
+        }
+        
+        .appointments-list strong {
+            font-size: 14px;
+            color: #374151;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .appointment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .appointment-date {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .appointment-time {
+            color: #6b7280;
+            margin-left: 10px;
+        }
+        
+        .appointment-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-pending, .status-scheduled {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .no-patients {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .no-patients i {
+            font-size: 64px;
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+        
+        .no-patients h3 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .no-patients p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats-header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats-header h2 {
+            margin: 0;
+            color: #1f2937;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-users"></i> Patient Management</h1>
+            <a href="provider-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+        
+        <!-- Stats Header -->
+        <div class="stats-header">
+            <h2 id="totalPatients">Total Patients: Loading...</h2>
+            <a href="provider-appointments.html" class="btn btn-primary">
+                <i class="fas fa-calendar"></i> View All Appointments
+            </a>
+        </div>
+        
+        <!-- Patients Section -->
+        <div class="patients-section" id="patientsSection">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading patient data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import firebaseConfig from './firebase-config.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.firebase = { app, db };
+        window.firebaseReady = true;
+
+        // Load clinic ID from session
+        function loadClinicId() {
+            if (window.authUtils) {
+                if (!window.authUtils.isAuthenticated()) {
+                    console.log('No valid session found');
+                    return null;
+                }
+                
+                const sessionInfo = window.authUtils.getSession();
+                if (sessionInfo && sessionInfo.session.uid) {
+                    return sessionInfo.session.uid;
+                }
+            }
+            
+            // Fallback: try direct localStorage/sessionStorage access
+            try {
+                let registrationId = localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+                if (registrationId) {
+                    return registrationId;
+                }
+                
+                let session = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession');
+                if (session) {
+                    const sessionData = JSON.parse(session);
+                    if (sessionData.uid) {
+                        return sessionData.uid;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading session:', error);
+            }
+            
+            return null;
+        }
+
+        // Load patient data
+        async function loadPatients() {
+            try {
+                const clinicId = loadClinicId();
+                
+                if (!clinicId) {
+                    document.getElementById('patientsSection').innerHTML = `
+                        <div class="no-patients">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Not Logged In</h3>
+                            <p>Please log in to view your patients.</p>
+                            <a href="provider-auth.html" class="btn btn-primary" style="margin-top: 15px; display: inline-block;">
+                                Log In
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Load appointments for this provider
+                const appointmentsRef = collection(db, 'appointments');
+                let appointmentsQuery;
+                try {
+                    appointmentsQuery = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId),
+                        orderBy('createdAt', 'desc')
+                    );
+                } catch (error) {
+                    console.log('Index not ready, querying without orderBy...');
+                    appointmentsQuery = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId)
+                    );
+                }
+                
+                let appointments = [];
+                try {
+                    const snapshot = await getDocs(appointmentsQuery);
+                    appointments = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    
+                    // Sort manually if orderBy wasn't used
+                    if (!appointmentsQuery._query?.orderBy) {
+                        appointments.sort((a, b) => {
+                            const aDate = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const bDate = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return bDate.getTime() - aDate.getTime();
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Error loading appointments:', error);
+                    try {
+                        const simpleQuery = query(appointmentsRef, where('clinicId', '==', clinicId));
+                        const snapshot = await getDocs(simpleQuery);
+                        appointments = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        appointments.sort((a, b) => {
+                            const aDate = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+                            const bDate = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+                            return bDate.getTime() - aDate.getTime();
+                        });
+                    } catch (fallbackError) {
+                        console.error('Fallback query also failed:', fallbackError);
+                    }
+                }
+                
+                // Group appointments by patient
+                const patientsMap = new Map();
+                appointments.forEach(apt => {
+                    const patientId = apt.patientId || apt.patientEmail || apt.patientName || 'unknown';
+                    if (!patientsMap.has(patientId)) {
+                        patientsMap.set(patientId, {
+                            id: patientId,
+                            name: apt.patientName || 'Unknown Patient',
+                            email: apt.patientEmail || apt.email || '',
+                            phone: apt.patientPhone || apt.phone || '',
+                            appointments: [],
+                            lastAppointment: null
+                        });
+                    }
+                    const patient = patientsMap.get(patientId);
+                    patient.appointments.push(apt);
+                    const aptDate = apt.date ? (apt.date.toDate ? apt.date.toDate() : new Date(apt.date)) : (apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : new Date(0)));
+                    if (!patient.lastAppointment || aptDate > patient.lastAppointment) {
+                        patient.lastAppointment = aptDate;
+                    }
+                });
+                
+                const patients = Array.from(patientsMap.values());
+                patients.sort((a, b) => (b.lastAppointment || new Date(0)) - (a.lastAppointment || new Date(0)));
+                
+                // Update total patients count
+                document.getElementById('totalPatients').textContent = `Total Patients: ${patients.length}`;
+                
+                if (patients.length === 0) {
+                    document.getElementById('patientsSection').innerHTML = `
+                        <div class="no-patients">
+                            <i class="fas fa-users"></i>
+                            <h3>No Patients Yet</h3>
+                            <p>You don't have any patient appointments yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display patients
+                document.getElementById('patientsSection').innerHTML = patients.map(patient => `
+                    <div class="patient-card">
+                        <div class="patient-header">
+                            <div class="patient-info">
+                                <h3>${patient.name}</h3>
+                                ${patient.email ? `<div class="patient-contact"><i class="fas fa-envelope"></i> ${patient.email}</div>` : ''}
+                                ${patient.phone ? `<div class="patient-contact"><i class="fas fa-phone"></i> ${patient.phone}</div>` : ''}
+                            </div>
+                            <div class="appointment-count">
+                                ${patient.appointments.length} appointment${patient.appointments.length !== 1 ? 's' : ''}
+                            </div>
+                        </div>
+                        <div class="appointments-list">
+                            <strong>Recent Appointments:</strong>
+                            ${patient.appointments.slice(0, 5).map(apt => {
+                                const aptDate = apt.date ? (apt.date.toDate ? apt.date.toDate() : new Date(apt.date)) : (apt.appointmentDate?.toDate ? apt.appointmentDate.toDate() : (apt.appointmentDate ? new Date(apt.appointmentDate) : null));
+                                const dateStr = aptDate ? aptDate.toLocaleDateString() : 'Date TBD';
+                                const timeStr = apt.time || apt.appointmentTime || '';
+                                const status = apt.status || 'scheduled';
+                                const statusClass = status === 'completed' ? 'status-completed' : status === 'cancelled' ? 'status-cancelled' : 'status-pending';
+                                return `
+                                    <div class="appointment-item">
+                                        <div>
+                                            <span class="appointment-date">${dateStr}</span>
+                                            ${timeStr ? `<span class="appointment-time">${timeStr}</span>` : ''}
+                                        </div>
+                                        <span class="appointment-status ${statusClass}">${status}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${patient.appointments.length > 5 ? `<p style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 8px;">+ ${patient.appointments.length - 5} more</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                document.getElementById('patientsSection').innerHTML = `
+                    <div class="no-patients">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Patients</h3>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 15px;">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        loadPatients();
+    </script>
+</body>
+</html>
+
