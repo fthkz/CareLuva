@@ -24,13 +24,23 @@ export default defineConfig({
         '*.html',
         'dev/',
         '**/*.test.js',
-        '**/*.spec.js'
+        '**/*.spec.js',
+        '**/test-*.js',
+        '**/*-test.js',
+        'firebase-config*.js',
+        'serve*.ps1',
+        'serve*.bat',
+        '*.bundle.js'
       ],
       include: [
         'auth-utils.js',
-        '*.js',
-        'src/**/*.js'
-      ]
+        'src/**/*.js',
+        '*.js'
+      ],
+      // Only include files that are actually imported in tests
+      all: false,
+      // Report coverage even if no tests cover a file
+      reportOnFailure: true
     },
     
     // Test timeout
