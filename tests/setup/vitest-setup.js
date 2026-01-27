@@ -5,6 +5,8 @@
 
 import { beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
+import crypto from 'crypto';
+import crypto from 'crypto';
 
 // Set up DOM environment
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
@@ -49,6 +51,56 @@ global.window.firebase = {
 };
 
 global.window.firebaseReady = false;
+
+// Set up crypto.subtle for Node.js environment (required for password hashing tests)
+if (!global.crypto) {
+  global.crypto = {};
+}
+
+// Provide crypto.getRandomValues
+if (!global.crypto.getRandomValues) {
+  global.crypto.getRandomValues = (arr) => {
+    const randomBytes = crypto.randomBytes(arr.length);
+    arr.set(randomBytes);
+    return arr;
+  };
+}
+
+// Provide crypto.subtle for Web Crypto API compatibility
+if (!global.crypto.subtle) {
+  global.crypto.subtle = {
+    digest: async (algorithm, data) => {
+      const algo = algorithm.toLowerCase().replace('-', '');
+      const hash = crypto.createHash(algo);
+      hash.update(Buffer.from(data));
+      return hash.digest();
+    },
+    importKey: async (format, keyData, algorithm, extractable, keyUsages) => {
+      // Return a mock key object for testing
+      return {
+        format,
+        keyData: Buffer.from(keyData),
+        algorithm,
+        extractable,
+        keyUsages
+      };
+    },
+    deriveBits: async (algorithm, baseKey, length) => {
+      // PBKDF2 implementation using Node.js crypto
+      const salt = algorithm.salt ? Buffer.from(algorithm.salt) : Buffer.alloc(16);
+      const iterations = algorithm.iterations || 100000;
+      const hash = algorithm.hash || 'sha256';
+      
+      return crypto.pbkdf2Sync(
+        baseKey.keyData,
+        salt,
+        iterations,
+        length / 8,
+        hash
+      );
+    }
+  };
+}
 
 // Mock console methods to avoid noise in tests
 global.console = {
