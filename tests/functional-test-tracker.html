@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Functional Test Tracker - CareLuva</title>
+  <link rel="stylesheet" href="../src/css/base/reset.css">
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --border: rgba(255,255,255,0.10);
+      --accent: #60a5fa;
+      --pass: #34d399;
+      --fail: #fb7185;
+      --skip: #fbbf24;
+      --na: #94a3b8;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(96,165,250,0.22), transparent 60%),
+                  radial-gradient(900px 500px at 80% 20%, rgba(52,211,153,0.18), transparent 60%),
+                  radial-gradient(900px 600px at 60% 90%, rgba(251,113,133,0.16), transparent 60%),
+                  var(--bg);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .title-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow);
+      flex: 1;
+    }
+
+    .title-card h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+    .title-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      min-width: 360px;
+    }
+
+    .meta-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    label { font-size: 12px; color: var(--muted); }
+    input[type="text"], input[type="url"], textarea, select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      padding: 10px 10px;
+      outline: none;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.45); }
+    textarea { min-height: 64px; resize: vertical; }
+
+    .btn {
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform 0.05s ease, background 0.15s ease, border 0.15s ease;
+      font-weight: 650;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+    .btn:hover { background: rgba(255,255,255,0.12); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: rgba(96,165,250,0.20); border-color: rgba(96,165,250,0.38); }
+    .btn.primary:hover { background: rgba(96,165,250,0.28); }
+    .btn.danger { background: rgba(251,113,133,0.16); border-color: rgba(251,113,133,0.35); }
+    .btn.danger:hover { background: rgba(251,113,133,0.22); }
+    .btn.success { background: rgba(52,211,153,0.14); border-color: rgba(52,211,153,0.32); }
+    .btn.success:hover { background: rgba(52,211,153,0.20); }
+    .btn.small { padding: 8px 10px; font-size: 12px; border-radius: 9px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent);
+    }
+    .panel-header h2 { margin: 0 0 6px; font-size: 14px; }
+    .panel-header p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .panel-body { padding: 14px; }
+
+    .statbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .pill {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.88);
+    }
+    .pill.pass { border-color: rgba(52,211,153,0.35); }
+    .pill.fail { border-color: rgba(251,113,133,0.35); }
+    .pill.skip { border-color: rgba(251,191,36,0.35); }
+    .pill.na { border-color: rgba(148,163,184,0.35); }
+
+    .search {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0 0;
+    }
+
+    .case-list {
+      max-height: calc(100vh - 290px);
+      overflow: auto;
+    }
+
+    .case-item {
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .case-item:hover { background: rgba(255,255,255,0.06); }
+    .case-item.active { background: rgba(96,165,250,0.16); border-top-color: rgba(96,165,250,0.35); }
+    .case-item .left { min-width: 0; }
+    .case-item .id { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.65); }
+    .case-item .name { font-size: 13px; font-weight: 700; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.22);
+      white-space: nowrap;
+    }
+    .badge.pass { border-color: rgba(52,211,153,0.45); color: rgba(52,211,153,0.95); }
+    .badge.fail { border-color: rgba(251,113,133,0.45); color: rgba(251,113,133,0.95); }
+    .badge.skip { border-color: rgba(251,191,36,0.45); color: rgba(251,191,36,0.95); }
+    .badge.na { border-color: rgba(148,163,184,0.45); color: rgba(148,163,184,0.95); }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .full { grid-column: 1 / -1; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+
+    .status-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-btn {
+      border-radius: 999px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 750;
+      font-size: 12px;
+      transition: background 0.15s ease, border 0.15s ease, transform 0.05s ease;
+    }
+    .status-btn:active { transform: translateY(1px); }
+    .status-btn[data-status="pass"] { border-color: rgba(52,211,153,0.35); }
+    .status-btn[data-status="fail"] { border-color: rgba(251,113,133,0.35); }
+    .status-btn[data-status="skip"] { border-color: rgba(251,191,36,0.35); }
+    .status-btn[data-status="na"] { border-color: rgba(148,163,184,0.35); }
+    .status-btn.active[data-status="pass"] { background: rgba(52,211,153,0.18); }
+    .status-btn.active[data-status="fail"] { background: rgba(251,113,133,0.18); }
+    .status-btn.active[data-status="skip"] { background: rgba(251,191,36,0.16); }
+    .status-btn.active[data-status="na"] { background: rgba(148,163,184,0.14); }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .muted { color: var(--muted); }
+    .mono { font-family: var(--mono); }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kpi .k {
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .kpi .k .n { font-size: 18px; font-weight: 900; }
+    .kpi .k .t { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    @media (max-width: 1150px) {
+      .grid { grid-template-columns: 1fr; }
+      .meta { min-width: 0; }
+      .case-list { max-height: 340px; }
+      .kpi { grid-template-columns: repeat(2, 1fr); }
+      .details-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="title-card">
+        <h1>✅ Functional Test Tracker</h1>
+        <p>
+          Track your manual regression run (pass/fail/skip), add notes + evidence, and export a report.
+          Data is stored locally in your browser (<span class="mono">localStorage</span>).
+        </p>
+        <div class="statbar" id="statbar"></div>
+      </div>
+
+      <div class="meta">
+        <div class="meta-card">
+          <div class="row">
+            <div style="flex: 1;">
+              <label for="runName">Run name</label>
+              <input id="runName" type="text" placeholder="e.g., Regression - main @ 2026-01-28" />
+            </div>
+            <div style="width: 180px;">
+              <label for="runEnv">Environment</label>
+              <input id="runEnv" type="text" placeholder="e.g., localhost:8080" />
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div style="flex: 1;">
+              <label for="firebaseProject">Firebase projectId</label>
+              <input id="firebaseProject" type="text" placeholder="e.g., careluva-dev" />
+            </div>
+            <div style="width: 180px;">
+              <label for="tester">Tester</label>
+              <input id="tester" type="text" placeholder="e.g., fthkz" />
+            </div>
+          </div>
+          <div class="footer-actions">
+            <button class="btn success" id="btnNewRun">New run (reset statuses)</button>
+            <button class="btn" id="btnClearAll">Clear storage</button>
+          </div>
+          <div class="hint">
+            Tip: keep one run per branch/PR. Export the report and attach it to your PR or documentation.
+          </div>
+        </div>
+
+        <div class="meta-card">
+          <div class="row">
+            <button class="btn primary" id="btnExportJson">Export JSON</button>
+            <button class="btn primary" id="btnExportMd">Export Markdown</button>
+            <button class="btn" id="btnCopyMd">Copy Markdown</button>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <label class="muted">Import JSON (paste)</label>
+          </div>
+          <textarea id="importJson" placeholder='Paste previously exported JSON here, then click "Import JSON".'></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" id="btnImportJson">Import JSON</button>
+            <button class="btn" id="btnDownloadMd">Download Markdown</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Test cases</h2>
+          <p>Pick a test case, mark status, and record evidence.</p>
+          <div class="search">
+            <input id="search" type="text" placeholder="Search by id/name/section..." />
+            <select id="filterStatus" style="width: 160px;">
+              <option value="all">All statuses</option>
+              <option value="na">N/A</option>
+              <option value="pass">Pass</option>
+              <option value="fail">Fail</option>
+              <option value="skip">Skip</option>
+              <option value="todo">Not run</option>
+            </select>
+          </div>
+          <div class="kpi" id="kpi"></div>
+        </div>
+        <div class="case-list" id="caseList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 id="caseTitle">Select a test case</h2>
+          <p id="caseSubtitle" class="muted">Use the list on the left.</p>
+        </div>
+        <div class="panel-body" id="details">
+          <div class="hint">No case selected.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Data model
+    // -----------------------------
+    const STORAGE_KEY = 'careluva.functionalTestTracker.v1';
+
+    // Keep this list aligned with FUNCTIONAL-TEST-EXECUTION-RESOLUTION.md
+    const CASES = [
+      // Smoke
+      { id: 'S1', section: 'Smoke', name: 'Home page loads', steps: ['Open /index.html', 'Confirm UI renders', 'Check console for uncaught errors'], expected: ['No blank screen', 'No uncaught exceptions'] },
+      { id: 'S2', section: 'Smoke', name: 'Patient auth page loads', steps: ['Open /patient-auth.html', 'Confirm UI renders', 'Check console'], expected: ['No uncaught exceptions'] },
+      { id: 'S3', section: 'Smoke', name: 'Provider auth page loads', steps: ['Open /provider-auth.html', 'Confirm UI renders', 'Check console'], expected: ['No uncaught exceptions'] },
+      { id: 'S4', section: 'Smoke', name: 'Admin panel loads', steps: ['Open /admin-panel.html', 'Confirm UI renders', 'Check console'], expected: ['No uncaught exceptions'] },
+      { id: 'S5', section: 'Smoke', name: 'Find clinics loads', steps: ['Open /find-clinics.html', 'Confirm UI renders', 'Check console'], expected: ['No uncaught exceptions'] },
+      { id: 'S6', section: 'Smoke', name: 'Provider directory loads for a clinic', steps: ['Open /provider-directory.html?id=<clinicId>', 'Confirm provider profile renders'], expected: ['Clinic profile loads (or clear “not found” message)'] },
+      { id: 'S7', section: 'Smoke', name: 'Appointment booking loads', steps: ['Open /appointment-booking.html', 'Confirm UI renders'], expected: ['No uncaught exceptions'] },
+      { id: 'S8', section: 'Smoke', name: 'Review system loads', steps: ['Open /review-system.html', 'Confirm UI renders'], expected: ['No uncaught exceptions'] },
+      { id: 'S9', section: 'Smoke', name: 'Provider dashboard loads', steps: ['Open /provider-dashboard.html', 'Confirm UI renders'], expected: ['No uncaught exceptions'] },
+      { id: 'S10', section: 'Smoke', name: 'Clinic photo gallery page loads', steps: ['Open /clinic-photo-gallery.html', 'Confirm UI renders'], expected: ['No uncaught exceptions'] },
+
+      // Auth/session
+      { id: 'A1', section: 'Auth', name: 'Patient login persists after refresh', steps: ['Login at /patient-auth.html', 'Refresh page', 'Open /patient-dashboard.html'], expected: ['User remains logged in', 'No redirect loop'] },
+      { id: 'A2', section: 'Auth', name: 'Provider login persists after refresh', steps: ['Login at /provider-auth.html', 'Refresh page', 'Open /provider-dashboard.html'], expected: ['User remains logged in'] },
+      { id: 'A3', section: 'Auth', name: 'Admin login persists across navigation', steps: ['Login at /admin-panel.html', 'Open an admin feature page', 'Navigate back/refresh'], expected: ['Admin stays authenticated', 'No permissions error loops'] },
+
+      // Patient journey
+      { id: 'P1', section: 'Patient', name: 'Find clinics search + filters', steps: ['Open /find-clinics.html', 'Use search', 'Use filters', 'Open a clinic profile'], expected: ['Filters narrow results', 'Clinic opens correctly'] },
+      { id: 'P2', section: 'Patient', name: 'Provider directory back navigation', steps: ['Open a provider profile from find-clinics', 'Use back/back-to-search'], expected: ['Returns to patient context correctly'] },
+
+      // Appointments
+      { id: 'AP1', section: 'Appointments', name: 'Book appointment (required fields)', steps: ['Open /appointment-booking.html', 'Fill required fields (clinicId, patientEmail, etc.)', 'Submit'], expected: ['Appointment created OR clear error explains what is missing'] },
+      { id: 'AP2', section: 'Appointments', name: 'Provider appointments show newly created appointment', steps: ['Login as provider', 'Open /provider-appointments.html', 'Locate appointment'], expected: ['Appointment visible to provider'] },
+
+      // Reviews
+      { id: 'R1', section: 'Reviews', name: 'Create review for existing clinic', steps: ['Open /review-system.html', 'Create review for existing clinic'], expected: ['Review saves without permission errors'] },
+      { id: 'R2', section: 'Reviews', name: 'Admin review moderation → View Clinic', steps: ['Open admin panel', 'Open review moderation', 'Click View Clinic'], expected: ['Clinic profile loads; fallback by name works', 'Back returns to admin'] },
+
+      // Provider dashboard/badges
+      { id: 'PD1', section: 'Provider', name: 'Verification badges show correctly', steps: ['Login as provider', 'Open /provider-dashboard.html', 'Check badges + tooltips'], expected: ['Badges reflect provider data + approval status'] },
+
+      // Photo gallery (subset)
+      { id: 'G1', section: 'Gallery', name: 'Provider uploads a photo', steps: ['Login as provider', 'Open photo gallery management path', 'Upload an image'], expected: ['Upload success; photo appears'] },
+      { id: 'G2', section: 'Gallery', name: 'Patient can view provider photos', steps: ['Login as patient', 'Open provider profile', 'Locate gallery section'], expected: ['Photos visible; modal works'] },
+      { id: 'G3', section: 'Gallery', name: 'Deleting a photo removes it for patient view', steps: ['Delete a photo as provider', 'Refresh provider profile as patient'], expected: ['Deleted photo no longer shows'] },
+
+      // Provider tools smoke
+      { id: 'PT1', section: 'Provider tools', name: 'Provider patients page smoke', steps: ['Open /provider-patients.html'], expected: ['Page loads; no permission errors'] },
+      { id: 'PT2', section: 'Provider tools', name: 'Provider invoices page smoke', steps: ['Open /provider-invoices.html'], expected: ['Page loads; no permission errors'] },
+      { id: 'PT3', section: 'Provider tools', name: 'Provider treatment plans page smoke', steps: ['Open /provider-treatment-plans.html'], expected: ['Page loads; no permission errors'] },
+      { id: 'PT4', section: 'Provider tools', name: 'Create treatment plan page smoke', steps: ['Open /create-treatment-plan.html'], expected: ['Page loads; no permission errors'] },
+
+      // Admin workflows
+      { id: 'AD1', section: 'Admin', name: 'Verification workflow: open + approve', steps: ['Open /admin-panel.html', 'Open verification workflow for pending registration', 'Approve'], expected: ['Status updates; verified badge logic consistent'] },
+      { id: 'AD2', section: 'Admin', name: 'Badge status check shows issues (e.g., expired insurance)', steps: ['In admin panel, open badge status', 'Check issues section'], expected: ['Issues listed correctly; expiry handled'] },
+      { id: 'AD3', section: 'Admin', name: 'Service catalog loads as admin', steps: ['Open /admin-service-catalog.html while logged in as admin'], expected: ['No insufficient permissions'] },
+      { id: 'AD4', section: 'Admin', name: 'Communication monitor smoke', steps: ['Open /admin-communication-monitor.html'], expected: ['Loads or shows empty state'] },
+      { id: 'AD5', section: 'Admin', name: 'Payment verification smoke', steps: ['Open /admin-payment-verification.html'], expected: ['Loads or shows empty state'] },
+
+      // Test utilities
+      { id: 'T1', section: 'Test utilities', name: 'Test hub loads', steps: ['Open /tests/run-tests.html', 'Open each suite card'], expected: ['Pages open; no script errors'] },
+      { id: 'T2', section: 'Test utilities', name: 'Run Auth tests in browser', steps: ['Open /tests/test-auth-utils.html', 'Run tests'], expected: ['Clear pass/fail output'] },
+      { id: 'T3', section: 'Test utilities', name: 'Run Firestore operations tests', steps: ['Open /tests/test-firestore-operations.html', 'Run connection tests'], expected: ['Connection tests pass; permission errors explained if any'] },
+      { id: 'T4', section: 'Test utilities', name: 'Data generator can save provider/patient/review', steps: ['Open /tests/test-data-generator-ui.html', 'Generate + Save provider/patient/review'], expected: ['Saves succeed (dev/test env)'] },
+      { id: 'T5', section: 'Test utilities', name: 'Appointment generator save behavior is clear', steps: ['In data generator, generate appointment', 'Attempt save'], expected: ['Either saves or explains required fields/rules clearly'] }
+    ];
+
+    const STATUS = {
+      todo: { label: 'Not run', css: 'na' },
+      pass: { label: 'Pass', css: 'pass' },
+      fail: { label: 'Fail', css: 'fail' },
+      skip: { label: 'Skip', css: 'skip' },
+      na:   { label: 'N/A',  css: 'na' }
+    };
+
+    function nowIso() { return new Date().toISOString(); }
+
+    function defaultState() {
+      const cases = {};
+      for (const c of CASES) {
+        cases[c.id] = { status: 'todo', notes: '', evidence: '', updatedAt: null };
+      }
+      return {
+        version: 1,
+        run: {
+          name: '',
+          env: '',
+          firebaseProjectId: '',
+          tester: '',
+          startedAt: nowIso(),
+          updatedAt: nowIso()
+        },
+        cases
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        // Merge forward (in case new cases are added)
+        const base = defaultState();
+        const merged = { ...base, ...parsed };
+        merged.run = { ...base.run, ...(parsed.run || {}) };
+        merged.cases = { ...base.cases, ...(parsed.cases || {}) };
+        merged.version = 1;
+        return merged;
+      } catch (e) {
+        console.warn('Failed to load tracker state, resetting.', e);
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      state.run.updatedAt = nowIso();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state, null, 2));
+    }
+
+    function resetRun(keepMeta = true) {
+      const prev = state;
+      state = defaultState();
+      if (keepMeta) {
+        state.run.name = prev.run.name || '';
+        state.run.env = prev.run.env || '';
+        state.run.firebaseProjectId = prev.run.firebaseProjectId || '';
+        state.run.tester = prev.run.tester || '';
+      }
+      saveState();
+      renderAll();
+      selectCaseId(null);
+    }
+
+    function clearStorage() {
+      localStorage.removeItem(STORAGE_KEY);
+      state = defaultState();
+      renderAll();
+      selectCaseId(null);
+    }
+
+    // -----------------------------
+    // Rendering
+    // -----------------------------
+    let state = loadState();
+    let selectedCaseId = null;
+
+    const el = (id) => document.getElementById(id);
+
+    function computeStats() {
+      const counts = { todo: 0, pass: 0, fail: 0, skip: 0, na: 0, total: CASES.length };
+      for (const c of CASES) {
+        const st = (state.cases[c.id] && state.cases[c.id].status) || 'todo';
+        if (counts[st] === undefined) counts.todo++;
+        else counts[st]++;
+      }
+      return counts;
+    }
+
+    function renderStatbar() {
+      const s = computeStats();
+      const parts = [
+        `<span class="pill pass">PASS ${s.pass}</span>`,
+        `<span class="pill fail">FAIL ${s.fail}</span>`,
+        `<span class="pill skip">SKIP ${s.skip}</span>`,
+        `<span class="pill na">N/A ${s.na}</span>`,
+        `<span class="pill">TODO ${s.todo}</span>`,
+        `<span class="pill">TOTAL ${s.total}</span>`
+      ];
+      el('statbar').innerHTML = parts.join('');
+      el('kpi').innerHTML = `
+        <div class="k"><div class="n">${s.total}</div><div class="t">Total cases</div></div>
+        <div class="k"><div class="n" style="color: var(--pass)">${s.pass}</div><div class="t">Passed</div></div>
+        <div class="k"><div class="n" style="color: var(--fail)">${s.fail}</div><div class="t">Failed</div></div>
+        <div class="k"><div class="n" style="color: rgba(255,255,255,0.72)">${s.todo}</div><div class="t">Not run</div></div>
+      `;
+    }
+
+    function matchFilter(c, query, statusFilter) {
+      const q = (query || '').trim().toLowerCase();
+      const current = (state.cases[c.id] && state.cases[c.id].status) || 'todo';
+
+      if (statusFilter && statusFilter !== 'all') {
+        if (statusFilter === 'todo') {
+          if (current !== 'todo') return false;
+        } else if (current !== statusFilter) return false;
+      }
+
+      if (!q) return true;
+      const hay = `${c.id} ${c.section} ${c.name}`.toLowerCase();
+      return hay.includes(q);
+    }
+
+    function renderCaseList() {
+      const query = el('search').value;
+      const statusFilter = el('filterStatus').value;
+      const items = CASES.filter(c => matchFilter(c, query, statusFilter));
+
+      el('caseList').innerHTML = items.map(c => {
+        const st = (state.cases[c.id] && state.cases[c.id].status) || 'todo';
+        const badgeClass = st === 'todo' ? 'na' : STATUS[st]?.css || 'na';
+        const badgeText = st === 'todo' ? 'TODO' : (STATUS[st]?.label || 'TODO').toUpperCase();
+        const active = c.id === selectedCaseId ? 'active' : '';
+        return `
+          <div class="case-item ${active}" data-case-id="${c.id}">
+            <div class="left">
+              <div class="id">${escapeHtml(c.section)} · ${escapeHtml(c.id)}</div>
+              <div class="name" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</div>
+            </div>
+            <div class="badge ${badgeClass}">${badgeText}</div>
+          </div>
+        `;
+      }).join('') || `<div class="case-item"><div class="left"><div class="name">No matches</div></div></div>`;
+
+      // Bind clicks
+      for (const node of el('caseList').querySelectorAll('.case-item[data-case-id]')) {
+        node.addEventListener('click', () => selectCaseId(node.getAttribute('data-case-id')));
+      }
+    }
+
+    function renderDetails() {
+      if (!selectedCaseId) {
+        el('caseTitle').textContent = 'Select a test case';
+        el('caseSubtitle').textContent = 'Use the list on the left.';
+        el('details').innerHTML = `<div class="hint">No case selected.</div>`;
+        return;
+      }
+
+      const c = CASES.find(x => x.id === selectedCaseId);
+      const record = state.cases[selectedCaseId] || { status: 'todo', notes: '', evidence: '', updatedAt: null };
+      const st = record.status || 'todo';
+
+      el('caseTitle').textContent = `${c.section} · ${c.id} — ${c.name}`;
+      el('caseSubtitle').textContent = record.updatedAt ? `Last updated: ${record.updatedAt}` : 'Not run yet.';
+
+      el('details').innerHTML = `
+        <div class="details-grid">
+          <div class="full">
+            <label>Status</label>
+            <div class="status-buttons" id="statusButtons">
+              ${statusButton('pass', st)}
+              ${statusButton('fail', st)}
+              ${statusButton('skip', st)}
+              ${statusButton('na', st)}
+              ${statusButton('todo', st, 'Not run')}
+            </div>
+            <div class="hint">Use <span class="mono">Skip</span> when blocked by environment/time. Use <span class="mono">N/A</span> when the feature/page is not applicable in your deployment.</div>
+          </div>
+
+          <div class="full">
+            <label>Steps</label>
+            <div class="hint" style="margin-top:6px;">
+              <ol style="margin: 0 0 0 18px; padding: 0; line-height: 1.6;">
+                ${(c.steps || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+              </ol>
+            </div>
+          </div>
+
+          <div class="full">
+            <label>Expected</label>
+            <div class="hint" style="margin-top:6px;">
+              <ul style="margin: 0 0 0 18px; padding: 0; line-height: 1.6;">
+                ${(c.expected || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <label for="notes">Notes</label>
+            <textarea id="notes" placeholder="What did you observe? Include error messages, reproduction notes, etc.">${escapeHtml(record.notes || '')}</textarea>
+          </div>
+          <div>
+            <label for="evidence">Evidence links</label>
+            <textarea id="evidence" placeholder="Paste links to screenshots, videos, logs, or PR comments. One per line.">${escapeHtml(record.evidence || '')}</textarea>
+          </div>
+
+          <div class="full">
+            <div class="row">
+              <button class="btn success" id="btnSaveCase">Save</button>
+              <button class="btn danger" id="btnResetCase">Reset this case</button>
+              <button class="btn" id="btnOpenRunDoc">Open functional test doc</button>
+              <button class="btn" id="btnOpenTestHub">Open tests hub</button>
+            </div>
+            <div class="hint">Save updates the timestamp. Reset sets status back to “Not run” and clears notes/evidence.</div>
+          </div>
+        </div>
+      `;
+
+      // Bind status buttons
+      for (const btn of el('statusButtons').querySelectorAll('.status-btn')) {
+        btn.addEventListener('click', () => {
+          const next = btn.getAttribute('data-status');
+          setCaseStatus(selectedCaseId, next);
+          renderAll();
+          renderDetails();
+        });
+      }
+
+      el('btnSaveCase').addEventListener('click', () => {
+        const notes = el('notes').value || '';
+        const evidence = el('evidence').value || '';
+        state.cases[selectedCaseId] = {
+          ...state.cases[selectedCaseId],
+          status: (state.cases[selectedCaseId]?.status || 'todo'),
+          notes,
+          evidence,
+          updatedAt: nowIso()
+        };
+        saveState();
+        renderAll();
+        renderDetails();
+      });
+
+      el('btnResetCase').addEventListener('click', () => {
+        state.cases[selectedCaseId] = { status: 'todo', notes: '', evidence: '', updatedAt: null };
+        saveState();
+        renderAll();
+        renderDetails();
+      });
+
+      el('btnOpenRunDoc').addEventListener('click', () => {
+        // repo root doc
+        window.open('../FUNCTIONAL-TEST-EXECUTION-RESOLUTION.md', '_blank', 'noopener');
+      });
+      el('btnOpenTestHub').addEventListener('click', () => {
+        window.open('./run-tests.html', '_blank', 'noopener');
+      });
+    }
+
+    function statusButton(status, current, labelOverride) {
+      const label = labelOverride || (STATUS[status]?.label || status);
+      const active = status === current ? 'active' : '';
+      return `<button class="status-btn ${active}" data-status="${status}">${label}</button>`;
+    }
+
+    function setCaseStatus(caseId, status) {
+      const existing = state.cases[caseId] || { status: 'todo', notes: '', evidence: '', updatedAt: null };
+      state.cases[caseId] = { ...existing, status, updatedAt: nowIso() };
+      saveState();
+    }
+
+    function renderAll() {
+      renderStatbar();
+      renderCaseList();
+    }
+
+    function selectCaseId(caseId) {
+      selectedCaseId = caseId;
+      renderAll();
+      renderDetails();
+    }
+
+    // -----------------------------
+    // Export / Import
+    // -----------------------------
+    function buildExportObject() {
+      // Include case definitions for portability
+      return {
+        version: 1,
+        exportedAt: nowIso(),
+        run: state.run,
+        cases: state.cases,
+        caseDefinitions: CASES
+      };
+    }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function toMarkdown() {
+      const stats = computeStats();
+      const header = [
+        `# CareLuva Functional Test Run`,
+        ``,
+        `- **Run name**: ${state.run.name || '(unnamed)'}`,
+        `- **Environment**: ${state.run.env || '(not set)'}`,
+        `- **Firebase projectId**: ${state.run.firebaseProjectId || '(not set)'}`,
+        `- **Tester**: ${state.run.tester || '(not set)'}`,
+        `- **Started**: ${state.run.startedAt}`,
+        `- **Updated**: ${state.run.updatedAt}`,
+        ``,
+        `## Summary`,
+        ``,
+        `- **Total**: ${stats.total}`,
+        `- **Pass**: ${stats.pass}`,
+        `- **Fail**: ${stats.fail}`,
+        `- **Skip**: ${stats.skip}`,
+        `- **N/A**: ${stats.na}`,
+        `- **Not run**: ${stats.todo}`,
+        ``,
+        `## Results`
+      ];
+
+      const bySection = {};
+      for (const c of CASES) {
+        if (!bySection[c.section]) bySection[c.section] = [];
+        bySection[c.section].push(c);
+      }
+
+      const lines = [...header];
+      const sections = Object.keys(bySection).sort((a,b) => a.localeCompare(b));
+      for (const sec of sections) {
+        lines.push(``);
+        lines.push(`### ${sec}`);
+        lines.push(``);
+        for (const c of bySection[sec]) {
+          const r = state.cases[c.id] || { status: 'todo', notes: '', evidence: '', updatedAt: null };
+          const status = r.status === 'todo' ? 'NOT RUN' : (STATUS[r.status]?.label || r.status).toUpperCase();
+          lines.push(`- **${c.id}**: ${c.name} — **${status}**${r.updatedAt ? ` _(updated ${r.updatedAt})_` : ''}`);
+          if (r.notes && r.notes.trim()) {
+            lines.push(`  - Notes: ${r.notes.trim().split('\n').join(' ')}`);
+          }
+          if (r.evidence && r.evidence.trim()) {
+            const ev = r.evidence.trim().split('\n').map(s => s.trim()).filter(Boolean);
+            if (ev.length) {
+              lines.push(`  - Evidence:`);
+              for (const e of ev) lines.push(`    - ${e}`);
+            }
+          }
+        }
+      }
+
+      lines.push(``);
+      lines.push(`## Evidence checklist`);
+      lines.push(`- Browser + OS`);
+      lines.push(`- Firebase project ID used`);
+      lines.push(`- Page URL`);
+      lines.push(`- Screenshot/video/logs`);
+      lines.push(`- Console error text (if any)`);
+
+      return lines.join('\n');
+    }
+
+    function doExportJson() {
+      const obj = buildExportObject();
+      const text = JSON.stringify(obj, null, 2);
+      downloadText(`functional-test-run-${safeFile(state.run.name) || 'run'}.json`, text);
+    }
+
+    function doExportMd() {
+      const md = toMarkdown();
+      downloadText(`functional-test-run-${safeFile(state.run.name) || 'run'}.md`, md);
+    }
+
+    async function copyMarkdown() {
+      const md = toMarkdown();
+      try {
+        await navigator.clipboard.writeText(md);
+        alert('Markdown copied to clipboard.');
+      } catch (e) {
+        // Fallback: put in textarea and select
+        el('importJson').value = md;
+        el('importJson').focus();
+        el('importJson').select();
+        alert('Could not access clipboard. Markdown is placed in the textarea—select & copy manually.');
+      }
+    }
+
+    function doImportJson() {
+      const raw = el('importJson').value;
+      if (!raw || !raw.trim()) {
+        alert('Paste JSON into the import box first.');
+        return;
+      }
+      try {
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== 'object') throw new Error('Invalid JSON structure.');
+        if (!obj.cases || typeof obj.cases !== 'object') throw new Error('Missing "cases".');
+        // Merge cases; keep current case definitions
+        const base = defaultState();
+        const next = loadState();
+        next.run = { ...base.run, ...(obj.run || {}) };
+        next.cases = { ...base.cases, ...obj.cases };
+        next.run.updatedAt = nowIso();
+        state = next;
+        saveState();
+        renderAll();
+        renderDetails();
+        alert('Import successful.');
+      } catch (e) {
+        alert('Import failed: ' + (e.message || e.toString()));
+      }
+    }
+
+    function safeFile(name) {
+      return String(name || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-_]+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 60)
+        .replace(/^-|-$/g, '');
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    // -----------------------------
+    // Wire up meta inputs + actions
+    // -----------------------------
+    function wireMeta() {
+      el('runName').value = state.run.name || '';
+      el('runEnv').value = state.run.env || '';
+      el('firebaseProject').value = state.run.firebaseProjectId || '';
+      el('tester').value = state.run.tester || '';
+
+      el('runName').addEventListener('input', () => { state.run.name = el('runName').value; saveState(); });
+      el('runEnv').addEventListener('input', () => { state.run.env = el('runEnv').value; saveState(); });
+      el('firebaseProject').addEventListener('input', () => { state.run.firebaseProjectId = el('firebaseProject').value; saveState(); });
+      el('tester').addEventListener('input', () => { state.run.tester = el('tester').value; saveState(); });
+
+      el('btnNewRun').addEventListener('click', () => {
+        if (!confirm('Reset all case statuses for a new run? Notes/evidence will be cleared.')) return;
+        resetRun(true);
+      });
+
+      el('btnClearAll').addEventListener('click', () => {
+        if (!confirm('Clear tracker storage in this browser? This cannot be undone.')) return;
+        clearStorage();
+      });
+
+      el('btnExportJson').addEventListener('click', doExportJson);
+      el('btnExportMd').addEventListener('click', doExportMd);
+      el('btnDownloadMd').addEventListener('click', doExportMd);
+      el('btnCopyMd').addEventListener('click', copyMarkdown);
+      el('btnImportJson').addEventListener('click', doImportJson);
+
+      el('search').addEventListener('input', renderCaseList);
+      el('filterStatus').addEventListener('change', renderCaseList);
+    }
+
+    // Init
+    wireMeta();
+    renderAll();
+    renderDetails();
+  </script>
+</body>
+</html>
+
+

@@ -1,11 +1,306 @@
-# Test Execution Resolution Document
+# ✅ CareLuva Functional Test Suite (Manual / Regression)
+
+This document is the **end-to-end functional regression checklist** for CareLuva. It covers the currently implemented pages and workflows, plus the supporting test utilities in `tests/`.
+
+> This file originally started as a “resolution document” for a few admin bugs. Those historical issue writeups are preserved at the bottom as **Appendix A**.
 
 ## Document Information
-- **Date**: 2024
-- **Project**: CareLuva Admin Panel
-- **Testing Phase**: Review Moderation & Navigation Testing
+- **Last Updated**: 2026-01-28
+- **Project**: CareLuva
+- **Scope**: Patient + Provider + Admin flows, plus testing utilities
+- **Goal**: Validate “it works in a real browser with the current Firebase/Firestore rules”
 
 ---
+
+## 0) Prerequisites (Do this once)
+
+### Local server
+- Start the local server (recommended port 8080):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File serve-port-8080.ps1
+```
+
+### Firebase config
+- Confirm `firebase-config.js` is configured for the intended Firebase project (dev/test).
+- Open any page and verify the browser console shows Firebase initialized without errors.
+
+### Test accounts / roles
+Have at least:
+- **Admin account** (present in `admins` collection if rules require it)
+- **Provider account** (provider registration exists in `providerRegistrations`)
+- **Patient account** (patient exists in `patientUsers`)
+
+### Test data helpers (recommended)
+- Open the test hub: `http://localhost:8080/tests/run-tests.html`
+- Use the generator UI: `http://localhost:8080/tests/test-data-generator-ui.html`
+- Use the functional tracker: `http://localhost:8080/tests/functional-test-tracker.html`
+
+---
+
+## 1) Recommended Execution Order (fastest signal → deeper checks)
+
+1. **Smoke / routing**: basic pages load without JS errors (Section 2)
+2. **Auth + session**: provider + patient + admin can log in and remain logged in (Section 3)
+3. **Core user journeys**:
+   - Patient: find clinic → view profile → book appointment → leave review (Sections 4–6)
+   - Provider: dashboard → manage photos → appointments/patients (Sections 7–9)
+4. **Admin workflows**: verification + review moderation + service catalog permissions (Sections 10–12)
+5. **Test utilities sanity**: test pages run and explain expected permissions (Section 13)
+
+> Note: this is **manual functional testing**. Automated tests (Vitest) are a separate gate and should be green before doing deep manual work.
+
+---
+
+## How to record results (Functional Test Tracker)
+
+Use `http://localhost:8080/tests/functional-test-tracker.html` to track a full regression run.
+
+### What it records
+- **Status** per case: Pass / Fail / Skip / N/A / Not run
+- **Notes** (error messages, reproduction steps, observations)
+- **Evidence links** (screenshots, screen recordings, logs, PR comments)
+- **Timestamps** (per case + overall run)
+
+### Persistence + export
+- Data is stored in your browser via **localStorage**
+- Export as:
+  - **JSON** (portable; can be imported later)
+  - **Markdown** (easy to paste into PR description / issue)
+
+### Keeping the tracker in sync
+The tracker’s case list is designed to mirror this document’s main sections.
+If you add/remove functional test cases here, update the tracker case list in `tests/functional-test-tracker.html` (look for the `CASES` array).
+
+## 2) Smoke Tests (Pages load + no console explosions)
+
+For each page below: open it, confirm UI renders, and check the console for uncaught errors.
+
+- **Home**: `/index.html`
+- **Patient auth**: `/patient-auth.html`
+- **Provider auth**: `/provider-auth.html`
+- **Admin panel**: `/admin-panel.html`
+- **Find clinics**: `/find-clinics.html`
+- **Provider directory/profile**: `/provider-directory.html?id=<clinicId>`
+- **Appointment booking**: `/appointment-booking.html`
+- **Review system**: `/review-system.html`
+- **Provider dashboard**: `/provider-dashboard.html`
+- **Clinic photo gallery**: `/clinic-photo-gallery.html`
+
+**Pass criteria**
+- No blank/white screen
+- No repeated “permission denied” loops
+- No uncaught exceptions in console
+
+---
+
+## 3) Authentication + Session Persistence
+
+### 3.1 Patient login + persistence
+1. Open `http://localhost:8080/patient-auth.html`
+2. Log in
+3. Refresh the page
+4. Open `http://localhost:8080/patient-dashboard.html`
+
+**Expected**
+- User is recognized as logged in after refresh
+- Dashboard loads without redirect loops
+
+### 3.2 Provider login + persistence
+1. Open `http://localhost:8080/provider-auth.html`
+2. Log in
+3. Refresh and open `http://localhost:8080/provider-dashboard.html`
+
+**Expected**
+- Provider session persists across refresh
+- Provider dashboard loads
+
+### 3.3 Admin login + persistence across navigation
+1. Open `http://localhost:8080/admin-panel.html`
+2. Log in as admin
+3. Navigate inside admin features (e.g., verification, service catalog)
+4. Return/back; refresh
+
+**Expected**
+- Admin remains authenticated
+- Pages that require admin do not show “Missing or insufficient permissions”
+
+---
+
+## 4) Patient Journey: Find Clinics + Provider Directory
+
+### 4.1 Find clinics search + filters
+1. Open `http://localhost:8080/find-clinics.html`
+2. Search by name/location/specialization (whatever UI supports)
+3. Use filters (including badge filters if enabled)
+4. Click a clinic card
+
+**Expected**
+- Results render quickly
+- Filters narrow results correctly
+- Clicking a clinic opens the correct clinic profile
+
+### 4.2 Provider directory: back navigation and context
+1. From find-clinics, open a provider profile
+2. Use “Back” / “Back to Search” behavior
+
+**Expected**
+- Returns to the correct prior context (patient search vs admin context)
+
+---
+
+## 5) Appointments (Booking + provider view)
+
+### 5.1 Book an appointment (patient-facing)
+1. Open `http://localhost:8080/appointment-booking.html`
+2. Fill required fields (must include the fields enforced by rules, e.g. `clinicId` and `patientEmail`)
+3. Submit
+
+**Expected**
+- Appointment is created successfully
+- If blocked by rules, the UI shows a clear error explaining what is missing
+
+### 5.2 Provider appointments view
+1. Log in as provider
+2. Open `http://localhost:8080/provider-appointments.html`
+3. Verify the newly created appointment appears
+
+**Expected**
+- Provider can view relevant appointments
+- Status transitions (if UI supports) work and persist
+
+---
+
+## 6) Reviews (Create + list + admin moderation linkouts)
+
+### 6.1 Create a review
+1. Open `http://localhost:8080/review-system.html`
+2. Create a review for an existing clinic (use real clinic IDs from generator if available)
+
+**Expected**
+- Review saves without permission errors
+- Review shows correctly in lists (provider profile / admin moderation)
+
+### 6.2 Admin: review moderation → view clinic profile
+1. Open `http://localhost:8080/admin-panel.html`
+2. Go to review moderation (where applicable)
+3. Click “View Clinic”
+
+**Expected**
+- Provider profile loads (by ID; fallback by name works if ID lookup fails)
+- Back button returns to admin correctly (or uses history correctly)
+
+---
+
+## 7) Provider Dashboard (Badges + core widgets)
+
+1. Log in as provider
+2. Open `http://localhost:8080/provider-dashboard.html`
+3. Verify verification badges appear as expected (Certified/Insured/Experienced/Verified)
+4. Hover badges (tooltips)
+
+**Expected**
+- Badges reflect Firestore data and approval status
+- No broken UI states when fields are missing (graceful “not verified yet”)
+
+---
+
+## 8) Photo Gallery (Provider upload + patient display)
+
+Follow the detailed steps in:
+- `TESTING-GUIDE.md` (photo gallery + verification workflow)
+
+Minimum regression subset:
+1. Provider uploads at least 1 photo
+2. Patient can view those photos on provider directory profile
+3. Deleting a photo removes it from patient view
+
+---
+
+## 9) Provider tools (Patients / Invoices / Treatment Plans)
+
+If these pages are in use in your environment, do a basic smoke + CRUD sanity test:
+- `/provider-patients.html`
+- `/provider-invoices.html`
+- `/provider-treatment-plans.html`
+- `/create-treatment-plan.html`
+
+**Expected**
+- Pages load without permission errors
+- Any create/update actions show clear success/failure messaging
+
+---
+
+## 10) Admin: Verification Workflow + Badge Status
+
+Use the detailed steps in:
+- `TESTING-GUIDE.md`
+- `VERIFICATION-TESTING-GUIDE.md`
+
+Minimum regression subset:
+1. Admin can open verification modal/workflow for a pending registration
+2. Approve → status updates; Verified badge logic becomes consistent
+3. “Check Badge Status” reflects expected issues (e.g., expired insurance)
+
+---
+
+## 11) Admin: Service Catalog Permissions
+
+1. While logged in as admin, open `http://localhost:8080/admin-service-catalog.html`
+
+**Expected**
+- Loads without “Missing or insufficient permissions”
+- If not logged in / not admin, user is redirected or shown an access error with next steps
+
+---
+
+## 12) Admin: Communication Monitor / Payment Verification (smoke)
+
+If you use these in production workflows, perform at least:
+- Load the page and confirm data loads (or shows empty states)
+- Trigger one action (if safe) and confirm it persists
+
+Pages:
+- `/admin-communication-monitor.html`
+- `/admin-payment-verification.html`
+
+---
+
+## 13) Test Utilities (Browser-based test pages)
+
+### 13.1 Test hub loads
+1. Open `http://localhost:8080/tests/run-tests.html`
+2. Open each card and run the suite
+
+**Expected**
+- Tests run and clearly explain permission failures (if any)
+- Results show pass/fail counts and timing
+
+### 13.2 Data generator sanity
+1. Open `http://localhost:8080/tests/test-data-generator-ui.html`
+2. Generate + save:
+   - Provider registration
+   - Patient user
+   - Review (with real clinic IDs if available)
+   - Appointment (ensure required fields are set)
+
+**Expected**
+- Provider/patient/review saves succeed
+- If appointment save fails due to rules, UI explains why and what field/auth is missing
+
+---
+
+## Evidence Checklist (what to capture when reporting)
+- Browser + OS
+- Firebase project ID used
+- Page URL
+- Screenshot of UI state
+- Console error (copy/paste)
+- Firestore document path that failed (if relevant)
+
+---
+
+## Appendix A: Historical Issue Resolutions (kept for reference)
 
 ## Test Findings Summary
 
@@ -191,6 +486,7 @@ When clicking "Service Catalog" in admin panel, error occurred: "Error loading s
 
 ## Sign-off
 - **Developer**: AI Assistant
-- **Date**: 2024
-- **Status**: ✅ All 5 issues resolved and tested
+- **Date**: 2026-01-28
+- **Status**: ✅ Appendix A issues resolved; main document is the active functional regression suite
+
 
