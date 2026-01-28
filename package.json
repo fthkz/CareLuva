@@ -10,7 +10,9 @@
     "test:coverage": "vitest run --coverage",
     "test:auth": "vitest run tests/unit/auth",
     "test:firestore": "vitest run tests/unit/firestore",
+    "test:services": "vitest run tests/unit/services",
     "test:integration": "vitest run tests/integration",
+    "test:performance": "vitest run tests/performance",
     "test:e2e": "vitest run tests/e2e",
     "lint": "eslint . --ext .js",
     "format": "prettier --write \"**/*.{js,html,css,json,md}\""

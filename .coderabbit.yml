@@ -1,0 +1,90 @@
+# CodeRabbit Configuration
+# Automated code review and suggestions
+
+# General settings
+language: javascript
+review:
+  # Review all pull requests
+  enabled: true
+  
+  # Review settings
+  review_type: full
+  review_status: approved
+  
+  # Comment settings
+  comment_mode: always
+  max_comments: 50
+  
+  # File patterns to review
+  paths:
+    include:
+      - "*.js"
+      - "*.html"
+      - "*.css"
+      - "*.json"
+    exclude:
+      - "node_modules/**"
+      - "coverage/**"
+      - "tests/results/**"
+      - "*.bundle.js"
+      - "package-lock.json"
+
+# Code quality checks
+quality:
+  # Enable quality checks
+  enabled: true
+  
+  # Check for common issues
+  checks:
+    - security
+    - performance
+    - best_practices
+    - code_smells
+    - bugs
+    - maintainability
+
+# Security scanning
+security:
+  enabled: true
+  severity: high
+  
+# Performance checks
+performance:
+  enabled: true
+  check_complexity: true
+  max_complexity: 15
+
+# Testing
+testing:
+  # Check test coverage
+  coverage:
+    enabled: true
+    threshold: 60  # Minimum coverage percentage
+  
+  # Test file patterns
+  test_paths:
+    - "tests/**/*.test.js"
+    - "tests/**/*.spec.js"
+
+# Documentation
+documentation:
+  enabled: true
+  require_docs: false  # Don't require docs for all functions
+
+# Suggestions
+suggestions:
+  enabled: true
+  include:
+    - refactoring
+    - optimization
+    - security_improvements
+    - best_practices
+
+# Ignore patterns
+ignore:
+  - "*.min.js"
+  - "*.bundle.js"
+  - "node_modules/**"
+  - "coverage/**"
+  - "tests/results/**"
+
