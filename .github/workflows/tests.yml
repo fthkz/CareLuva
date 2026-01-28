@@ -101,6 +101,11 @@ jobs:
       run: npm install
     
     - name: Run linter (if configured)
-      run: npm run lint || echo "Linter not configured, skipping"
+      run: |
+        if npm list eslint > /dev/null 2>&1; then
+          npm run lint || echo "Linter found issues but continuing..."
+        else
+          echo "ESLint not installed, skipping lint check"
+        fi
       continue-on-error: true
 
