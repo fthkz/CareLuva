@@ -5,7 +5,7 @@ This document is the **end-to-end functional regression checklist** for CareLuva
 > This file originally started as a “resolution document” for a few admin bugs. Those historical issue writeups are preserved at the bottom as **Appendix A**.
 
 ## Document Information
-- **Last Updated**: 2026-01-28
+- **Last Updated**: 2026-01-28 (Holistic order + CI/CD + CodeRabbit + Rules + Tracker sections added)
 - **Project**: CareLuva
 - **Scope**: Patient + Provider + Admin flows, plus testing utilities
 - **Goal**: Validate “it works in a real browser with the current Firebase/Firestore rules”
@@ -38,17 +38,134 @@ Have at least:
 
 ---
 
-## 1) Recommended Execution Order (fastest signal → deeper checks)
+## 1) Holistic Recommended Execution Order (Complete Testing Workflow)
 
-1. **Smoke / routing**: basic pages load without JS errors (Section 2)
-2. **Auth + session**: provider + patient + admin can log in and remain logged in (Section 3)
+This order integrates **all testing tools** (automated, manual, code review) for comprehensive validation:
+
+### Phase 0: Pre-flight checks (5 minutes)
+1. **Start local server**: `powershell -ExecutionPolicy Bypass -File serve-port-8080.ps1`
+2. **Verify Firebase config**: Open any page, check console for initialization errors
+3. **Open Functional Test Tracker**: `http://localhost:8080/tests/functional-test-tracker.html`
+   - Fill in: **Run name**, **Environment**, **Firebase projectId**, **Tester**
+   - This will track your entire regression run
+
+### Phase 1: Automated tests gate (10–15 minutes)
+**Goal**: Ensure code-level tests pass before manual testing
+
+1. **Run Vitest suite locally**:
+   ```bash
+   npm test
+   ```
+   - **Expected**: All unit/integration/performance tests pass
+   - **If failures**: Fix code issues first, then continue
+
+2. **Verify CI/CD is green** (Section 15):
+   - Check GitHub Actions: `https://github.com/<owner>/<repo>/actions`
+   - Confirm latest push triggered tests
+   - Download artifacts if needed
+
+**Decision point**: If automated tests fail, fix them before proceeding to manual tests.
+
+### Phase 2: Test data preparation (10 minutes)
+**Goal**: Ensure you have realistic test data for manual testing
+
+1. **Use Test Data Generator** (Section 13.2):
+   - Open: `http://localhost:8080/tests/test-data-generator-ui.html`
+   - Generate + save:
+     - **Provider registration** (with certifications, insurance, experience)
+     - **Patient user** (with name, email, password)
+     - **Review** (use real clinic IDs from Firestore)
+     - **Appointment** (ensure `clinicId` and `patientEmail` are set)
+
+2. **Verify test accounts exist**:
+   - Admin account (in `admins` collection)
+   - Provider account (in `providerRegistrations`)
+   - Patient account (in `patientUsers`)
+
+### Phase 3: Code review (CodeRabbit) (5–10 minutes)
+**Goal**: Get automated code quality feedback before manual testing
+
+1. **Create/update PR** (if not already done):
+   - Push changes to a branch
+   - Create Pull Request on GitHub
+
+2. **Wait for CodeRabbit review** (Section 16):
+   - CodeRabbit comments appear in PR within 2–10 minutes
+   - Review suggestions in **Conversation** and **Files changed** tabs
+
+3. **Address critical issues**:
+   - Fix security issues immediately
+   - Address high-priority suggestions
+   - Document why you're deferring low-priority items
+
+**Decision point**: If CodeRabbit flags critical security issues, fix them before manual testing.
+
+### Phase 4: Manual functional testing (30–60 minutes)
+**Goal**: Validate end-to-end user workflows in a real browser
+
+Follow this order for fastest signal → deeper validation:
+
+1. **Smoke tests** (Section 2): Pages load without JS errors (5 min)
+2. **Auth + session** (Section 3): Login persistence works (5 min)
 3. **Core user journeys**:
-   - Patient: find clinic → view profile → book appointment → leave review (Sections 4–6)
-   - Provider: dashboard → manage photos → appointments/patients (Sections 7–9)
-4. **Admin workflows**: verification + review moderation + service catalog permissions (Sections 10–12)
-5. **Test utilities sanity**: test pages run and explain expected permissions (Section 13)
+   - **Patient**: Find clinic → View profile → Book appointment → Leave review (Sections 4–6) (10 min)
+   - **Provider**: Dashboard → Manage photos → Appointments/patients (Sections 7–9) (10 min)
+4. **Admin workflows** (Sections 10–12): Verification + Review moderation + Service catalog (10 min)
+5. **Test utilities sanity** (Section 13): Test pages run correctly (5 min)
 
-> Note: this is **manual functional testing**. Automated tests (Vitest) are a separate gate and should be green before doing deep manual work.
+**Record results**: Use the Functional Test Tracker to mark Pass/Fail, add notes, and link evidence.
+
+### Phase 5: Firestore rules validation (15–20 minutes)
+**Goal**: Verify security rules enforce expected constraints
+
+1. **Test rules constraints** (Section 14):
+   - Appointment creation (requires `clinicId` + `patientEmail`)
+   - Review creation (requires `reviewerName`, `reviewText`, `clinicId`)
+   - Admin-only operations (verification, service catalog)
+   - Provider/patient data access (own data only)
+
+2. **Use Rules Verification Tool**:
+   - Open: `http://localhost:8080/tests/test-rules-verification.html`
+   - Test specific rule scenarios
+
+### Phase 6: Functional test tracker self-test (5 minutes)
+**Goal**: Ensure the tracker itself works correctly
+
+1. **Test tracker functionality** (Section 17):
+   - Set statuses (Pass/Fail/Skip/N/A)
+   - Add notes and evidence links
+   - Export Markdown and JSON
+   - Import JSON (verify round-trip)
+
+### Phase 7: Final validation + reporting (10 minutes)
+**Goal**: Compile results and document findings
+
+1. **Export tracker results**:
+   - **Markdown**: Paste into PR description or issue
+   - **JSON**: Archive for future reference
+
+2. **Review CI/CD artifacts**:
+   - Download test results from GitHub Actions
+   - Review coverage reports
+
+3. **Summarize findings**:
+   - List any failures with evidence
+   - Document any blockers
+   - Note any deferred CodeRabbit suggestions
+
+---
+
+## Quick Reference: Testing Tools Summary
+
+| Tool | Purpose | When to Use | Location |
+|------|---------|-------------|----------|
+| **Vitest** | Automated unit/integration tests | Before manual testing | `npm test` |
+| **Test Data Generator** | Create test data | Before manual testing | `tests/test-data-generator-ui.html` |
+| **CodeRabbit** | Automated code review | On PR creation/update | GitHub PR comments |
+| **CI/CD (GitHub Actions)** | Automated test execution | On every push/PR | GitHub Actions tab |
+| **Functional Test Tracker** | Record manual test results | During manual testing | `tests/functional-test-tracker.html` |
+| **Firestore Rules Tool** | Test security rules | After manual testing | `tests/test-rules-verification.html` |
+| **Test Hub** | Access all test utilities | Anytime | `tests/run-tests.html` |
 
 ---
 
@@ -287,6 +404,333 @@ Pages:
 **Expected**
 - Provider/patient/review saves succeed
 - If appointment save fails due to rules, UI explains why and what field/auth is missing
+
+---
+
+## 14) Firestore Rules Constraints Testing
+
+**Goal**: Verify security rules enforce expected constraints and prevent unauthorized access.
+
+### 14.1 Appointment creation constraints
+
+**Test**: Appointment requires `clinicId` and `patientEmail` (non-empty strings)
+
+1. **Test valid appointment**:
+   - Open `http://localhost:8080/appointment-booking.html`
+   - Fill: `clinicId` (real clinic ID), `patientEmail` (valid email), other required fields
+   - Submit
+   - **Expected**: Appointment created successfully
+
+2. **Test missing `clinicId`**:
+   - Submit appointment with empty `clinicId`
+   - **Expected**: Permission denied or clear error message
+
+3. **Test missing `patientEmail`**:
+   - Submit appointment with empty `patientEmail`
+   - **Expected**: Permission denied or clear error message
+
+4. **Test invalid `clinicId` format**:
+   - Submit with `clinicId` as number/null/undefined
+   - **Expected**: Permission denied (rules require string)
+
+### 14.2 Review creation constraints
+
+**Test**: Review requires `reviewerName`, `reviewText`, `clinicId` (all non-empty strings)
+
+1. **Test valid review**:
+   - Open `http://localhost:8080/review-system.html`
+   - Fill: `reviewerName`, `reviewText`, `clinicId` (real clinic ID), rating
+   - Submit
+   - **Expected**: Review created successfully
+
+2. **Test missing required fields**:
+   - Submit review with empty `reviewerName` or `reviewText` or `clinicId`
+   - **Expected**: Permission denied
+
+### 14.3 Admin-only operations
+
+**Test**: Admin-only collections require Firebase Auth + admin document
+
+1. **Test admin service catalog** (Section 11):
+   - Log in as admin → Open `/admin-service-catalog.html`
+   - **Expected**: Loads successfully
+
+2. **Test admin service catalog (not admin)**:
+   - Log in as provider/patient → Open `/admin-service-catalog.html`
+   - **Expected**: Redirected or shown access error
+
+3. **Test admin verification workflow**:
+   - Log in as admin → Open admin panel → Click "Review & Approve"
+   - **Expected**: Verification modal opens
+
+4. **Test admin verification (not admin)**:
+   - Log in as provider → Try to access admin verification endpoints
+   - **Expected**: Permission denied
+
+### 14.4 Provider/patient data access (own data only)
+
+**Test**: Users can only read/update their own data
+
+1. **Provider reads own registration**:
+   - Log in as provider → Query `providerRegistrations` where `email` matches
+   - **Expected**: Can read own registration
+
+2. **Provider reads other provider's registration**:
+   - Log in as provider → Try to read another provider's registration
+   - **Expected**: Permission denied (unless admin)
+
+3. **Patient reads own data**:
+   - Log in as patient → Query `patientUsers` where `email` matches
+   - **Expected**: Can read own data
+
+### 14.5 Use Rules Verification Tool
+
+1. Open: `http://localhost:8080/tests/test-rules-verification.html`
+2. Test specific rule scenarios:
+   - Create document with valid fields
+   - Create document with missing required fields
+   - Update document (own vs others)
+   - Delete document (admin vs non-admin)
+
+**Expected**
+- Rules tool shows clear pass/fail for each scenario
+- Error messages explain which rule constraint failed
+
+---
+
+## 15) CI/CD Workflow Verification
+
+**Goal**: Verify automated tests run correctly on GitHub Actions.
+
+### 15.1 Check CI/CD status
+
+1. **Go to GitHub Actions**:
+   - Navigate: `https://github.com/<owner>/<repo>/actions`
+   - Look for **"Automated Tests"** workflow
+
+2. **Verify latest run**:
+   - Check status: ✅ Green = Passed, ❌ Red = Failed, 🟡 Yellow = Running
+   - Click on latest run to see details
+
+### 15.2 Review test execution
+
+1. **Check test jobs**:
+   - **Run Tests (Node.js 18.x)**: Should show test results
+   - **Run Tests (Node.js 20.x)**: Should show test results
+   - **Lint Code**: Should show linting results (if configured)
+
+2. **Review test output**:
+   - Click on a job → Expand "Run all tests" step
+   - Verify: Test count, pass/fail counts, execution time
+   - Check for any errors or warnings
+
+### 15.3 Download artifacts
+
+1. **Scroll to bottom** of workflow run page
+2. **Find "Artifacts" section**:
+   - `test-results-18.x` - Test results JSON for Node 18
+   - `test-results-20.x` - Test results JSON for Node 20
+   - `coverage` - Coverage reports (if generated)
+
+3. **Download and review**:
+   - Extract artifacts
+   - Review `test-results.json` for detailed results
+   - Review coverage reports if available
+
+### 15.4 Verify triggers
+
+**Test**: CI/CD runs on expected events
+
+1. **Push to main/develop**:
+   - Make a small commit → Push to `main` or `develop`
+   - **Expected**: Workflow triggers automatically
+
+2. **Pull request**:
+   - Create PR → Push to PR branch
+   - **Expected**: Workflow runs on PR
+
+3. **Scheduled run** (if configured):
+   - Check Actions tab daily at scheduled time
+   - **Expected**: Workflow runs automatically
+
+### 15.5 Check notifications (optional)
+
+1. **GitHub email notifications**:
+   - Go to: `https://github.com/settings/notifications`
+   - Enable: "Email notifications for failed workflows"
+   - **Expected**: Receive email when tests fail
+
+**Expected**
+- CI/CD runs automatically on push/PR
+- All test jobs complete successfully
+- Artifacts are downloadable
+- Test results are visible in PR comments (if configured)
+
+---
+
+## 16) CodeRabbit Review Process
+
+**Goal**: Get automated code quality feedback and address suggestions.
+
+### 16.1 Verify CodeRabbit is active
+
+1. **Check GitHub App installation**:
+   - Go to: `https://github.com/<owner>/<repo>/settings/installations`
+   - Look for **"CodeRabbit"** or **"CodeRabbitAI"**
+   - **Expected**: Shows as "Active" with repository access
+
+2. **Check `.coderabbit.yml` exists**:
+   - File should exist in repository root
+   - **Expected**: Contains review configuration
+
+### 16.2 Create/update PR to trigger review
+
+1. **Create a test PR** (if not already done):
+   ```bash
+   git checkout -b test-coderabbit-review
+   # Make a small change (e.g., add a comment)
+   git add .
+   git commit -m "test: Trigger CodeRabbit review"
+   git push origin test-coderabbit-review
+   ```
+   - Create Pull Request on GitHub
+
+2. **Wait for CodeRabbit**:
+   - CodeRabbit reviews within 2–10 minutes
+   - Check PR **Conversation** tab for CodeRabbit comments
+
+### 16.3 Review CodeRabbit suggestions
+
+1. **Check Conversation tab**:
+   - Look for comment from `coderabbit[bot]`
+   - Review summary and recommendations
+
+2. **Check Files changed tab**:
+   - Look for inline comments on specific lines
+   - CodeRabbit comments appear as suggestions
+
+3. **Review categories**:
+   - **Security issues**: Fix immediately
+   - **Performance**: Address if significant
+   - **Best practices**: Consider for code quality
+   - **Documentation**: Address if unclear
+
+### 16.4 Address CodeRabbit feedback
+
+1. **Critical issues** (security, bugs):
+   - Fix immediately
+   - Commit and push
+   - CodeRabbit will re-review
+
+2. **High-priority suggestions**:
+   - Address if time permits
+   - Document why deferring if not addressed
+
+3. **Low-priority suggestions**:
+   - Can defer to future PRs
+   - Document in PR comments if needed
+
+### 16.5 Verify re-review (after fixes)
+
+1. **Push fixes**:
+   - Commit changes addressing CodeRabbit feedback
+   - Push to PR branch
+
+2. **Wait for re-review**:
+   - CodeRabbit re-reviews within 2–10 minutes
+   - Check if suggestions are resolved
+
+**Expected**
+- CodeRabbit comments appear on PR within 10 minutes
+- Suggestions are actionable and clear
+- Re-review happens automatically after fixes
+
+---
+
+## 17) Functional Test Tracker Self-Test
+
+**Goal**: Verify the functional test tracker itself works correctly.
+
+### 17.1 Basic functionality
+
+1. **Open tracker**: `http://localhost:8080/tests/functional-test-tracker.html`
+2. **Fill metadata**:
+   - Run name: "Tracker Self-Test"
+   - Environment: "Development"
+   - Firebase projectId: Your project ID
+   - Tester: Your name
+3. **Expected**: Fields save automatically (check localStorage)
+
+### 17.2 Status management
+
+1. **Set statuses**:
+   - Click a test case → Set to **Pass**
+   - Click another → Set to **Fail**
+   - Click another → Set to **Skip**
+   - Click another → Set to **N/A**
+2. **Refresh page**
+3. **Expected**: Statuses persist (loaded from localStorage)
+
+### 17.3 Notes and evidence
+
+1. **Add notes**:
+   - Select a test case → Add notes: "Test note for tracker validation"
+   - Save
+2. **Add evidence links**:
+   - Add evidence: "https://example.com/screenshot.png"
+   - Save
+3. **Refresh page**
+4. **Expected**: Notes and evidence persist
+
+### 17.4 Export functionality
+
+1. **Export Markdown**:
+   - Click **"Copy Markdown"** or **"Download Markdown"**
+   - **Expected**: Markdown includes all cases, statuses, notes, evidence
+
+2. **Export JSON**:
+   - Click **"Export JSON"**
+   - **Expected**: JSON file downloads with complete state
+
+3. **Verify export content**:
+   - Open exported Markdown/JSON
+   - **Expected**: Contains run metadata, all cases, statuses, notes, evidence
+
+### 17.5 Import functionality
+
+1. **Export current state** (from step 17.4)
+2. **Reset tracker**: Click **"New Run"** → Confirm
+3. **Import JSON**:
+   - Paste exported JSON into import box
+   - Click **"Import JSON"**
+4. **Expected**: All data restored (statuses, notes, evidence)
+
+### 17.6 Search and filter
+
+1. **Search**:
+   - Type in search box (e.g., "Smoke")
+   - **Expected**: Only matching cases shown
+
+2. **Filter by status**:
+   - Select status filter (e.g., "Pass")
+   - **Expected**: Only cases with that status shown
+
+3. **Clear filters**:
+   - Clear search and filter
+   - **Expected**: All cases shown
+
+### 17.7 Statistics display
+
+1. **Check statbar**:
+   - Look at top statistics (Total, Pass, Fail, Skip, N/A, Not run)
+2. **Set multiple statuses** (from step 17.2)
+3. **Expected**: Statistics update correctly
+
+**Expected**
+- Tracker saves/loads data correctly
+- Export/import works (round-trip)
+- Search and filter work
+- Statistics are accurate
 
 ---
 

@@ -438,7 +438,35 @@
       { id: 'T2', section: 'Test utilities', name: 'Run Auth tests in browser', steps: ['Open /tests/test-auth-utils.html', 'Run tests'], expected: ['Clear pass/fail output'] },
       { id: 'T3', section: 'Test utilities', name: 'Run Firestore operations tests', steps: ['Open /tests/test-firestore-operations.html', 'Run connection tests'], expected: ['Connection tests pass; permission errors explained if any'] },
       { id: 'T4', section: 'Test utilities', name: 'Data generator can save provider/patient/review', steps: ['Open /tests/test-data-generator-ui.html', 'Generate + Save provider/patient/review'], expected: ['Saves succeed (dev/test env)'] },
-      { id: 'T5', section: 'Test utilities', name: 'Appointment generator save behavior is clear', steps: ['In data generator, generate appointment', 'Attempt save'], expected: ['Either saves or explains required fields/rules clearly'] }
+      { id: 'T5', section: 'Test utilities', name: 'Appointment generator save behavior is clear', steps: ['In data generator, generate appointment', 'Attempt save'], expected: ['Either saves or explains required fields/rules clearly'] },
+
+      // Firestore rules constraints (Section 14)
+      { id: 'FR1', section: 'Firestore Rules', name: 'Appointment creation requires clinicId + patientEmail', steps: ['Submit appointment with valid clinicId + patientEmail', 'Submit with empty clinicId', 'Submit with empty patientEmail'], expected: ['Valid creates successfully', 'Missing fields show permission denied or clear error'] },
+      { id: 'FR2', section: 'Firestore Rules', name: 'Review creation requires reviewerName + reviewText + clinicId', steps: ['Submit review with all required fields', 'Submit with missing fields'], expected: ['Valid creates successfully', 'Missing fields show permission denied'] },
+      { id: 'FR3', section: 'Firestore Rules', name: 'Admin-only operations require admin auth', steps: ['Open admin service catalog as admin', 'Open admin service catalog as provider/patient'], expected: ['Admin can access', 'Non-admin redirected or shown error'] },
+      { id: 'FR4', section: 'Firestore Rules', name: 'Users can only read/update own data', steps: ['Provider reads own registration', 'Provider tries to read other provider registration', 'Patient reads own data'], expected: ['Own data accessible', 'Others data permission denied (unless admin)'] },
+      { id: 'FR5', section: 'Firestore Rules', name: 'Rules verification tool works', steps: ['Open /tests/test-rules-verification.html', 'Test valid/invalid scenarios'], expected: ['Tool shows clear pass/fail', 'Error messages explain rule constraints'] },
+
+      // CI/CD workflow verification (Section 15)
+      { id: 'CI1', section: 'CI/CD', name: 'GitHub Actions runs on push to main/develop', steps: ['Push a commit to main/develop', 'Check GitHub Actions tab'], expected: ['Workflow triggers automatically', 'Status visible'] },
+      { id: 'CI2', section: 'CI/CD', name: 'CI/CD runs on pull request', steps: ['Create PR', 'Check Actions tab'], expected: ['Workflow runs on PR', 'Test jobs execute'] },
+      { id: 'CI3', section: 'CI/CD', name: 'Test jobs complete successfully', steps: ['Open workflow run', 'Check Run Tests jobs (Node 18.x, 20.x)'], expected: ['All test jobs pass', 'Test output visible'] },
+      { id: 'CI4', section: 'CI/CD', name: 'Test artifacts are downloadable', steps: ['Scroll to bottom of workflow run', 'Download test-results artifacts'], expected: ['Artifacts available', 'JSON files contain test results'] },
+
+      // CodeRabbit review process (Section 16)
+      { id: 'CR1', section: 'CodeRabbit', name: 'CodeRabbit is installed and active', steps: ['Check GitHub Settings → Installations', 'Look for CodeRabbit'], expected: ['Shows as Active', 'Repository access configured'] },
+      { id: 'CR2', section: 'CodeRabbit', name: 'CodeRabbit reviews PR automatically', steps: ['Create/update PR', 'Wait 2-10 minutes', 'Check PR Conversation tab'], expected: ['CodeRabbit comments appear', 'Summary + recommendations visible'] },
+      { id: 'CR3', section: 'CodeRabbit', name: 'CodeRabbit provides inline comments', steps: ['Check PR Files changed tab', 'Look for inline suggestions'], expected: ['Comments on specific lines', 'Suggestions are actionable'] },
+      { id: 'CR4', section: 'CodeRabbit', name: 'CodeRabbit re-reviews after fixes', steps: ['Address CodeRabbit feedback', 'Push fixes', 'Wait for re-review'], expected: ['Re-review happens automatically', 'Resolved suggestions marked'] },
+
+      // Functional test tracker self-test (Section 17)
+      { id: 'TR1', section: 'Tracker', name: 'Tracker saves/loads data correctly', steps: ['Fill metadata fields', 'Set some statuses', 'Refresh page'], expected: ['Data persists in localStorage', 'Statuses restored after refresh'] },
+      { id: 'TR2', section: 'Tracker', name: 'Notes and evidence save correctly', steps: ['Add notes to a case', 'Add evidence links', 'Refresh page'], expected: ['Notes persist', 'Evidence links persist'] },
+      { id: 'TR3', section: 'Tracker', name: 'Export Markdown works', steps: ['Set some statuses + notes', 'Click Copy Markdown or Download Markdown'], expected: ['Markdown includes all cases', 'Statuses, notes, evidence included'] },
+      { id: 'TR4', section: 'Tracker', name: 'Export JSON works', steps: ['Click Export JSON', 'Open downloaded file'], expected: ['JSON file downloads', 'Contains complete state'] },
+      { id: 'TR5', section: 'Tracker', name: 'Import JSON works (round-trip)', steps: ['Export JSON', 'Reset tracker', 'Import JSON'], expected: ['All data restored', 'Statuses, notes, evidence match'] },
+      { id: 'TR6', section: 'Tracker', name: 'Search and filter work', steps: ['Type in search box', 'Select status filter', 'Clear filters'], expected: ['Search narrows results', 'Filter works', 'Clear shows all'] },
+      { id: 'TR7', section: 'Tracker', name: 'Statistics display correctly', steps: ['Set multiple statuses', 'Check statbar'], expected: ['Statistics update', 'Counts are accurate'] }
     ];
 
     const STATUS = {
