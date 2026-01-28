@@ -16,6 +16,7 @@
     "test:e2e": "vitest run tests/e2e",
     "lint": "eslint . --ext .js",
     "format": "prettier --write \"**/*.{js,html,css,json,md}\""
+    // Note: All test scripts use Vitest for consistent testing
   },
   "keywords": [
     "healthcare",
