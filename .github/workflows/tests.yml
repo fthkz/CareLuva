@@ -101,6 +101,6 @@ jobs:
       run: npm install
     
     - name: Run linter (if configured)
-      run: npm run lint || echo "Linter not configured, skipping"
+      run: npm run lint || echo "Linter not configured or found issues, skipping..."
       continue-on-error: true
 
