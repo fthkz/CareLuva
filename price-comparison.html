@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compare Prices - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('patientSession') || sessionStorage.getItem('patientSession') ||
+                localStorage.getItem('patientUser') || sessionStorage.getItem('patientUser');
+            if (!has) { window.location.replace('patient-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,7 +26,6 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
@@ -243,13 +251,116 @@
             padding: 40px;
             color: #6b7280;
         }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .back-btn {
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+                min-height: 44px; /* Touch-friendly */
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-section {
+                padding: 20px;
+            }
+            
+            /* Tables should scroll horizontally */
+            .comparison-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .comparison-table thead,
+            .comparison-table tbody,
+            .comparison-table tr {
+                display: block;
+            }
+            
+            .comparison-table th,
+            .comparison-table td {
+                display: inline-block;
+                min-width: 150px;
+            }
+            
+            .view-btn {
+                padding: 10px 16px;
+                min-height: 44px; /* Touch-friendly */
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Forms */
+            input, select, textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+                padding: 12px;
+            }
+            
+            button, .btn {
+                width: 100%;
+                padding: 14px;
+                min-height: 44px; /* Touch-friendly */
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .search-section {
+                padding: 15px;
+            }
+            
+            .comparison-section {
+                padding: 15px;
+            }
+            
+            .stat-value {
+                font-size: 1.25rem;
+            }
+        }
     </style>
 </head>
-<body>
+<body data-patient-nav-active="pricing">
+    <script src="patient-nav.js"></script>
     <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-balance-scale"></i> Compare Prices</h1>
-            <a href="find-clinics.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Search</a>
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size:1.5rem;font-weight:600;color:#1f2937;"><i class="fas fa-balance-scale"></i> Compare Prices</h1>
         </div>
         
         <div class="search-section">
@@ -508,7 +619,7 @@
                                             ` : '<span style="color: #9ca3af;">No ratings</span>'}
                                         </td>
                                         <td>
-                                            <a href="provider-directory.html?clinicId=${clinic.clinicId}" class="view-btn">
+                                            <a href="provider-directory.html?id=${clinic.clinicId}" class="view-btn">
                                                 View Profile
                                             </a>
                                         </td>

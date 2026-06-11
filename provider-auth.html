@@ -16,6 +16,54 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: 0;
+        }
+
+        .auth-hub-bar {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0.65rem 1.25rem;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .auth-hub-logo {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .auth-hub-logo h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            line-height: 1;
+        }
+
+        .auth-hub-logo:hover h2 {
+            color: #1d4ed8;
+        }
+
+        .auth-hub-context {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .auth-hub-main {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -278,24 +326,6 @@
             to { transform: rotate(360deg); }
         }
         
-        .back-link {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            opacity: 0.9;
-            transition: opacity 0.3s ease;
-        }
-        
-        .back-link:hover {
-            opacity: 1;
-        }
-        
         .error-message {
             background: #fee2e2;
             color: #991b1b;
@@ -331,17 +361,23 @@
             .auth-left h1 {
                 font-size: 2rem;
             }
+
+            .auth-hub-context {
+                display: none;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-        <!-- Authentication Utilities -->
-        <script src="auth-utils.js"></script>
-    <a href="index.html" class="back-link">
-        ← Back to CareLuva
-    </a>
-    
+    <script src="auth-utils.js"></script>
+    <header class="auth-hub-bar" role="navigation">
+        <a href="index.html" class="auth-hub-logo" aria-label="CareLuva home">
+            <h2>CareLuva</h2>
+        </a>
+        <span class="auth-hub-context">Provider</span>
+    </header>
+    <div class="auth-hub-main">
     <div class="auth-container">
         <div class="auth-left">
             <h1>Join CareLuva</h1>
@@ -438,6 +474,7 @@
             </div>
         </div>
     </div>
+    </div>
 
     <!-- Firebase Configuration -->
     <script type="module">
@@ -448,14 +485,21 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+        // Analytics import removed - not needed and causes API permission errors
+        // import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
 
         try {
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const analytics = getAnalytics(app);
+            
+            // Initialize Analytics (optional - may fail if API is not enabled)
+            // Note: getAnalytics() may throw async errors, so we handle it separately
+            let analytics = null;
+            // Don't initialize Analytics if API is not enabled to avoid errors
+            // Analytics can be enabled later if needed
+            // analytics = getAnalytics(app);
 
             // Make available globally
             window.firebase = { app, auth, db, analytics };
@@ -552,42 +596,108 @@
             clearMessages();
             
             try {
-                if (!firebaseReady || !window.firebase || !window.firebase.db) {
+                if (!firebaseReady || !window.firebase || !window.firebase.auth || !window.firebase.db) {
                     throw new Error('Firebase is not available. Please ensure Firebase is properly configured.');
                 }
                 
-                // Use Firestore-based authentication (providers are stored in Firestore, not Firebase Auth)
-                const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                // Try Firebase Auth login first (new method)
+                const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                // Find provider registration by email
-                const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
-                const emailQuery = query(registrationsRef, where('email', '==', email));
-                const snapshot = await getDocs(emailQuery);
+                let firebaseAuthUser = null;
+                let registrationData = null;
+                let registrationId = null;
                 
-                if (snapshot.empty) {
-                    throw new Error('No account found with this email address. Please check your email or complete registration.');
-                }
-                
-                // Get the registration document
-                const registrationDoc = snapshot.docs[0];
-                const registrationData = registrationDoc.data();
-                
-                // Verify password (supports both hashed and plain text for migration)
-                if (!registrationData.password) {
-                    throw new Error('Incorrect password. Please try again.');
-                }
-                
-                // Use authUtils to verify password (handles both hashed and plain text)
-                let passwordValid = false;
-                if (window.authUtils) {
-                    passwordValid = await window.authUtils.verifyPassword(password, registrationData.password);
-                } else {
-                    // Fallback: direct comparison (for legacy plain text passwords)
-                    passwordValid = registrationData.password === password;
-                }
-                
-                if (!passwordValid) {
-                    throw new Error('Incorrect password. Please try again.');
+                try {
+                    // Attempt Firebase Auth login
+                    console.log('🔐 Attempting Firebase Auth login...');
+                    const userCredential = await signInWithEmailAndPassword(
+                        window.firebase.auth,
+                        email,
+                        password
+                    );
+                    
+                    firebaseAuthUser = userCredential.user;
+                    console.log('✅ Firebase Auth login successful:', firebaseAuthUser.uid);
+                    
+                    // Load registration: first by Firebase Auth UID (migrated doc ID = uid), then by email (legacy doc)
+                    const registrationDocRefByUid = doc(window.firebase.db, 'providerRegistrations', firebaseAuthUser.uid);
+                    let registrationDoc = await getDoc(registrationDocRefByUid);
+                    
+                    if (!registrationDoc.exists()) {
+                        // Legacy case: Firestore doc ID is not the auth UID (e.g. EUBv9YqnqwopMpv07fhD). Look up by email and link.
+                        const { collection, query, where, getDocs, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                        const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
+                        const emailQuery = query(registrationsRef, where('email', '==', firebaseAuthUser.email));
+                        const snapshot = await getDocs(emailQuery);
+                        if (snapshot.empty) {
+                            throw new Error('Account found but registration data is missing. Please contact support.');
+                        }
+                        const legacyDoc = snapshot.docs[0];
+                        registrationId = legacyDoc.id;
+                        registrationData = legacyDoc.data();
+                        // Link this Firestore document to the Firebase Auth user so future lookups work
+                        await updateDoc(doc(window.firebase.db, 'providerRegistrations', registrationId), {
+                            firebaseAuthUid: firebaseAuthUser.uid,
+                            authProvider: 'firebase-email',
+                            migrationDate: new Date().toISOString()
+                        });
+                        registrationData = { ...registrationData, firebaseAuthUid: firebaseAuthUser.uid };
+                        console.log('✅ Linked legacy registration to Firebase Auth:', registrationId);
+                    } else {
+                        registrationId = registrationDoc.id;
+                        registrationData = registrationDoc.data();
+                    }
+                    
+                } catch (authError) {
+                    // If Firebase Auth fails, try legacy Firestore-only auth (for backward compatibility)
+                    console.log('⚠️ Firebase Auth login failed, trying legacy method...', authError.code);
+                    
+                    if (authError.code === 'auth/user-not-found' || authError.code === 'auth/wrong-password') {
+                        // Try legacy Firestore-only authentication
+                        const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                        
+                        const registrationsRef = collection(window.firebase.db, 'providerRegistrations');
+                        const emailQuery = query(registrationsRef, where('email', '==', email));
+                        const snapshot = await getDocs(emailQuery);
+                        
+                        if (snapshot.empty) {
+                            throw new Error('No account found with this email address. Please check your email or complete registration.');
+                        }
+                        
+                        const registrationDoc = snapshot.docs[0];
+                        registrationData = registrationDoc.data();
+                        registrationId = registrationDoc.id;
+                        
+                        // Verify password (legacy method)
+                        if (!registrationData.password) {
+                            throw new Error('Incorrect password. Please try again.');
+                        }
+                        
+                        let passwordValid = false;
+                        if (window.authUtils) {
+                            passwordValid = await window.authUtils.verifyPassword(password, registrationData.password);
+                        } else {
+                            passwordValid = registrationData.password === password;
+                        }
+                        
+                        if (!passwordValid) {
+                            throw new Error('Incorrect password. Please try again.');
+                        }
+                        
+                        console.log('✅ Legacy Firestore login successful:', registrationId);
+                        
+                        // Note: User should migrate to Firebase Auth (will be prompted later)
+                    } else {
+                        // Other Firebase Auth errors
+                        if (authError.code === 'auth/invalid-email') {
+                            throw new Error('Invalid email address. Please check your email.');
+                        } else if (authError.code === 'auth/user-disabled') {
+                            throw new Error('This account has been disabled. Please contact support.');
+                        } else {
+                            throw new Error(`Login failed: ${authError.message}`);
+                        }
+                    }
                 }
                 
                 // Check registration status
@@ -595,37 +705,47 @@
                     throw new Error('Your registration has been rejected. Please contact support.');
                 }
                 
-                console.log('Firestore login successful:', registrationDoc.id);
-                
                 // Use improved session management
                 if (window.authUtils) {
                     const session = window.authUtils.createSession(
-                        registrationDoc.id,
+                        registrationId,
                         registrationData.email,
                         registrationData,
                         rememberMe
                     );
                     window.authUtils.saveSession(session, registrationData, rememberMe);
-                    
-                    // Also store registration ID separately for backward compatibility
-                    const storage = rememberMe ? localStorage : sessionStorage;
-                    storage.setItem('providerRegistrationId', registrationDoc.id);
+
+                    localStorage.setItem('providerRegistrationId', registrationId);
+
+                    if (firebaseAuthUser && typeof window.authUtils.exchangeFirebaseSessionCookie === 'function') {
+                        try {
+                            const idToken = await firebaseAuthUser.getIdToken();
+                            const cookieOk = await window.authUtils.exchangeFirebaseSessionCookie(idToken);
+                            if (!cookieOk) {
+                                console.warn('⚠️ HttpOnly session cookie was not set — AG14 session-verify will fail until session-login succeeds (check Network tab)');
+                            }
+                        } catch (cookieErr) {
+                            console.warn('HttpOnly session cookie not set (deploy session API for full protection):', cookieErr);
+                        }
+                    } else if (!firebaseAuthUser) {
+                        console.info('ℹ️ Legacy Firestore login — HttpOnly session-login skipped (use Firebase Auth login for server cookie / AG14)');
+                    }
                 } else {
                     // Fallback: basic session storage
-                const sessionData = {
-                        uid: registrationDoc.id,
+                    const sessionData = {
+                        uid: registrationId,
                         email: registrationData.email,
-                    loginTime: new Date().toISOString()
-                };
-                    const storage = rememberMe ? localStorage : sessionStorage;
+                        loginTime: new Date().toISOString()
+                    };
+                    const storage = localStorage;
                     storage.setItem('providerSession', JSON.stringify(sessionData));
-                    storage.setItem('providerRegistrationId', registrationDoc.id);
+                    storage.setItem('providerRegistrationId', registrationId);
                     // Don't store password in session
                     const safeData = { ...registrationData };
                     delete safeData.password;
                     storage.setItem('providerRegistration', JSON.stringify(safeData));
                 }
-                
+
                 showMessage('Login successful! Redirecting...', 'success');
                 
                 // Redirect to provider dashboard
@@ -858,7 +978,7 @@
             resetContainer.innerHTML = `
                 <div style="background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; padding: 40px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="font-size: 2rem; color: #3b82f6; margin-bottom: 10px;">🏥 CareLuva</h1>
+                        <h2 style="margin: 0 0 10px; font-size: 1.5rem; font-weight: 700; color: #2563eb;">CareLuva</h2>
                         <h2 style="margin: 0 0 10px 0; color: #1f2937; font-size: 1.5rem;">Reset Your Password</h2>
                         <p style="color: #6b7280; font-size: 14px;">Enter your new password for <strong>${email}</strong></p>
                     </div>

@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Appointment - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('patientSession') || sessionStorage.getItem('patientSession') ||
+                localStorage.getItem('patientUser') || sessionStorage.getItem('patientUser');
+            if (!has) { window.location.replace('patient-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,7 +26,6 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
@@ -130,6 +138,37 @@
         }
         
         /* Calendar */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-month-label {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .calendar-nav-btn {
+            background: #e5e7eb;
+            border: none;
+            border-radius: 999px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #374151;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: #d1d5db;
+            transform: translateY(-1px);
+        }
+
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -322,6 +361,25 @@
         
         /* Responsive */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
             .booking-container {
                 grid-template-columns: 1fr;
             }
@@ -338,16 +396,46 @@
             .calendar-day {
                 padding: 10px 5px;
                 font-size: 12px;
+                min-height: 44px; /* Touch-friendly */
+            }
+            
+            /* Touch-friendly buttons */
+            button, .btn, a.btn {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px 16px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Forms */
+            input, select, textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+                padding: 12px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .calendar-day {
+                padding: 8px 4px;
+                font-size: 11px;
             }
         }
     </style>
 </head>
-<body>
+<body data-patient-nav-active="booking">
+    <script src="patient-nav.js"></script>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1><i class="fas fa-calendar-check"></i> Book Appointment</h1>
-            <a href="find-clinics.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Search</a>
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size:1.5rem;font-weight:600;color:#1f2937;"><i class="fas fa-calendar-check"></i> Book Appointment</h1>
         </div>
         
         <!-- Booking Container -->
@@ -377,6 +465,15 @@
                     <!-- Select Date -->
                     <div class="form-section" id="dateSection" style="display: none;">
                         <h2>Select Date</h2>
+                        <div class="calendar-controls">
+                            <button type="button" class="calendar-nav-btn" id="prevMonth" aria-label="Previous month">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="calendar-month-label" id="calendarMonthLabel"></div>
+                            <button type="button" class="calendar-nav-btn" id="nextMonth" aria-label="Next month">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                         <div class="calendar" id="calendar"></div>
                     </div>
                     
@@ -550,10 +647,12 @@
             }
 
             try {
+                console.log('Loading clinic info for ID:', clinicId);
                 const clinicRef = doc(db, 'providerRegistrations', clinicId);
                 const clinicSnap = await getDoc(clinicRef);
 
                 if (!clinicSnap.exists()) {
+                    console.error('Clinic not found:', clinicId);
                     document.getElementById('clinicInfo').innerHTML = `
                         <div class="error-message">
                             <p>Clinic not found.</p>
@@ -563,6 +662,9 @@
                 }
 
                 clinicData = clinicSnap.data();
+                console.log('Clinic data loaded:', clinicData);
+                console.log('Professionals array:', clinicData.professionals);
+                
                 displayClinicInfo(clinicData);
                 displayProfessionals(clinicData);
                 updateSummary();
@@ -570,7 +672,7 @@
                 console.error('Error loading clinic info:', error);
                 document.getElementById('clinicInfo').innerHTML = `
                     <div class="error-message">
-                        <p>Error loading clinic information.</p>
+                        <p>Error loading clinic information: ${error.message}</p>
                     </div>
                 `;
             }
@@ -600,9 +702,21 @@
             const professionalSection = document.getElementById('professionalSection');
             const noProfessionals = document.getElementById('noProfessionals');
             
+            console.log('Displaying professionals. Clinic has professionals:', clinic.professionals);
+            console.log('Is array?', Array.isArray(clinic.professionals));
+            console.log('Length:', clinic.professionals ? clinic.professionals.length : 'null/undefined');
+            
             if (!clinic.professionals || !Array.isArray(clinic.professionals) || clinic.professionals.length === 0) {
-                professionalSection.style.display = 'none';
+                console.warn('No professionals found for clinic. Showing message.');
+                professionalSection.style.display = 'block'; // Show section even if no professionals
                 noProfessionals.style.display = 'block';
+                professionalsList.innerHTML = '';
+                
+                // Show date/time sections even without professionals (for clinics without professionals setup)
+                document.getElementById('dateSection').style.display = 'block';
+                document.getElementById('timeSection').style.display = 'block';
+                generateCalendar();
+                
                 return;
             }
             
@@ -672,6 +786,7 @@
         
         // Select professional
         function selectProfessional(index, professional) {
+            console.log('Selecting professional:', index, professional);
             selectedProfessional = { index, ...professional };
             
             // Update UI
@@ -705,16 +820,50 @@
             }
             updateSummary();
         }
+        
+        // Allow booking without professional if clinic has no professionals
+        function allowBookingWithoutProfessional() {
+            // If no professionals, allow booking with clinic as the "professional"
+            if (!clinicData.professionals || !Array.isArray(clinicData.professionals) || clinicData.professionals.length === 0) {
+                selectedProfessional = {
+                    index: -1,
+                    name: clinicData.clinicName || 'Clinic',
+                    specialization: clinicData.specialization || 'General Medicine'
+                };
+                console.log('No professionals found, allowing booking with clinic as professional');
+                return true;
+            }
+            return false;
+        }
 
-        // Generate calendar
+        // Helper to format local date as YYYY-MM-DD (no timezone shifts)
+        function formatDateKey(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        // Calendar month state
+        const calendarToday = new Date();
+        let calendarMonth = calendarToday.getMonth();
+        let calendarYear = calendarToday.getFullYear();
+
+        function updateCalendarMonthLabel() {
+            const labelEl = document.getElementById('calendarMonthLabel');
+            if (!labelEl) return;
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            labelEl.textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+        }
+
+        // Generate calendar for current calendarMonth/calendarYear
         function generateCalendar() {
             const calendar = document.getElementById('calendar');
+            if (!calendar) return;
             calendar.innerHTML = ''; // Clear existing calendar
             
-            const today = new Date();
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
-            
+            updateCalendarMonthLabel();
+
             // Days of week
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             daysOfWeek.forEach(day => {
@@ -724,23 +873,41 @@
                 calendar.appendChild(header);
             });
 
-            // Generate next 30 days
-            for (let i = 0; i < 35; i++) {
-                const date = new Date(currentYear, currentMonth, today.getDate() + i);
+            // First day of month and number of days
+            const firstDay = new Date(calendarYear, calendarMonth, 1);
+            const startingWeekday = firstDay.getDay();
+            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            // Empty cells before first day
+            for (let i = 0; i < startingWeekday; i++) {
+                const empty = document.createElement('div');
+                calendar.appendChild(empty);
+            }
+
+            // Calendar days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(calendarYear, calendarMonth, day);
                 const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                
-                if (i === 0) {
+                dayElement.className = 'calendar-day disabled';
+
+                // Mark today
+                const isToday =
+                    date.getFullYear() === calendarToday.getFullYear() &&
+                    date.getMonth() === calendarToday.getMonth() &&
+                    date.getDate() === calendarToday.getDate();
+                if (isToday) {
                     dayElement.classList.add('today');
                 }
-                
-                // Mark as available (for demo, all future dates are available)
-                if (i > 0) {
+
+                // Mark as available for today and all future dates
+                const todayMidnight = new Date(calendarToday.getFullYear(), calendarToday.getMonth(), calendarToday.getDate());
+                if (date >= todayMidnight) {
+                    dayElement.classList.remove('disabled');
                     dayElement.classList.add('available');
                 }
-                
-                dayElement.textContent = date.getDate();
-                dayElement.dataset.date = date.toISOString().split('T')[0];
+
+                dayElement.textContent = day;
+                dayElement.dataset.date = formatDateKey(date);
                 
                 dayElement.addEventListener('click', async () => {
                     if (dayElement.classList.contains('available')) {
@@ -756,19 +923,52 @@
             }
         }
 
+        // Month navigation
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+        if (prevMonthBtn && nextMonthBtn) {
+            prevMonthBtn.addEventListener('click', () => {
+                calendarMonth--;
+                if (calendarMonth < 0) {
+                    calendarMonth = 11;
+                    calendarYear--;
+                }
+                generateCalendar();
+            });
+            nextMonthBtn.addEventListener('click', () => {
+                calendarMonth++;
+                if (calendarMonth > 11) {
+                    calendarMonth = 0;
+                    calendarYear++;
+                }
+                generateCalendar();
+            });
+        }
+
         // Generate time slots with availability checking
         async function generateTimeSlots() {
             const timeSlotsContainer = document.getElementById('timeSlots');
             timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;"><i class="fas fa-spinner fa-spin"></i> Checking availability...</div>';
 
-            if (!selectedDate || !selectedProfessional) {
-                timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Please select a date and professional first</div>';
+            if (!selectedDate) {
+                timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Please select a date first</div>';
                 return;
+            }
+            
+            // Allow time slot generation even without professional (for clinics without professionals)
+            if (!selectedProfessional) {
+                if (!allowBookingWithoutProfessional()) {
+                    timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Please select a professional first</div>';
+                    return;
+                }
             }
 
             try {
-                // Load professional schedule
-                const professionalSchedule = await loadProfessionalSchedule(selectedProfessional.index);
+                // Load professional schedule (if professional exists)
+                let professionalSchedule = null;
+                if (selectedProfessional && selectedProfessional.index >= 0) {
+                    professionalSchedule = await loadProfessionalSchedule(selectedProfessional.index);
+                }
                 
                 // Load existing appointments for conflict checking
                 const existingAppointments = await loadExistingAppointments(selectedDate);
@@ -783,13 +983,47 @@
                     return;
                 }
 
+                const now = new Date();
+                // Parse selectedDate (YYYY-MM-DD) as local date to avoid timezone issues
+                let isTodaySelected = false;
+                let selectedLocal = null;
+                if (selectedDate) {
+                    const [sy, sm, sd] = selectedDate.split('-').map(Number);
+                    selectedLocal = new Date(sy, sm - 1, sd);
+                    isTodaySelected =
+                        selectedLocal.getFullYear() === now.getFullYear() &&
+                        selectedLocal.getMonth() === now.getMonth() &&
+                        selectedLocal.getDate() === now.getDate();
+                }
+
                 availableSlots.forEach(time => {
                     const slot = document.createElement('div');
                     const isBooked = existingAppointments.some(apt => apt.time === time);
+                    let isPast = false;
+
+                    if (isTodaySelected && selectedLocal) {
+                        // time is in format "HH:MM"
+                        const [h, m] = time.split(':').map(Number);
+                        const slotDateTime = new Date(
+                            selectedLocal.getFullYear(),
+                            selectedLocal.getMonth(),
+                            selectedLocal.getDate(),
+                            h,
+                            m || 0,
+                            0,
+                            0
+                        );
+                        if (slotDateTime <= now) {
+                            isPast = true;
+                        }
+                    }
                     
                     if (isBooked) {
                         slot.className = 'time-slot unavailable';
                         slot.title = 'This time slot is already booked';
+                    } else if (isPast) {
+                        slot.className = 'time-slot disabled';
+                        slot.title = 'This time slot is in the past';
                     } else {
                         slot.className = 'time-slot available';
                     }
@@ -834,17 +1068,31 @@
 
         // Load existing appointments
         async function loadExistingAppointments(date) {
-            if (!selectedProfessional || !clinicId) return [];
+            if (!clinicId) return [];
 
             try {
                 const appointmentsRef = collection(db, 'appointments');
-                const q = query(
-                    appointmentsRef,
-                    where('clinicId', '==', clinicId),
-                    where('professionalId', '==', selectedProfessional.index),
-                    where('date', '==', date),
-                    where('status', 'in', ['pending', 'confirmed'])
-                );
+                
+                // Build query based on whether professional is selected
+                let q;
+                if (selectedProfessional && selectedProfessional.index >= 0) {
+                    q = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId),
+                        where('professionalId', '==', selectedProfessional.index),
+                        where('date', '==', date),
+                        where('status', 'in', ['pending', 'confirmed'])
+                    );
+                } else {
+                    // If no professional, check all appointments for the clinic on this date
+                    q = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId),
+                        where('date', '==', date),
+                        where('status', 'in', ['pending', 'confirmed'])
+                    );
+                }
+                
                 const snapshot = await getDocs(q);
                 
                 const appointments = [];
@@ -896,18 +1144,33 @@
 
         // Check for booking conflicts
         async function checkBookingConflicts(date, time) {
-            if (!selectedProfessional || !clinicId) return [];
+            if (!clinicId) return [];
 
             try {
                 const appointmentsRef = collection(db, 'appointments');
-                const q = query(
-                    appointmentsRef,
-                    where('clinicId', '==', clinicId),
-                    where('professionalId', '==', selectedProfessional.index),
-                    where('date', '==', date),
-                    where('time', '==', time),
-                    where('status', 'in', ['pending', 'confirmed'])
-                );
+                
+                // Build query based on whether professional is selected
+                let q;
+                if (selectedProfessional && selectedProfessional.index >= 0) {
+                    q = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId),
+                        where('professionalId', '==', selectedProfessional.index),
+                        where('date', '==', date),
+                        where('time', '==', time),
+                        where('status', 'in', ['pending', 'confirmed'])
+                    );
+                } else {
+                    // If no professional, check all appointments for the clinic at this time
+                    q = query(
+                        appointmentsRef,
+                        where('clinicId', '==', clinicId),
+                        where('date', '==', date),
+                        where('time', '==', time),
+                        where('status', 'in', ['pending', 'confirmed'])
+                    );
+                }
+                
                 const snapshot = await getDocs(q);
                 
                 const conflicts = [];
@@ -963,9 +1226,12 @@
         document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Allow booking without professional if clinic has no professionals
             if (!selectedProfessional) {
-                alert('Please select a professional first.');
-                return;
+                if (!allowBookingWithoutProfessional()) {
+                    alert('Please select a professional first.');
+                    return;
+                }
             }
             
             if (!selectedDate || !selectedTime) {
@@ -978,9 +1244,12 @@
             submitBtn.innerHTML = '<div class="spinner" style="display: inline-block; width: 20px; height: 20px; margin-right: 10px;"></div> Booking...';
 
             try {
+                // Allow booking without professional if clinic has no professionals
                 if (!selectedProfessional) {
-                    alert('Please select a professional first');
-                    return;
+                    if (!allowBookingWithoutProfessional()) {
+                        alert('Please select a professional first');
+                        return;
+                    }
                 }
                 
                 // Check for conflicts before booking
@@ -1022,9 +1291,9 @@
                 const appointmentData = {
                     clinicId: clinicId.trim(),
                     clinicName: clinicData.clinicName || clinicData.name,
-                    professionalId: selectedProfessional.index,
-                    professionalName: selectedProfessional.name,
-                    specialization: selectedProfessional.specialization || clinicData.specialization,
+                    professionalId: selectedProfessional ? selectedProfessional.index : -1,
+                    professionalName: selectedProfessional ? selectedProfessional.name : (clinicData.clinicName || 'Clinic'),
+                    specialization: selectedProfessional ? (selectedProfessional.specialization || clinicData.specialization) : (clinicData.specialization || 'General Medicine'),
                     date: selectedDate,
                     time: selectedTime,
                     patientName: patientName,

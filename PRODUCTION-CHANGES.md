@@ -28,6 +28,193 @@ This document tracks all changes that need to be completed before deploying to p
     - [x] T&C acceptance stored in `termsAcceptance` collection
   - [ ] **MUST COMPLETE BEFORE LAUNCH**: Legal review and approval
 
+### Regulation & Compliance Requirements
+
+#### 1. Complication Insurance for International Patients (Effective January 2026)
+- [ ] **MANDATORY: Implement Complication Insurance System**
+  - [ ] **Status**: ✅ Implementation plan created (see `complication_insurance_implementation_cbb04c2d.plan.md`)
+  - [ ] **Effective Date**: January 2026
+  - [ ] **Requirement**: All international (non-resident) patients undergoing surgical or interventional procedures in Turkey must obtain mandatory complication insurance
+  - [ ] **Applicability**: 
+    - Applies to non-resident patients aged 18-65 (some providers extend to 18-75)
+    - Excludes Turkish nationals and residents (covered under domestic plans)
+    - Applies to surgical and interventional procedures in accredited hospitals/clinics
+  - [ ] **Coverage Details**:
+    - Duration: 6-12 months post-procedure (dental implants up to 365 days)
+    - Geographic scope: Valid exclusively within Turkey
+    - Covers: Post-operative complications (infections, bleeding, organ issues), revision surgeries, hospital stays, return travel to Turkey, accommodation during treatment, medical transportation
+    - Excludes: Medical negligence/malpractice, pre-existing conditions, cosmetic dissatisfaction, non-surgical treatments (Botox, fillers)
+  - [ ] **Premium Payment**:
+    - Can be bundled into package price or itemized separately
+    - Must be paid when contract is concluded
+    - Pricing varies by insurance provider and procedure type (requires market research)
+  - [ ] **Arrangement Options**:
+    - CareLuva can arrange insurance
+    - Patient can arrange insurance
+    - Provider can arrange insurance
+    - Manual document upload initially, API integration later
+  - [ ] **Implementation Status**:
+    - [x] Data model designed (includes `premiumAmount` field)
+    - [x] Implementation plan created
+    - [ ] Core insurance management system (pending)
+    - [ ] Document upload interface (pending)
+    - [ ] Booking flow integration (pending)
+    - [ ] Admin verification dashboard (pending)
+  - [ ] **Regulatory Framework**: Governed by "Regulation on International Health Tourism and Tourist Health" (May 2025) - Turkish Ministry of Health
+  - [ ] **References**:
+    - [Heal In Türkiye - Complication Insurance](https://healinturkiye.gov.tr/complication-insurance)
+    - [Health Tourism Department](https://shgmturizmdb.saglik.gov.tr/EN-108974/regulation-on-international-health-tourism-and-tourist-health.html)
+    - [Regulation Document (English)](https://karsiyakaadsm.saglik.gov.tr/EN-368110/regulation-on-international-health-tourism-and-tourist-health--english-versions-.html)
+
+#### 2. TURSAB Registration (Turkish Travel Agencies Association)
+- [ ] **RESEARCH REQUIRED: Determine if TURSAB registration is mandatory**
+  - [ ] **Status**: ⚠️ **NEEDS LEGAL CONSULTATION**
+  - [ ] **Question**: Is TURSAB registration mandatory for health tourism intermediaries/facilitators?
+  - [ ] **Context**: TURSAB (Türkiye Seyahat Acenteleri Birliği) is the Turkish Travel Agencies Association
+  - [ ] **Research Needed**:
+    - [ ] Verify if health tourism intermediaries require TURSAB membership
+    - [ ] Understand TURSAB registration requirements and process
+    - [ ] Determine costs and timeline for registration
+    - [ ] Check if registration is required before obtaining other certifications
+  - [ ] **Action Items**:
+    - [ ] Contact TURSAB directly for clarification
+    - [ ] Consult with Turkish business law attorney specializing in health tourism
+    - [ ] Review "Regulation on International Health Tourism and Tourist Health" for TURSAB requirements
+  - [ ] **Note**: Some health tourism companies mention TURSAB license numbers, suggesting it may be required or beneficial
+
+#### 3. International Health Tourism Authorization Certificate (Ministry of Health)
+- [ ] **RESEARCH REQUIRED: Obtain International Health Tourism Authorization Certificate**
+  - [ ] **Status**: ⚠️ **CRITICAL - REQUIRES IMMEDIATE ATTENTION**
+  - [ ] **Issuing Authority**: Republic of Turkey Ministry of Health - Health Tourism Department
+  - [ ] **Requirement**: Likely mandatory for intermediaries/facilitators operating in health tourism sector
+  - [ ] **Research Needed**:
+    - [ ] Verify if this certificate is mandatory for CareLuva's business model
+    - [ ] Understand application requirements and eligibility criteria
+    - [ ] Determine required documentation and company structure
+    - [ ] Check if Turkish company registration is required
+    - [ ] Understand processing timeline and costs
+    - [ ] Verify if foreign companies (German company) can obtain this certificate
+  - [ ] **Application Process** (to be researched):
+    - [ ] Contact Ministry of Health - Health Tourism Department
+    - [ ] Obtain application forms and requirements checklist
+    - [ ] Prepare required documentation
+    - [ ] Submit application
+    - [ ] Follow up on approval status
+  - [ ] **References**:
+    - [Health Tourism Department](https://shgmturizmdb.saglik.gov.tr/EN-108974/regulation-on-international-health-tourism-and-tourist-health.html)
+    - [Regulation Document](https://karsiyakaadsm.saglik.gov.tr/EN-368110/regulation-on-international-health-tourism-and-tourist-health--english-versions-.html)
+  - [ ] **Action Items**:
+    - [ ] Contact Turkish Ministry of Health - Health Tourism Department directly
+    - [ ] Request official documentation on authorization requirements
+    - [ ] Clarify company structure requirements (Turkish vs. foreign company)
+
+#### 4. USBS (Uzaktan Sağlık Bilgi Sistemi) Approval
+- [ ] **RESEARCH REQUIRED: Obtain USBS Approval**
+  - [ ] **Status**: ⚠️ **NEEDS CLARIFICATION**
+  - [ ] **Full Name**: Uzaktan Sağlık Bilgi Sistemi (Remote Health Information System)
+  - [ ] **Issuing Authority**: Republic of Turkey Ministry of Health
+  - [ ] **Purpose**: Remote health information system registration/approval
+  - [ ] **Research Needed**:
+    - [ ] Determine if USBS approval is mandatory for health tourism intermediaries
+    - [ ] Understand what USBS approval entails
+    - [ ] Check if it's related to telemedicine/remote health services
+    - [ ] Verify application requirements and process
+    - [ ] Determine if it applies to CareLuva's platform model
+  - [ ] **Action Items**:
+    - [ ] Contact Ministry of Health for USBS requirements
+    - [ ] Review "Regulation on International Health Tourism and Tourist Health" for USBS mentions
+    - [ ] Consult with health tourism legal expert
+
+### Company Structure & Business Establishment Research
+
+#### Company Establishment Requirements
+- [ ] **RESEARCH REQUIRED: Determine Optimal Company Structure**
+  - [ ] **Your Situation**:
+    - Turkish citizen
+    - Resident in Germany (not German citizen)
+    - Operating health tourism intermediary platform (CareLuva)
+  - [ ] **Key Questions to Resolve**:
+    1. **Can you establish a Turkish company while living in Germany?**
+       - [ ] Research Turkish company law regarding Turkish citizens abroad
+       - [ ] Verify if residency in Turkey is required for company establishment
+       - [ ] Understand minimum capital requirements
+       - [ ] Check if you can be the sole shareholder/director
+    2. **What type of company is required?**
+       - [ ] Limited Liability Company (LLC - Limited Şirketi) - Most common for small/medium businesses
+       - [ ] Joint Stock Company (Anonim Şirketi) - For larger operations
+       - [ ] Other structures (to be researched)
+    3. **Can you operate with a German company?**
+       - [ ] Verify if German company can obtain Turkish health tourism certifications
+       - [ ] Check if International Health Tourism Authorization Certificate can be issued to foreign companies
+       - [ ] Understand tax implications (Turkish vs. German taxation)
+       - [ ] Verify if Turkish citizen ownership of German company affects eligibility
+    4. **Where should the company be established?**
+       - [ ] Turkey: If Turkish company is required for certifications
+       - [ ] Germany: If foreign companies can obtain Turkish certifications
+       - [ ] Both: Turkish subsidiary of German company (to be researched)
+
+#### Legal Consultation Required
+- [ ] **IMMEDIATE ACTION: Engage Legal Counsel**
+  - [ ] **Turkish Business Law Attorney** (specializing in health tourism):
+    - [ ] Verify company establishment requirements
+    - [ ] Clarify certification eligibility for foreign companies
+    - [ ] Understand regulatory compliance requirements
+    - [ ] Review tax implications
+  - [ ] **German Business Law Attorney** (if considering German company):
+    - [ ] Understand German company establishment for Turkish citizen
+    - [ ] Review cross-border business operations
+    - [ ] Understand German tax obligations
+  - [ ] **Health Tourism Regulatory Expert**:
+    - [ ] Verify all mandatory certifications
+    - [ ] Understand application processes
+    - [ ] Review compliance requirements
+
+#### Research Summary & Recommendations
+
+**Current Understanding:**
+1. **Complication Insurance**: ✅ Clear requirement - Implementation plan exists
+2. **TURSAB Registration**: ⚠️ Unclear if mandatory - Needs verification
+3. **International Health Tourism Authorization**: ⚠️ Likely mandatory - Needs application process research
+4. **USBS Approval**: ⚠️ Unclear requirement - Needs clarification
+5. **Company Structure**: ⚠️ Critical decision point - Needs legal consultation
+
+**Recommended Next Steps:**
+1. **Priority 1 (Immediate)**:
+   - [ ] Contact Turkish Ministry of Health - Health Tourism Department
+     - Email/phone: [To be researched]
+     - Request official documentation on:
+       - Authorization certificate requirements
+       - Company structure eligibility (Turkish vs. foreign)
+       - All mandatory certifications
+       - Application processes
+   - [ ] Engage Turkish business law attorney specializing in health tourism
+     - Review company establishment options
+     - Verify certification eligibility
+     - Understand regulatory requirements
+
+2. **Priority 2 (Within 30 days)**:
+   - [ ] Contact TURSAB for registration requirements
+   - [ ] Research USBS approval requirements
+   - [ ] Obtain cost estimates for all certifications
+   - [ ] Create timeline for certification applications
+
+3. **Priority 3 (Ongoing)**:
+   - [ ] Continue complication insurance implementation (already planned)
+   - [ ] Monitor regulatory changes
+   - [ ] Maintain compliance documentation
+
+**Important Notes:**
+- ⚠️ **CRITICAL**: Do not proceed with production launch without clarifying company structure and certification requirements
+- ⚠️ **RISK**: Operating without proper authorization may result in legal penalties
+- ⚠️ **RECOMMENDATION**: Legal consultation is essential before making company structure decisions
+- 📋 **DOCUMENTATION**: Maintain all official correspondence and legal opinions for compliance records
+
+**References for Further Research:**
+- Turkish Ministry of Health - Health Tourism Department: https://shgmturizmdb.saglik.gov.tr/
+- Regulation on International Health Tourism and Tourist Health (English): https://karsiyakaadsm.saglik.gov.tr/EN-368110/regulation-on-international-health-tourism-and-tourist-health--english-versions-.html
+- TURSAB (Turkish Travel Agencies Association): [Website to be researched]
+- Turkish Trade Registry: [To be researched for company establishment]
+
 ### Security & Configuration
 - [ ] Update Firebase configuration for production environment
   - [ ] Replace development API keys with production keys
@@ -40,15 +227,30 @@ This document tracks all changes that need to be completed before deploying to p
   - [x] ✅ **COMPLETED**: Password reset logic moved from modal to dedicated page
   - [x] ✅ **COMPLETED**: "Forgot Password?" link now navigates to dedicated page
   - [ ] **PENDING**: Email service integration (required for production)
+  - [ ] **CRITICAL**: Move password reset to Cloud Functions (recommended)
+    - [ ] **Why**: Current Firestore rules block unauthenticated reads, breaking password reset
+    - [ ] **Security**: Cloud Functions provide better security by keeping credentials server-side
+    - [ ] **Implementation**: 
+      - [ ] Create Cloud Function for password reset request (query by email, generate token, send email)
+      - [ ] Create Cloud Function for password reset verification (validate token, update password)
+      - [ ] Update `password-reset.html` to call Cloud Functions instead of direct Firestore access
+      - [ ] Remove unauthenticated read access from Firestore rules (already done)
+      - [ ] Store email service credentials in Cloud Functions environment (not client-side)
+    - [ ] **Benefits**:
+      - [ ] No unauthenticated Firestore reads needed
+      - [ ] Better security (credentials not exposed to client)
+      - [ ] Can implement rate limiting server-side
+      - [ ] Better error handling and logging
   - [ ] Current implementation: 
-    - [ ] Firestore rules allow unauthenticated reads of `providerRegistrations` for password reset (see `firestore.rules` lines 32-41)
+    - [ ] Firestore rules DO NOT allow unauthenticated reads (security improvement - see `firestore.rules`)
+    - [ ] Password reset currently broken due to removed unauthenticated read access
     - [ ] Password reset links are displayed on page in development mode (see `password-reset.html`)
     - [ ] TODO comment in `password-reset.html`: "In production, send via email service"
   - [ ] Reason: Needed to read registration data for Firestore-only authentication (no Firebase Auth)
-  - [ ] Security concern: This exposes registration data to unauthenticated users (though they already know the email)
+  - [ ] Security concern: Previous implementation exposed registration data to unauthenticated users
   - [ ] Production solution: 
-    - [ ] **Option A**: Move password reset logic to a Cloud Function for better security
-    - [ ] **Option B**: Keep client-side but integrate email service directly
+    - [ ] **Option A (RECOMMENDED)**: Move password reset logic to a Cloud Function for better security
+    - [ ] **Option B**: Keep client-side but integrate email service directly (less secure, still requires unauthenticated reads)
     - [ ] Integrate email service for sending password reset links (choose one):
       - [ ] **Option 1**: SendGrid integration
         - [ ] Set up SendGrid account and API key

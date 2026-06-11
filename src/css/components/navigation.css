@@ -21,6 +21,20 @@
     height: 70px;
 }
 
+.nav-logo {
+    display: inline-flex;
+    align-items: center;
+}
+
+a.nav-logo {
+    text-decoration: none;
+    color: inherit;
+}
+
+a.nav-logo:hover h2 {
+    color: var(--primary-dark);
+}
+
 .nav-logo h2 {
     color: var(--primary-color);
     margin: 0;

@@ -163,9 +163,30 @@
 
     .search {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin: 10px 0 0;
     }
+    .search input[type="text"] { flex: 1; min-width: 160px; }
+    .search select { flex-shrink: 0; }
+
+    .audience-pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 3px 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.2);
+      color: rgba(255,255,255,0.75);
+      white-space: nowrap;
+    }
+    .audience-pill.patient { border-color: rgba(96,165,250,0.45); color: #93c5fd; }
+    .audience-pill.provider { border-color: rgba(52,211,153,0.45); color: #6ee7b7; }
+    .audience-pill.admin { border-color: rgba(251,113,133,0.4); color: #fda4af; }
+    .audience-pill.other { border-color: rgba(148,163,184,0.45); color: #cbd5e1; }
 
     .case-list {
       max-height: calc(100vh - 290px);
@@ -272,6 +293,32 @@
     .kpi .k .n { font-size: 18px; font-weight: 900; }
     .kpi .k .t { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
+    .launch-banner {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.22);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .launch-banner.ready {
+      border-color: rgba(52,211,153,0.45);
+      background: rgba(16,185,129,0.12);
+      color: #a7f3d0;
+    }
+    .launch-banner.blocked {
+      border-color: rgba(251,113,133,0.4);
+      background: rgba(239,68,68,0.1);
+      color: #fecdd3;
+    }
+    .launch-banner.pending {
+      border-color: rgba(251,191,36,0.45);
+      background: rgba(245,158,11,0.1);
+      color: #fde68a;
+    }
+    .launch-banner strong { font-weight: 800; }
+
     @media (max-width: 1150px) {
       .grid { grid-template-columns: 1fr; }
       .meta { min-width: 0; }
@@ -285,11 +332,13 @@
   <div class="container">
     <div class="topbar">
       <div class="title-card">
-        <h1>✅ Functional Test Tracker</h1>
+        <h1>✅ CareLuva Pre-Launch Test Tracker</h1>
         <p>
-          Track your manual regression run (pass/fail/skip), add notes + evidence, and export a report.
-          Data is stored locally in your browser (<span class="mono">localStorage</span>).
+          <strong>Go-live gate:</strong> run the full list on your production URL (e.g. <span class="mono">careluva-5635e.web.app</span>).
+          Every case must be <strong>Pass</strong> or <strong>N/A</strong> (with evidence) before launch. No open <strong>Fail</strong>, <strong>Skip</strong>, or <strong>Not run</strong> items.
+          Progress is stored in <span class="mono">localStorage</span>; export Markdown for sign-off.
         </p>
+        <div id="launchBanner" class="launch-banner" role="status" aria-live="polite"></div>
         <div class="statbar" id="statbar"></div>
       </div>
 
@@ -318,9 +367,10 @@
           <div class="footer-actions">
             <button class="btn success" id="btnNewRun">New run (reset statuses)</button>
             <button class="btn" id="btnClearAll">Clear storage</button>
+            <button class="btn" id="btnVerifySave" title="Check if current progress is saved">Verify Save</button>
           </div>
           <div class="hint">
-            Tip: keep one run per branch/PR. Export the report and attach it to your PR or documentation.
+            Tip: set Environment to your production URL. Export Markdown when the launch banner is green for launch sign-off (LR1).
           </div>
         </div>
 
@@ -346,10 +396,17 @@
       <div class="panel">
         <div class="panel-header">
           <h2>Test cases</h2>
-          <p>Pick a test case, mark status, and record evidence.</p>
+          <p>Pre-launch checklist: mark each case Pass or N/A before go-live. Filter by <strong>audience</strong> for role-based test passes. Watch the launch banner until it shows <strong>Ready for launch</strong>.</p>
           <div class="search">
-            <input id="search" type="text" placeholder="Search by id/name/section..." />
-            <select id="filterStatus" style="width: 160px;">
+            <input id="search" type="text" placeholder="Search id, name, section, audience..." />
+            <select id="filterAudience" style="width: 148px;" title="E2E role to test as">
+              <option value="all">All audiences</option>
+              <option value="patient">Patient</option>
+              <option value="provider">Provider</option>
+              <option value="admin">Admin</option>
+              <option value="other">Other</option>
+            </select>
+            <select id="filterStatus" style="width: 148px;">
               <option value="all">All statuses</option>
               <option value="na">N/A</option>
               <option value="pass">Pass</option>
@@ -399,10 +456,32 @@
       { id: 'A1', section: 'Auth', name: 'Patient login persists after refresh', steps: ['Login at /patient-auth.html', 'Refresh page', 'Open /patient-dashboard.html'], expected: ['User remains logged in', 'No redirect loop'] },
       { id: 'A2', section: 'Auth', name: 'Provider login persists after refresh', steps: ['Login at /provider-auth.html', 'Refresh page', 'Open /provider-dashboard.html'], expected: ['User remains logged in'] },
       { id: 'A3', section: 'Auth', name: 'Admin login persists across navigation', steps: ['Login at /admin-panel.html', 'Open an admin feature page', 'Navigate back/refresh'], expected: ['Admin stays authenticated', 'No permissions error loops'] },
+      { id: 'A4', section: 'Auth', name: 'Provider: Clinic profile & settings in multiple tabs', steps: ['Login at /provider-auth.html (Firebase email/password)', 'Open /provider-clinic-profile.html in tab 1', 'Open /provider-settings.html in a new tab (middle-click or Ctrl+click a bookmark)', 'Refresh tab 1'], expected: ['Both tabs stay signed in', 'No redirect to provider-auth.html', 'Profile form and settings page load'] },
+
+      // Auth Guard Protection (NEW - Pre-Launch Critical)
+      { id: 'AG1', section: 'Auth Guard', name: 'Provider: Direct nav to protected pages (not logged in)', steps: ['Clear browser storage (logout)', 'Navigate directly to provider-dashboard.html', 'Navigate to provider-clinic-profile.html', 'Navigate to clinic-photo-gallery.html'], expected: ['Loading overlay appears immediately', 'Page content hidden', 'Immediate redirect to provider-auth.html (no delay)', 'No content visible before redirect'] },
+      { id: 'AG2', section: 'Auth Guard', name: 'Provider: Auth guard works when logged in', steps: ['Login as provider', 'Navigate directly to provider-dashboard.html', 'Navigate to provider-appointments.html'], expected: ['Loading overlay appears briefly', 'Page content displays after auth verified', 'No redirect occurs', 'User can access features'] },
+      { id: 'AG3', section: 'Auth Guard', name: 'Provider: Session denied after logout', steps: ['Login as provider', 'Navigate to provider-dashboard.html (should work)', 'Click Logout', 'Immediately navigate to provider-dashboard.html'], expected: ['Immediate redirect to provider-auth.html', 'No page content visible', 'Session and registration ID cleared'] },
+      { id: 'AG4', section: 'Auth Guard', name: 'Patient: Direct nav to protected pages (not logged in)', steps: ['Clear browser storage (logout)', 'Navigate directly to patient-dashboard.html', 'Navigate to patient-account.html', 'Navigate to patient-medical-records.html'], expected: ['Loading overlay appears immediately', 'Page content hidden', 'Immediate redirect to patient-auth.html (no delay)'] },
+      { id: 'AG5', section: 'Auth Guard', name: 'Patient: Auth guard works when logged in', steps: ['Login as patient', 'Navigate directly to patient-dashboard.html', 'Navigate to patient-account.html'], expected: ['Loading overlay appears briefly', 'Page content displays after auth verified', 'No redirect occurs'] },
+      { id: 'AG6', section: 'Auth Guard', name: 'Patient: Session denied after logout', steps: ['Login as patient', 'Navigate to patient-dashboard.html (should work)', 'Click Logout', 'Immediately navigate to patient-dashboard.html'], expected: ['Immediate redirect to patient-auth.html', 'No page content visible', 'Session cleared'] },
+      { id: 'AG7', section: 'Auth Guard', name: 'Admin: Direct nav to protected pages (not logged in)', steps: ['Clear browser storage (logout)', 'Navigate directly to admin-service-catalog.html', 'Navigate to admin-verification-workflow.html', 'Navigate to admin-payment-verification.html'], expected: ['Loading overlay appears immediately', 'Page content hidden', 'Immediate redirect to admin-panel.html', 'No content visible before redirect'] },
+      { id: 'AG8', section: 'Auth Guard', name: 'Admin: Auth guard works when logged in', steps: ['Login as admin', 'Navigate directly to admin-service-catalog.html', 'Navigate to admin-communication-monitor.html'], expected: ['Loading overlay appears briefly', 'Firebase Auth state checked', 'Admin role verified in Firestore', 'Page content displays', 'No redirect occurs'] },
+      { id: 'AG9', section: 'Auth Guard', name: 'Admin: Session denied after logout', steps: ['Login as admin', 'Navigate to admin-service-catalog.html (should work)', 'Click Logout', 'Immediately navigate to admin-service-catalog.html'], expected: ['Immediate redirect to admin-panel.html', 'No page content visible', 'Firebase Auth session cleared'] },
+      { id: 'AG10', section: 'Auth Guard', name: 'Admin: Non-admin user blocked from admin pages', steps: ['Login as provider or patient (NOT admin)', 'Try to navigate to admin-service-catalog.html'], expected: ['Loading overlay appears', 'Firebase Auth check finds user', 'Admin role check fails', 'Immediate redirect to admin-panel.html with Access Denied', 'No admin content accessible'] },
+      { id: 'AG11', section: 'Auth Guard', name: 'Cross-user: Provider accessing patient pages', steps: ['Login as provider', 'Navigate directly to patient-dashboard.html'], expected: ['Auth guard checks for patient session', 'Provider session not recognized as patient', 'Immediate redirect to patient-auth.html'] },
+      { id: 'AG12', section: 'Auth Guard', name: 'Cross-user: Patient accessing provider pages', steps: ['Login as patient', 'Navigate directly to provider-dashboard.html'], expected: ['Auth guard checks for provider session', 'Patient session not recognized as provider', 'Immediate redirect to provider-auth.html'] },
+      { id: 'AG13', section: 'Auth Guard', name: 'Provider: New tab stays signed in (nav link)', steps: ['Login as provider with Firebase email/password on same origin you deploy to (HTTPS recommended)', 'Open provider-dashboard.html', 'Open Appointments or Patients from top nav in a NEW tab (middle-click / Ctrl+click / Open in new tab)', 'Wait for full load'], expected: ['New tab does NOT redirect to provider-auth.html', 'Protected page content visible', 'Session readable from localStorage in both tabs'] },
+      { id: 'AG14', section: 'Auth Guard', name: 'Provider: HttpOnly session API (post-deploy Hosting)', steps: ['Ensure firebase deploy --only functions,hosting completed', 'Login as provider with Firebase Auth on Hosting URL (e.g. *.web.app)', 'Open DevTools → Network', 'Confirm POST /api/auth/session-login after login', 'Load a protected page and confirm GET /api/auth/session-verify'], expected: ['session-login returns 200', 'session-verify returns 200 with JSON body when cookie set', 'On static localhost without rewrites to Functions, mark N/A and note'] },
+        { id: 'AG15', section: 'Auth Guard', name: 'Provider: Logout clears HttpOnly session cookie', steps: ['Login as provider on Hosting with Functions deployed', 'Open Network tab', 'Trigger Logout from nav or dashboard', 'Inspect POST /api/auth/session-logout'], expected: ['session-logout returns 200', 'Response clears __session cookie', 'Opening a protected page again redirects to provider-auth.html'] },
+      { id: 'AG16', section: 'Auth Guard', name: 'Patient: New tab with Remember me checked', steps: ['Clear site data', 'Login at patient-auth.html WITH Remember me checked', 'Open patient-dashboard.html in tab 1', 'Open patient-account.html in a new tab (new tab + paste URL or middle-click if link exists)'], expected: ['Second tab loads without forced login', 'patientSession / patient data available from localStorage path'] },
+      { id: 'AG17', section: 'Auth Guard', name: 'Patient: New tab without Remember me (expected gap)', steps: ['Clear site data', 'Login at patient-auth.html WITHOUT Remember me', 'Open patient-dashboard.html in tab A', 'Open patient-account.html in new tab B (same origin)'], expected: ['If tab B redirects to patient-auth: expected today (patient keys may use sessionStorage)', 'If product later moves patient session to localStorage-only, re-run and expect both tabs signed in'] },
+      { id: 'AG18', section: 'Auth Guard', name: 'Admin: New tab while logged in (Firebase)', steps: ['Login as admin at admin-panel.html', 'Open admin-service-catalog.html in tab 1', 'Open admin-verification-workflow.html in a new tab'], expected: ['New admin tab loads without forced login', 'Provider HttpOnly cookie flow does not apply; admin-auth-guard + Firebase Auth govern access'] },
 
       // Patient journey
       { id: 'P1', section: 'Patient', name: 'Find clinics search + filters', steps: ['Open /find-clinics.html', 'Use search', 'Use filters', 'Open a clinic profile'], expected: ['Filters narrow results', 'Clinic opens correctly'] },
       { id: 'P2', section: 'Patient', name: 'Provider directory back navigation', steps: ['Open a provider profile from find-clinics', 'Use back/back-to-search'], expected: ['Returns to patient context correctly'] },
+      { id: 'P3', section: 'Patient', name: 'Provider directory: Photo Gallery Visibility', steps: ['Prerequisites: Provider has uploaded photos', 'Navigate to provider-directory.html?id=<clinicId>', 'Scroll to Photo Gallery section', 'Check console logs'], expected: ['Photos visible grouped by category', 'Console shows successful photo loading', 'No errors', 'Photos open in modal when clicked'] },
 
       // Appointments
       { id: 'AP1', section: 'Appointments', name: 'Book appointment (required fields)', steps: ['Open /appointment-booking.html', 'Fill required fields (clinicId, patientEmail, etc.)', 'Submit'], expected: ['Appointment created OR clear error explains what is missing'] },
@@ -419,6 +498,7 @@
       { id: 'G1', section: 'Gallery', name: 'Provider uploads a photo', steps: ['Login as provider', 'Open photo gallery management path', 'Upload an image'], expected: ['Upload success; photo appears'] },
       { id: 'G2', section: 'Gallery', name: 'Patient can view provider photos', steps: ['Login as patient', 'Open provider profile', 'Locate gallery section'], expected: ['Photos visible; modal works'] },
       { id: 'G3', section: 'Gallery', name: 'Deleting a photo removes it for patient view', steps: ['Delete a photo as provider', 'Refresh provider profile as patient'], expected: ['Deleted photo no longer shows'] },
+      { id: 'G4', section: 'Gallery', name: 'Photo Gallery Visibility in Provider Directory (NEW)', steps: ['Login as provider', 'Upload 3 photos (one per category: Clinic Facilities, Professionals, Services)', 'Note clinic ID', 'Navigate to provider-directory.html?id=<clinicId>', 'Scroll to Photo Gallery section', 'Check browser console'], expected: ['Photo Gallery section visible', 'Photos displayed grouped by category', 'Photos clickable and open modal', 'Console shows: Loading photo gallery for clinicId', 'Console shows: Photo query result: X photos found', 'Console shows: Successfully loaded X photos', 'No errors in console'] },
 
       // Provider tools smoke
       { id: 'PT1', section: 'Provider tools', name: 'Provider patients page smoke', steps: ['Open /provider-patients.html'], expected: ['Page loads; no permission errors'] },
@@ -427,7 +507,7 @@
       { id: 'PT4', section: 'Provider tools', name: 'Create treatment plan page smoke', steps: ['Open /create-treatment-plan.html'], expected: ['Page loads; no permission errors'] },
 
       // Admin workflows
-      { id: 'AD1', section: 'Admin', name: 'Verification workflow: open + approve', steps: ['Open /admin-panel.html', 'Open verification workflow for pending registration', 'Approve'], expected: ['Status updates; verified badge logic consistent'] },
+      { id: 'AD1', section: 'Admin', name: 'Verification workflow: open + approve', steps: ['After a provider submits registration (PR21), login as admin', 'Open /admin-panel.html', 'Locate pending provider registration', 'Open verification workflow and Approve'], expected: ['Pending registration visible in admin panel', 'Status updates on approve', 'Verified badge logic consistent on provider dashboard'] },
       { id: 'AD2', section: 'Admin', name: 'Badge status check shows issues (e.g., expired insurance)', steps: ['In admin panel, open badge status', 'Check issues section'], expected: ['Issues listed correctly; expiry handled'] },
       { id: 'AD3', section: 'Admin', name: 'Service catalog loads as admin', steps: ['Open /admin-service-catalog.html while logged in as admin'], expected: ['No insufficient permissions'] },
       { id: 'AD4', section: 'Admin', name: 'Communication monitor smoke', steps: ['Open /admin-communication-monitor.html'], expected: ['Loads or shows empty state'] },
@@ -446,6 +526,138 @@
       { id: 'FR3', section: 'Firestore Rules', name: 'Admin-only operations require admin auth', steps: ['Open admin service catalog as admin', 'Open admin service catalog as provider/patient'], expected: ['Admin can access', 'Non-admin redirected or shown error'] },
       { id: 'FR4', section: 'Firestore Rules', name: 'Users can only read/update own data', steps: ['Provider reads own registration', 'Provider tries to read other provider registration', 'Patient reads own data'], expected: ['Own data accessible', 'Others data permission denied (unless admin)'] },
       { id: 'FR5', section: 'Firestore Rules', name: 'Rules verification tool works', steps: ['Open /tests/test-rules-verification.html', 'Test valid/invalid scenarios'], expected: ['Tool shows clear pass/fail', 'Error messages explain rule constraints'] },
+      { id: 'FR6', section: 'Firestore Rules', name: 'Provider registrations: No unauthenticated read access', steps: ['Logout (clear all storage)', 'Try to query providerRegistrations collection', 'Check console for permission errors'], expected: ['Permission denied error', 'Cannot read provider registrations without authentication'] },
+      { id: 'FR7', section: 'Firestore Rules', name: 'Patient users: No unauthenticated read access', steps: ['Logout (clear all storage)', 'Try to query patientUsers collection', 'Check console for permission errors'], expected: ['Permission denied error', 'Cannot read patient users without authentication'] },
+      { id: 'FR8', section: 'Firestore Rules', name: 'Provider can only read own registration by Firebase Auth UID', steps: ['Login as Provider A (Firebase Auth)', 'Try to read Provider A registration', 'Try to read Provider B registration (different UID)'], expected: ['Can read own registration', 'Cannot read other provider registration', 'Permission denied for others data'] },
+      { id: 'FR9', section: 'Firestore Rules', name: 'Patient can only read own data by Firebase Auth UID', steps: ['Login as Patient A (Firebase Auth)', 'Try to read Patient A data', 'Try to read Patient B data (different UID)'], expected: ['Can read own data', 'Cannot read other patient data', 'Permission denied for others data'] },
+      { id: 'FR10', section: 'Firestore Rules', name: 'Appointments: Patient can only read own appointments', steps: ['Login as Patient A', 'Query appointments by patientEmail', 'Login as Patient B', 'Query appointments by patientEmail'], expected: ['Patient A sees only their appointments', 'Patient B sees only their appointments', 'No cross-patient data leakage'] },
+
+      // Patient Data Access Control (Section 18)
+      { id: 'PA1', section: 'Patient Access', name: 'Patient dashboard: Only shows own data', steps: ['Login as Patient A', 'Open /patient-dashboard.html', 'Check appointments list', 'Check profile information'], expected: ['Only Patient A appointments visible', 'Profile shows Patient A information', 'No other patient data visible'] },
+      { id: 'PA2', section: 'Patient Access', name: 'Patient account: Can only update own profile', steps: ['Login as Patient A', 'Open /patient-account.html', 'Update profile information', 'Check Firestore update'], expected: ['Profile updates successfully', 'Only Patient A data updated', 'No permission errors'] },
+      { id: 'PA3', section: 'Patient Access', name: 'Patient medical records: Only shows own records', steps: ['Login as Patient A', 'Open /patient-medical-records.html', 'Check records displayed'], expected: ['Only Patient A medical records visible', 'No other patient records accessible'] },
+      { id: 'PA4', section: 'Patient Access', name: 'Patient appointments: Query by verified email', steps: ['Login as Patient A', 'Open /patient-dashboard.html', 'Check appointments query', 'Verify patientEmail matches logged-in user'], expected: ['Appointments query uses verified patientEmail', 'Only own appointments returned', 'Data verification utility works'] },
+      { id: 'PA5', section: 'Patient Access', name: 'Patient cannot access other patient data via URL manipulation', steps: ['Login as Patient A', 'Note Patient A ID', 'Try to access Patient B data by changing URL parameters', 'Check console for errors'], expected: ['Access denied or redirect', 'Cannot view other patient data', 'Data verification blocks unauthorized access'] },
+      { id: 'PA6', section: 'Patient Access', name: 'Patient Firebase Auth: Registration creates Auth account', steps: ['Register via /patient-registration.html or /patient-auth.html Sign Up', 'Check Firebase Auth console', 'Verify patientUsers document', 'Confirm UID alignment'], expected: ['Firebase Auth account created', 'patientUsers document exists', 'UID matches Firestore document ID', 'Can login with Firebase Auth'] },
+      { id: 'PA7', section: 'Patient Access', name: 'Patient Firebase Auth: Login uses Firebase Auth', steps: ['Open /patient-auth.html', 'Login with email/password', 'Check Firebase Auth state', 'Verify session created'], expected: ['Firebase Auth login successful', 'Session created with Auth UID', 'Can access protected pages'] },
+      { id: 'PA8', section: 'Patient Access', name: 'Patient data verification utility works', steps: ['Login as Patient A', 'Open browser console', 'Check window.patientDataVerification', 'Test getVerifiedPatientId()'], expected: ['Utility loaded', 'Returns verified patient ID', 'Verification passes for own data'] },
+      { id: 'PA9', section: 'Patient Access', name: 'Patient migration: Legacy accounts still work', steps: ['Login with legacy patient account (Firestore-only auth)', 'Access patient dashboard', 'Check appointments load'], expected: ['Legacy login works', 'Dashboard loads', 'Backward compatibility maintained'] },
+      { id: 'PA10', section: 'Patient Access', name: 'Patient cannot access provider pages', steps: ['Login as Patient A', 'Try to navigate to /provider-dashboard.html', 'Try to navigate to /provider-clinic-profile.html'], expected: ['Redirected to provider-auth.html', 'Access denied', 'Cross-user access blocked'] },
+
+      // Provider Data Access Control (Section 19)
+      { id: 'PR1', section: 'Provider Access', name: 'Provider dashboard: Only shows own clinic data', steps: ['Login as Provider A', 'Open /provider-dashboard.html', 'Check clinic information displayed'], expected: ['Only Provider A clinic data visible', 'No other clinic data accessible'] },
+      { id: 'PR2', section: 'Provider Access', name: 'Provider appointments: Only shows own clinic appointments', steps: ['Login as Provider A', 'Open /provider-appointments.html', 'Check appointments list', 'Verify clinicId matches'], expected: ['Only Provider A clinic appointments visible', 'Appointments filtered by own clinicId', 'No other clinic appointments shown'] },
+      { id: 'PR3', section: 'Provider Access', name: 'Provider patients: Only shows own clinic patients', steps: ['Login as Provider A', 'Open /provider-patients.html', 'Check patients list'], expected: ['Only patients with appointments at Provider A clinic', 'No other clinic patients visible'] },
+      { id: 'PR4', section: 'Provider Access', name: 'Manage professionals: Only own clinic professionals', steps: ['Login as Provider A', 'Open /manage-professionals.html', 'Check professionals list', 'Try to add/edit professional'], expected: ['Only Provider A clinic professionals visible', 'Can only manage own professionals', 'Ownership verification works'] },
+      { id: 'PR5', section: 'Provider Access', name: 'Clinic photo gallery: Only own clinic photos', steps: ['Login as Provider A', 'Open /clinic-photo-gallery.html', 'Check photos displayed', 'Try to upload photo'], expected: ['Only Provider A clinic photos visible', 'Can only upload to own clinic', 'No other clinic photos accessible'] },
+      { id: 'PR6', section: 'Provider Access', name: 'Provider cannot access other provider data via URL manipulation', steps: ['Login as Provider A', 'Note Provider A registration ID', 'Try to access Provider B data by changing URL parameters', 'Check console for errors'], expected: ['Access denied or redirect', 'Cannot view other provider data', 'Data verification blocks unauthorized access'] },
+      { id: 'PR7', section: 'Provider Access', name: 'Provider Firebase Auth: Registration creates Auth account', steps: ['Complete registration on /provider-registration.html or /complete-registration.html (see PR21)', 'Check Firebase Auth console', 'Verify providerRegistrations document ID matches Auth UID when applicable'], expected: ['Firebase Auth account created', 'UID matches Firestore registration ID', 'Can login with Firebase Auth'] },
+      { id: 'PR8', section: 'Provider Access', name: 'Provider Firebase Auth: Login uses Firebase Auth', steps: ['Open /provider-auth.html', 'Login with email/password', 'Check Firebase Auth state', 'Verify session created'], expected: ['Firebase Auth login successful', 'Session created with Auth UID', 'Can access protected pages'] },
+      { id: 'PR9', section: 'Provider Access', name: 'Provider data verification utility works', steps: ['Login as Provider A', 'Open browser console', 'Check window.providerDataVerification', 'Test getVerifiedClinicId()'], expected: ['Utility loaded', 'Returns verified clinic ID', 'Verification passes for own data'] },
+      { id: 'PR10', section: 'Provider Access', name: 'Provider migration: Legacy accounts still work', steps: ['Login with legacy provider account (Firestore-only auth)', 'Access provider dashboard', 'Check appointments load'], expected: ['Legacy login works', 'Dashboard loads', 'Backward compatibility maintained'] },
+      { id: 'PR11', section: 'Provider Access', name: 'Provider cannot access patient pages', steps: ['Login as Provider A', 'Try to navigate to /patient-dashboard.html', 'Try to navigate to /patient-account.html'], expected: ['Redirected to patient-auth.html', 'Access denied', 'Cross-user access blocked'] },
+      { id: 'PR12', section: 'Provider Access', name: 'Provider service pricing: Only own clinic pricing', steps: ['Login as Provider A', 'Open /service-pricing-management.html', 'Check pricing displayed', 'Try to update pricing'], expected: ['Only Provider A clinic pricing visible', 'Can only update own pricing', 'Ownership verification works'] },
+      { id: 'PR13', section: 'Provider Access', name: 'Provider service packages: Only own clinic packages', steps: ['Login as Provider A', 'Open /service-packages-management.html', 'Check packages displayed'], expected: ['Only Provider A clinic packages visible', 'Can only manage own packages'] },
+      { id: 'PR14', section: 'Provider Access', name: 'Provider treatment plans: Only own clinic plans', steps: ['Login as Provider A', 'Open /provider-treatment-plans.html', 'Check treatment plans displayed'], expected: ['Only Provider A clinic treatment plans visible', 'Can only manage own plans'] },
+      { id: 'PR15', section: 'Provider Access', name: 'Provider invoices: Only own clinic invoices', steps: ['Login as Provider A', 'Open /provider-invoices.html', 'Check invoices displayed'], expected: ['Only Provider A clinic invoices visible', 'Can only view own invoices'] },
+      { id: 'PR16', section: 'Provider Access', name: 'Provider professional schedules: Only own clinic schedules', steps: ['Login as Provider A', 'Open /professional-schedules.html', 'Check schedules displayed'], expected: ['Only Provider A clinic professional schedules visible', 'Can only manage own schedules'] },
+
+      // Provider registration (E2E)
+      { id: 'PR17', section: 'Provider Registration', name: 'Provider registration page loads', steps: ['Open /provider-registration.html', 'Confirm header and step 1 form are visible', 'Check browser console'], expected: ['Page renders without blank screen', 'Progress steps visible', 'No uncaught exceptions'] },
+      { id: 'PR18', section: 'Provider Registration', name: 'Complete registration page loads', steps: ['Open /complete-registration.html', 'Confirm multi-step UI renders', 'Check browser console'], expected: ['Page loads', 'Step UI visible', 'No uncaught exceptions'] },
+      { id: 'PR19', section: 'Provider Registration', name: 'Multi-step wizard: next and previous', steps: ['Open /provider-registration.html', 'Fill required fields on step 1', 'Click Next through steps 2–4', 'Click Previous to go back', 'Reach review step (step 5)'], expected: ['Each step advances', 'Previous returns to prior step with data retained', 'Review step shows entered summary'] },
+      { id: 'PR20', section: 'Provider Registration', name: 'Validation blocks advance with missing required fields', steps: ['Open /provider-registration.html', 'Leave required fields empty on step 1', 'Click Next', 'Observe error messaging or blocked navigation'], expected: ['Cannot proceed without required data', 'Clear validation message or step stays on current page', 'No silent Firestore write'] },
+      { id: 'PR21', section: 'Provider Registration', name: 'Full submit creates providerRegistrations document', steps: ['Use a unique test email (e.g. provider+e2e+DATE@test.com)', 'Complete all steps on /provider-registration.html', 'Submit registration', 'Check success message', 'In Firebase console verify providerRegistrations doc with matching email and pending/review status'], expected: ['Success confirmation shown', 'Document created in providerRegistrations', 'email and clinicName present', 'Status indicates pending review (not immediately approved)'] },
+      { id: 'PR22', section: 'Provider Registration', name: 'Entry from provider-auth Sign Up flow', steps: ['Open /provider-auth.html', 'Switch to Sign Up tab', 'Click Start Registration', 'Confirm navigation to /complete-registration.html or registration form'], expected: ['Sign Up options visible', 'Start Registration navigates to registration flow', 'No broken links'] },
+      { id: 'PR23', section: 'Provider Registration', name: 'Entry from home page provider modal (if enabled)', steps: ['Open /index.html', 'Open provider registration (Register as Provider or equivalent CTA)', 'Confirm modal or registration UI opens', 'Close modal'], expected: ['Registration entry point works from marketing page', 'Form/modal renders', 'No console errors on open/close'] },
+      { id: 'PR24', section: 'Provider Registration', name: 'Post-registration login at provider-auth', steps: ['After PR21 (or use existing pending provider test account)', 'Open /provider-auth.html', 'Login with the email/password used at registration', 'Open /provider-dashboard.html'], expected: ['Firebase Auth login succeeds', 'Dashboard loads or shows pending-review message (not a hard error)', 'Session stored for provider'] },
+
+      // Patient registration (E2E)
+      { id: 'PA11', section: 'Patient Registration', name: 'Patient registration page loads', steps: ['Open /patient-registration.html', 'Confirm registration form visible', 'Check browser console'], expected: ['Page renders without blank screen', 'Form fields visible', 'No uncaught exceptions'] },
+      { id: 'PA12', section: 'Patient Registration', name: 'Patient auth Sign Up tab and registration link', steps: ['Open /patient-auth.html', 'Click Sign Up tab', 'Confirm intro and link to patient-registration.html', 'Follow link to registration page'], expected: ['Sign Up tab shows registration options', 'Link opens /patient-registration.html', 'No broken navigation'] },
+      { id: 'PA13', section: 'Patient Registration', name: 'Signup validation: password rules and mismatch', steps: ['On /patient-auth.html Sign Up (inline form if shown) OR /patient-registration.html', 'Enter mismatched passwords or password under 8 characters', 'Submit'], expected: ['Submit blocked or clear error shown', 'No Firebase Auth account created', 'No patientUsers document created'] },
+      { id: 'PA14', section: 'Patient Registration', name: 'Full registration via patient-registration.html', steps: ['Open /patient-registration.html', 'Register with unique test email (e.g. patient+e2e+DATE@test.com)', 'Complete required fields and submit', 'Check Firebase Auth console and patientUsers collection'], expected: ['Registration succeeds with confirmation', 'Firebase Auth user created', 'patientUsers document exists with matching UID/email'] },
+      { id: 'PA15', section: 'Patient Registration', name: 'Full registration via patient-auth signup form', steps: ['Open /patient-auth.html', 'Sign Up tab → use inline signup form if available (or Google signup path)', 'Register with unique test email', 'Verify Auth + Firestore'], expected: ['Account created', 'Can sign in immediately or see success prompt', 'patientUsers doc matches Auth UID'] },
+      { id: 'PA16', section: 'Patient Registration', name: 'Post-registration access to patient dashboard', steps: ['After PA14 or PA15', 'Login at /patient-auth.html if not already signed in', 'Open /patient-dashboard.html'], expected: ['Patient dashboard loads', 'Own profile/appointments area accessible', 'No redirect loop to patient-auth'] },
+      // Launch readiness (go-live gate)
+      { id: 'LR1', section: 'Launch Readiness', name: 'Production sign-off: all cases Pass or N/A', steps: ['Run full tracker on production Hosting URL with Firebase projectId filled in', 'Mark every case Pass or N/A (document N/A reason + evidence in notes)', 'Export Markdown report', 'Confirm zero Fail, zero Skip, zero Not run'], expected: ['All cases Pass or N/A only', 'Markdown export attached for launch record', 'Team agrees solution is ready to go live'] },
+
+      // Patient discover (nav pages)
+      { id: 'P4', section: 'Patient Discover', name: 'Favorite clinics page loads', steps: ['Login as patient', 'Open /favorite-clinics.html from nav or direct URL', 'Check console'], expected: ['Page loads with patient nav', 'No uncaught exceptions', 'Empty state or favorites list renders'] },
+      { id: 'P5', section: 'Patient Discover', name: 'Add and remove clinic favorite', steps: ['Login as patient', 'From /find-clinics.html favorite a clinic (or use page control)', 'Open /favorite-clinics.html', 'Confirm clinic appears', 'Remove favorite', 'Refresh page'], expected: ['Favorite persists after add', 'Removed clinic no longer listed after refresh', 'No permission errors'] },
+      { id: 'P6', section: 'Patient Discover', name: 'Price comparison page loads and works', steps: ['Login as patient', 'Open /price-comparison.html', 'Run a comparison if UI supports it', 'Open a clinic from results if available'], expected: ['Page loads', 'Comparison UI responds', 'View Clinic opens provider-directory or booking context'] },
+      { id: 'P7', section: 'Patient Discover', name: 'Clinic recommendations page loads', steps: ['Login as patient', 'Open /clinic-recommendations.html', 'Check recommendations list or empty state'], expected: ['Page loads with patient nav', 'Recommendations or clear empty state', 'No console errors'] },
+      { id: 'P8', section: 'Patient Discover', name: 'Patient account settings page', steps: ['Login as patient', 'Open /patient-account.html', 'Update a safe field (e.g. phone or display name)', 'Save', 'Refresh page'], expected: ['Form loads', 'Update saves without permission error', 'Value persists after refresh'] },
+
+      // Appointments (end-to-end)
+      { id: 'AP3', section: 'Appointments', name: 'Book from find-clinics → clinic profile → booking', steps: ['Login as patient', 'Open /find-clinics.html', 'Open a clinic → /provider-directory.html?id=<clinicId>', 'Start booking (Book / appointment CTA)', 'Complete /appointment-booking.html with required fields', 'Submit'], expected: ['Navigation chain works', 'clinicId pre-filled or selectable', 'Appointment created or clear validation errors'] },
+      { id: 'AP4', section: 'Appointments', name: 'Patient dashboard shows new appointment', steps: ['After AP1 or AP3', 'Login as same patient', 'Open /patient-dashboard.html', 'Locate the new appointment'], expected: ['Appointment visible on dashboard', 'Date/time/clinic match submission', 'Only this patient appointment shown'] },
+      { id: 'AP5', section: 'Appointments', name: 'Provider views appointment (list or detail)', steps: ['Login as provider for the clinic', 'Open /provider-appointments.html', 'Open appointment detail (row expand or View link)', 'If appointment-details.html exists, confirm it loads; if missing, confirm inline detail works'], expected: ['Appointment from AP1/AP3 visible', 'Detail view works OR documented product gap with fail + ticket', 'No 404 on linked detail page'] },
+      { id: 'AP6', section: 'Appointments', name: 'Provider updates appointment status', steps: ['Login as provider', 'Open /provider-appointments.html', 'Change status (confirm/cancel/complete) if UI supports it', 'Refresh list'], expected: ['Status updates in UI', 'Firestore reflects change', 'Patient view updates on refresh (if implemented)'] },
+      { id: 'AP7', section: 'Appointments', name: 'Patient cancel or reschedule (if supported)', steps: ['Login as patient with upcoming appointment', 'Attempt cancel or reschedule from dashboard or booking page'], expected: ['Action completes OR mark N/A if feature not shipped', 'Clear messaging to patient', 'Provider list reflects change when supported'] },
+
+      // Auth (password reset & Google)
+      { id: 'A5', section: 'Auth', name: 'Password reset page loads', steps: ['Open /password-reset.html', 'Confirm UI renders', 'Check console'], expected: ['Page loads', 'Role-appropriate reset form or instructions', 'No uncaught exceptions'] },
+      { id: 'A6', section: 'Auth', name: 'Patient password reset flow', steps: ['Open /password-reset.html as patient path (or from patient-auth link)', 'Request reset for test account', 'Complete reset if email delivery works in env'], expected: ['Request accepted or clear error', 'If email works: new password login succeeds', 'If email not configured: mark N/A with note'] },
+      { id: 'A7', section: 'Auth', name: 'Provider password reset flow', steps: ['Open /password-reset.html for provider', 'Request reset for provider test account', 'Complete reset if email works'], expected: ['Request accepted or clear error', 'Provider can login with new password when email works', 'Mark N/A if email not configured'] },
+      { id: 'A8', section: 'Auth', name: 'Provider Google Sign-In', steps: ['Open /provider-auth.html', 'Use Continue with Google (or demo Google if only test path)', 'Complete auth', 'Open /provider-dashboard.html'], expected: ['Google auth completes without loop', 'Session established', 'Dashboard or complete-registration prompt is appropriate'] },
+      { id: 'A9', section: 'Auth', name: 'Patient Google Sign-In', steps: ['Open /patient-auth.html', 'Sign Up or Login with Google', 'Open /patient-dashboard.html'], expected: ['Google auth completes', 'Patient session established', 'Dashboard loads'] },
+
+      // Admin workflows (extended)
+      { id: 'AD6', section: 'Admin', name: 'Reject pending provider registration', steps: ['Submit test registration (PR21) or use pending provider', 'Login as admin', 'Open verification workflow', 'Reject registration with reason if UI supports'], expected: ['Status shows rejected/denied', 'Provider cannot access as approved', 'Provider sees appropriate message on login'] },
+      { id: 'AD7', section: 'Admin', name: 'Admin verification workflow page', steps: ['Login as admin', 'Open /admin-verification-workflow.html', 'Open a pending item'], expected: ['Page loads', 'Pending registrations list or detail', 'Approve/Reject controls work'] },
+      { id: 'AD8', section: 'Admin', name: 'Payment verification approve/reject', steps: ['Login as admin', 'Open /admin-payment-verification.html', 'Process a pending payment (approve or reject) if data exists'], expected: ['Page loads', 'Action updates status OR empty state with no errors', 'Mark N/A if no test payments'] },
+      { id: 'AD9', section: 'Admin', name: 'Communication monitor review', steps: ['Login as admin', 'Open /admin-communication-monitor.html', 'Open a thread or message if present'], expected: ['Page loads', 'Messages readable', 'No permission errors'] },
+
+      // Provider tools (extended E2E)
+      { id: 'PR25', section: 'Provider tools', name: 'Provider analytics page', steps: ['Login as provider', 'Open /provider-analytics.html from nav', 'Check charts/metrics or empty state'], expected: ['Page loads with provider nav', 'Metrics render or clear empty state', 'No console errors'] },
+      { id: 'PR26', section: 'Provider tools', name: 'Create treatment plan E2E', steps: ['Login as provider', 'Open /create-treatment-plan.html', 'Fill required fields', 'Save', 'Open /provider-treatment-plans.html'], expected: ['Plan saves successfully', 'New plan appears in list', 'Only own clinic plans visible'] },
+      { id: 'PR27', section: 'Provider tools', name: 'Service pricing create or update', steps: ['Login as provider', 'Open /service-pricing-management.html', 'Add or edit a pricing row', 'Save', 'Refresh page'], expected: ['Change persists', 'Only own clinic pricing affected', 'No permission errors'] },
+      { id: 'PR28', section: 'Provider tools', name: 'Service package create or update', steps: ['Login as provider', 'Open /service-packages-management.html', 'Add or edit a package', 'Save', 'Refresh'], expected: ['Package persists', 'Visible only for own clinic'] },
+      { id: 'PR29', section: 'Provider tools', name: 'Manage professionals add/edit', steps: ['Login as provider', 'Open /manage-professionals.html', 'Add or edit a professional', 'Save'], expected: ['Professional saved', 'Listed under own clinic only'] },
+      { id: 'PR30', section: 'Provider tools', name: 'Professional schedules add/edit', steps: ['Login as provider', 'Open /professional-schedules.html', 'Add or edit schedule slot', 'Save'], expected: ['Schedule saves', 'Own clinic only'] },
+
+      // Provider registration (extended)
+      { id: 'PR31', section: 'Provider Registration', name: 'Duplicate email registration handling', steps: ['Attempt second registration with email already in providerRegistrations', 'Submit or advance wizard'], expected: ['Clear error: email already registered', 'No duplicate Auth user without intent', 'No corrupt duplicate docs'] },
+      { id: 'PR32', section: 'Provider Registration', name: 'Registration file upload (if applicable)', steps: ['On registration flow upload license/certification file if field exists', 'Complete submit'], expected: ['Upload succeeds or clear error', 'File in Storage or doc reference in Firestore', 'Mark N/A if uploads not in UI'] },
+
+      // Patient registration (extended)
+      { id: 'PA17', section: 'Patient Registration', name: 'Patient Google signup E2E', steps: ['Clear site data', 'Open /patient-auth.html Sign Up', 'Sign up with Google', 'Verify patientUsers + Auth'], expected: ['Account created', 'Can access patient-dashboard', 'Firestore patient record exists'] },
+      { id: 'PA18', section: 'Patient Registration', name: 'Patient account profile after registration', steps: ['After PA14/PA17', 'Open /patient-account.html', 'Confirm profile fields populated', 'Update one field and save'], expected: ['Profile reflects registered user', 'Save works'] },
+
+      // Reviews (extended)
+      { id: 'R3', section: 'Reviews', name: 'Patient edits or deletes own review', steps: ['Login as patient who wrote a review', 'Open /review-system.html', 'Edit or delete review if UI supports'], expected: ['Change saves OR mark N/A if not supported', 'No permission errors on own review'] },
+      { id: 'R4', section: 'Reviews', name: 'Admin moderates review (reject/hide)', steps: ['Login as admin', 'Open review moderation from admin panel', 'Reject or hide a test review'], expected: ['Moderation action saves', 'Review hidden from public clinic view if applicable'] },
+
+      // Gallery / Storage
+      { id: 'G5', section: 'Gallery', name: 'Photo upload Storage path and permissions', steps: ['Login as provider', 'Upload photo in /clinic-photo-gallery.html', 'Check Network/Firebase Storage for upload path', 'Confirm file in Storage console'], expected: ['Upload reaches Firebase Storage', 'Correct clinic folder path', 'Rules allow own-clinic write only'] },
+      { id: 'G6', section: 'Gallery', name: 'Upload failure handled gracefully', steps: ['Simulate failure (oversized file, offline, or rules denial)', 'Attempt upload'], expected: ['User sees clear error', 'No uncaught exception', 'UI remains usable'] },
+
+      // Firestore rules (extended)
+      { id: 'FR11', section: 'Firestore Rules', name: 'Unauthenticated create providerRegistrations', steps: ['Logout / clear storage', 'Submit minimal provider registration (PR21) without logging in', 'Verify doc created'], expected: ['Create succeeds per rules (email + clinicName)', 'Cannot read collection without auth (FR6 still holds)'] },
+
+      // Navigation (cross-role)
+      { id: 'NV1', section: 'Navigation', name: 'provider-directory: patient nav when logged in as patient', steps: ['Login as patient', 'Open /provider-directory.html?id=<clinicId> from find-clinics', 'Confirm patient-nav (CareLuva → patient-dashboard)', 'Use nav link to dashboard'], expected: ['Patient nav visible', 'No provider/admin nav', 'Links work'] },
+      { id: 'NV2', section: 'Navigation', name: 'provider-directory: provider nav when logged in as provider', steps: ['Login as provider', 'Open own or any clinic provider-directory.html', 'Confirm provider-nav'], expected: ['Provider nav visible', 'Dashboard link goes to provider-dashboard'] },
+      { id: 'NV3', section: 'Navigation', name: 'provider-directory: admin context', steps: ['Login as admin', 'Open provider-directory from review moderation or ?from=admin', 'Confirm admin-nav or back to admin'], expected: ['Admin context preserved', 'Back/control returns to admin workflow'] },
+      { id: 'NV4', section: 'Navigation', name: 'Patient nav on all primary patient pages', steps: ['Login as patient', 'Visit dashboard, find-clinics, favorites, price-comparison, recommendations, records, account', 'Confirm consistent nav on each'], expected: ['patient-nav on each page', 'Active state highlights current section', 'Logout works from each'] },
+      { id: 'NV5', section: 'Navigation', name: 'Provider nav on all primary provider pages', steps: ['Login as provider', 'Visit dashboard, appointments, patients, analytics, billing, clinic profile, settings', 'Confirm provider-nav'], expected: ['provider-nav on each page', 'No missing nav on authorized pages', 'Logout works'] },
+      { id: 'NV6', section: 'Navigation', name: 'Logged-in user on marketing index', steps: ['Login as patient or provider', 'Open /index.html', 'Observe nav/login state', 'Navigate to app dashboard'], expected: ['Sensible behavior (marketing nav or redirect)', 'No auth confusion', 'Can reach role dashboard'] },
+
+      // Mobile
+      { id: 'MB1', section: 'Mobile', name: 'Mobile layout: patient dashboard', steps: ['Resize to mobile width (375px) or use device mode', 'Open /patient-dashboard.html as patient', 'Open hamburger nav'], expected: ['No horizontal scroll overflow', 'Nav menu usable', 'Core content readable'] },
+      { id: 'MB2', section: 'Mobile', name: 'Mobile layout: provider dashboard', steps: ['Mobile width', 'Open /provider-dashboard.html as provider', 'Open nav menu'], expected: ['Layout usable', 'Nav accessible', 'No broken overlays'] },
+      { id: 'MB3', section: 'Mobile', name: 'Mobile layout: find-clinics', steps: ['Mobile width', 'Open /find-clinics.html', 'Search and open a clinic card'], expected: ['Cards stack correctly', 'Clinic profile opens', 'Touch targets adequate'] },
+
+      // Legal
+      { id: 'LG1', section: 'Legal', name: 'Terms of service page loads', steps: ['Open /terms-of-service.html'], expected: ['Page loads', 'Content readable', 'No script errors'] },
+      { id: 'LG2', section: 'Legal', name: 'Patient terms and conditions', steps: ['Open /patient-terms-and-conditions.html'], expected: ['Page loads', 'Linked from patient flows if applicable'] },
+      { id: 'LG3', section: 'Legal', name: 'Provider terms and conditions', steps: ['Open /provider-terms-and-conditions.html'], expected: ['Page loads', 'Linked from provider registration if applicable'] },
+
+      // Operations (optional pre-launch)
+      { id: 'OPS1', section: 'Operations', name: 'Provider Auth migration tool (ops)', steps: ['Open /migrate-providers-to-firebase-auth.html as admin/ops', 'Review UI only OR run on test provider in dev'], expected: ['Tool loads', 'Mark N/A for production launch unless migration required', 'No accidental production migration without backup'] },
+
+
 
       // CI/CD workflow verification (Section 15)
       { id: 'CI1', section: 'CI/CD', name: 'GitHub Actions runs on push to main/develop', steps: ['Push a commit to main/develop', 'Check GitHub Actions tab'], expected: ['Workflow triggers automatically', 'Status visible'] },
@@ -465,9 +677,99 @@
       { id: 'TR3', section: 'Tracker', name: 'Export Markdown works', steps: ['Set some statuses + notes', 'Click Copy Markdown or Download Markdown'], expected: ['Markdown includes all cases', 'Statuses, notes, evidence included'] },
       { id: 'TR4', section: 'Tracker', name: 'Export JSON works', steps: ['Click Export JSON', 'Open downloaded file'], expected: ['JSON file downloads', 'Contains complete state'] },
       { id: 'TR5', section: 'Tracker', name: 'Import JSON works (round-trip)', steps: ['Export JSON', 'Reset tracker', 'Import JSON'], expected: ['All data restored', 'Statuses, notes, evidence match'] },
-      { id: 'TR6', section: 'Tracker', name: 'Search and filter work', steps: ['Type in search box', 'Select status filter', 'Clear filters'], expected: ['Search narrows results', 'Filter works', 'Clear shows all'] },
-      { id: 'TR7', section: 'Tracker', name: 'Statistics display correctly', steps: ['Set multiple statuses', 'Check statbar'], expected: ['Statistics update', 'Counts are accurate'] }
+      { id: 'TR6', section: 'Tracker', name: 'Search and filter work', steps: ['Type in search box', 'Select audience filter (Patient / Provider / Admin / Other)', 'Select status filter', 'Clear filters'], expected: ['Search narrows results', 'Audience filter shows only cases for that E2E role', 'Status filter works', 'Clear shows all'] },
+      { id: 'TR7', section: 'Tracker', name: 'Statistics display correctly', steps: ['Set multiple statuses', 'Check statbar'], expected: ['Statistics update', 'Counts are accurate'] },
+      { id: 'TR8', section: 'Tracker', name: 'Launch readiness banner reflects gate', steps: ['Mark all cases Pass or N/A', 'Check launch banner at top', 'Leave one case as Not run and confirm banner shows blocked'], expected: ['Banner shows Ready when only Pass/N/A', 'Banner shows blocked when Fail/Skip/Todo remain', 'LR1 aligns with banner state'] }
     ];
+
+  const AUDIENCE_LABELS = {
+    patient: 'Patient',
+    provider: 'Provider',
+    admin: 'Admin',
+    other: 'Other'
+  };
+
+  const AUDIENCE_ORDER = ['patient', 'provider', 'admin', 'other'];
+
+  /** Explicit overrides; otherwise inferred from section/id/name. */
+  const AUDIENCE_BY_ID = {
+    S1: 'other', S6: 'other',
+    G3: 'other', AG10: 'other', AG11: 'other', AG12: 'other',
+    FR4: 'other', FR5: 'other', FR6: 'other', FR7: 'other', FR11: 'other',
+    LR1: 'other', NV1: 'other', NV2: 'other', NV3: 'other', NV4: 'other', NV5: 'other', NV6: 'other',
+    MB1: 'other', MB2: 'other', MB3: 'other',
+    LG1: 'other', LG2: 'other', LG3: 'other',
+    OPS1: 'other', TR8: 'other'
+  };
+
+  function audiencePillHtml(audience) {
+    const key = audience || 'other';
+    const label = AUDIENCE_LABELS[key] || key;
+    return `<span class="audience-pill ${escapeHtml(key)}">${escapeHtml(label)}</span>`;
+  }
+
+  function getAudience(c) {
+    if (c.audience) return c.audience;
+    if (AUDIENCE_BY_ID[c.id]) return AUDIENCE_BY_ID[c.id];
+
+    const id = c.id;
+    const section = c.section;
+    const name = (c.name || '').toLowerCase();
+
+    if (section === 'Launch Readiness' || section === 'Navigation' || section === 'Mobile' || section === 'Legal' || section === 'Operations') return 'other';
+    if (section === 'Patient Discover') return 'patient';
+    if (section === 'Patient Access' || section === 'Patient' || section === 'Patient Registration') return 'patient';
+    if (section === 'Provider Access' || section === 'Provider tools' || section === 'Provider Registration') return 'provider';
+    if (section === 'Admin') return 'admin';
+    if (section === 'CI/CD' || section === 'CodeRabbit' || section === 'Tracker' || section === 'Test utilities') return 'other';
+
+    if (id.startsWith('PA')) return 'patient';
+    if (id.startsWith('PR')) return 'provider';
+    if (id.startsWith('AD')) return 'admin';
+    if (id.startsWith('CI') || id.startsWith('CR') || id.startsWith('TR')) return 'other';
+
+    if (id === 'S2' || id === 'S5' || id === 'S7' || id === 'S8') return 'patient';
+    if (id === 'S3' || id === 'S9' || id === 'S10') return 'provider';
+    if (id === 'S4') return 'admin';
+
+    if (id === 'A1' || id === 'A6' || id === 'A9') return 'patient';
+    if (id === 'A2' || id === 'A4' || id === 'A7' || id === 'A8') return 'provider';
+    if (id === 'A5') return 'other';
+    if (id === 'A3') return 'admin';
+
+    if (id.startsWith('AG')) {
+      if (name.includes('patient')) return 'patient';
+      if (name.includes('provider')) return 'provider';
+      if (name.includes('admin')) return 'admin';
+      if (name.includes('cross-user') || name.includes('non-admin')) return 'other';
+      return 'other';
+    }
+
+    if (id === 'P1' || id === 'P2' || id === 'P3' || id === 'P4' || id === 'P5' || id === 'P6' || id === 'P7' || id === 'P8') return 'patient';
+    if (id === 'AP1' || id === 'AP3' || id === 'AP4' || id === 'AP7' || id === 'R1' || id === 'R3') return 'patient';
+    if (id === 'AP5' || id === 'AP6') return 'provider';
+    if (id === 'AP2' || id === 'PD1') return 'provider';
+    if (id === 'R2' || id === 'R4') return 'admin';
+
+    if (id === 'G1' || id === 'G4' || id === 'G5' || id === 'G6') return 'provider';
+    if (id === 'G2') return 'patient';
+
+    if (id.startsWith('PT')) return 'provider';
+    if (id.startsWith('T')) return 'other';
+
+    if (id.startsWith('FR')) {
+      if (id === 'FR3') return 'admin';
+      if (id === 'FR8') return 'provider';
+      if (id === 'FR1' || id === 'FR2' || id === 'FR9' || id === 'FR10') return 'patient';
+      return 'other';
+    }
+
+    return 'other';
+  }
+
+  for (const c of CASES) {
+    c.audience = getAudience(c);
+  }
 
     const STATUS = {
       todo: { label: 'Not run', css: 'na' },
@@ -501,24 +803,52 @@
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return defaultState();
+        if (!raw) {
+          console.log('[Tracker] No saved state found, using default state');
+          return defaultState();
+        }
         const parsed = JSON.parse(raw);
+        console.log('[Tracker] Loaded state from localStorage:', {
+          version: parsed.version,
+          runName: parsed.run?.name,
+          totalCases: parsed.cases ? Object.keys(parsed.cases).length : 0,
+          passCount: parsed.cases ? Object.values(parsed.cases).filter(c => c.status === 'pass').length : 0,
+          failCount: parsed.cases ? Object.values(parsed.cases).filter(c => c.status === 'fail').length : 0
+        });
         // Merge forward (in case new cases are added)
         const base = defaultState();
         const merged = { ...base, ...parsed };
         merged.run = { ...base.run, ...(parsed.run || {}) };
+        // Preserve existing case statuses, only add new cases from base
         merged.cases = { ...base.cases, ...(parsed.cases || {}) };
         merged.version = 1;
+        console.log('[Tracker] Merged state:', {
+          totalCases: Object.keys(merged.cases).length,
+          passCount: Object.values(merged.cases).filter(c => c.status === 'pass').length
+        });
         return merged;
       } catch (e) {
-        console.warn('Failed to load tracker state, resetting.', e);
+        console.warn('[Tracker] Failed to load tracker state, resetting.', e);
         return defaultState();
       }
     }
 
     function saveState() {
       state.run.updatedAt = nowIso();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state, null, 2));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state, null, 2));
+        console.log('[Tracker] State saved to localStorage:', {
+          totalCases: Object.keys(state.cases).length,
+          passCount: Object.values(state.cases).filter(c => c.status === 'pass').length,
+          failCount: Object.values(state.cases).filter(c => c.status === 'fail').length,
+          skipCount: Object.values(state.cases).filter(c => c.status === 'skip').length,
+          naCount: Object.values(state.cases).filter(c => c.status === 'na').length,
+          todoCount: Object.values(state.cases).filter(c => c.status === 'todo' || !c.status).length
+        });
+      } catch (e) {
+        console.error('[Tracker] Failed to save state:', e);
+        alert('Failed to save progress. Check console for details.');
+      }
     }
 
     function resetRun(keepMeta = true) {
@@ -550,14 +880,57 @@
 
     const el = (id) => document.getElementById(id);
 
-    function computeStats() {
-      const counts = { todo: 0, pass: 0, fail: 0, skip: 0, na: 0, total: CASES.length };
-      for (const c of CASES) {
+    function computeStatsForCases(cases) {
+      const counts = { todo: 0, pass: 0, fail: 0, skip: 0, na: 0, total: cases.length };
+      for (const c of cases) {
         const st = (state.cases[c.id] && state.cases[c.id].status) || 'todo';
         if (counts[st] === undefined) counts.todo++;
         else counts[st]++;
       }
       return counts;
+    }
+
+    function computeStats() {
+      return computeStatsForCases(CASES);
+    }
+
+    function renderKpi(counts, subtitle) {
+      el('kpi').innerHTML = `
+        <div class="k"><div class="n">${counts.total}</div><div class="t">${escapeHtml(subtitle || 'Total cases')}</div></div>
+        <div class="k"><div class="n" style="color: var(--pass)">${counts.pass}</div><div class="t">Passed</div></div>
+        <div class="k"><div class="n" style="color: var(--fail)">${counts.fail}</div><div class="t">Failed</div></div>
+        <div class="k"><div class="n" style="color: rgba(255,255,255,0.72)">${counts.todo}</div><div class="t">Not run</div></div>
+      `;
+    }
+
+    
+    function computeLaunchGate() {
+      const counts = computeStats();
+      const blocking = counts.fail + counts.skip + counts.todo;
+      const ready = blocking === 0 && counts.total > 0;
+      return { ready, blocking, counts };
+    }
+
+    function renderLaunchBanner() {
+      const elBanner = el('launchBanner');
+      if (!elBanner) return;
+      const gate = computeLaunchGate();
+      const c = gate.counts;
+      elBanner.classList.remove('ready', 'blocked', 'pending');
+      if (gate.ready) {
+        elBanner.classList.add('ready');
+        elBanner.innerHTML = '<strong>Ready for launch</strong> — All ' + c.total + ' cases are Pass or N/A. Complete <strong>LR1</strong> sign-off and export Markdown before go-live.';
+      } else if (c.pass + c.na === 0) {
+        elBanner.classList.add('pending');
+        elBanner.innerHTML = '<strong>Pre-launch testing in progress</strong> — ' + c.todo + ' not run, ' + c.fail + ' fail, ' + c.skip + ' skip. Run on production; every case must be Pass or N/A before launch.';
+      } else {
+        elBanner.classList.add('blocked');
+        elBanner.innerHTML = '<strong>Not ready for launch</strong> — Resolve: ' +
+          (c.fail ? c.fail + ' fail ' : '') +
+          (c.skip ? c.skip + ' skip ' : '') +
+          (c.todo ? c.todo + ' not run ' : '') +
+          '(Pass: ' + c.pass + ', N/A: ' + c.na + ', Total: ' + c.total + ').';
+      }
     }
 
     function renderStatbar() {
@@ -570,18 +943,24 @@
         `<span class="pill">TODO ${s.todo}</span>`,
         `<span class="pill">TOTAL ${s.total}</span>`
       ];
+      for (const aud of AUDIENCE_ORDER) {
+        const n = CASES.filter(c => c.audience === aud).length;
+        if (n) parts.push(`<span class="pill audience-pill ${aud}">${AUDIENCE_LABELS[aud]} ${n}</span>`);
+      }
       el('statbar').innerHTML = parts.join('');
-      el('kpi').innerHTML = `
-        <div class="k"><div class="n">${s.total}</div><div class="t">Total cases</div></div>
-        <div class="k"><div class="n" style="color: var(--pass)">${s.pass}</div><div class="t">Passed</div></div>
-        <div class="k"><div class="n" style="color: var(--fail)">${s.fail}</div><div class="t">Failed</div></div>
-        <div class="k"><div class="n" style="color: rgba(255,255,255,0.72)">${s.todo}</div><div class="t">Not run</div></div>
-      `;
+      const audienceFilter = el('filterAudience')?.value || 'all';
+      if (audienceFilter === 'all') {
+        renderKpi(s, 'Total cases');
+      }
     }
 
-    function matchFilter(c, query, statusFilter) {
+    function matchFilter(c, query, statusFilter, audienceFilter) {
       const q = (query || '').trim().toLowerCase();
       const current = (state.cases[c.id] && state.cases[c.id].status) || 'todo';
+
+      if (audienceFilter && audienceFilter !== 'all' && c.audience !== audienceFilter) {
+        return false;
+      }
 
       if (statusFilter && statusFilter !== 'all') {
         if (statusFilter === 'todo') {
@@ -590,14 +969,24 @@
       }
 
       if (!q) return true;
-      const hay = `${c.id} ${c.section} ${c.name}`.toLowerCase();
+      const audienceLabel = AUDIENCE_LABELS[c.audience] || c.audience;
+      const hay = `${c.id} ${c.section} ${c.name} ${audienceLabel} ${c.audience}`.toLowerCase();
       return hay.includes(q);
     }
 
     function renderCaseList() {
       const query = el('search').value;
       const statusFilter = el('filterStatus').value;
-      const items = CASES.filter(c => matchFilter(c, query, statusFilter));
+      const audienceFilter = el('filterAudience').value;
+      const items = CASES.filter(c => matchFilter(c, query, statusFilter, audienceFilter));
+
+      if (audienceFilter !== 'all') {
+        const fs = computeStatsForCases(items);
+        const label = AUDIENCE_LABELS[audienceFilter] || audienceFilter;
+        renderKpi(fs, `${label} · filtered`);
+      } else {
+        renderKpi(computeStats(), 'Total cases');
+      }
 
       el('caseList').innerHTML = items.map(c => {
         const st = (state.cases[c.id] && state.cases[c.id].status) || 'todo';
@@ -610,7 +999,10 @@
               <div class="id">${escapeHtml(c.section)} · ${escapeHtml(c.id)}</div>
               <div class="name" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</div>
             </div>
-            <div class="badge ${badgeClass}">${badgeText}</div>
+            <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+              ${audiencePillHtml(c.audience)}
+              <div class="badge ${badgeClass}">${badgeText}</div>
+            </div>
           </div>
         `;
       }).join('') || `<div class="case-item"><div class="left"><div class="name">No matches</div></div></div>`;
@@ -636,8 +1028,18 @@
       el('caseTitle').textContent = `${c.section} · ${c.id} — ${c.name}`;
       el('caseSubtitle').textContent = record.updatedAt ? `Last updated: ${record.updatedAt}` : 'Not run yet.';
 
+      const audienceHint = c.audience === 'other'
+        ? 'Run as the role(s) described in the steps (may need multiple accounts or no login).'
+        : `Sign in as ${AUDIENCE_LABELS[c.audience] || c.audience} before running this case.`;
+
       el('details').innerHTML = `
         <div class="details-grid">
+          <div class="full">
+            <label>Audience (E2E)</label>
+            <div style="margin-top:6px;">${audiencePillHtml(c.audience)}</div>
+            <div class="hint" style="margin-top:6px;">${escapeHtml(audienceHint)}</div>
+          </div>
+
           <div class="full">
             <label>Status</label>
             <div class="status-buttons" id="statusButtons">
@@ -693,9 +1095,18 @@
       for (const btn of el('statusButtons').querySelectorAll('.status-btn')) {
         btn.addEventListener('click', () => {
           const next = btn.getAttribute('data-status');
+          console.log('[Tracker] Setting status for case', selectedCaseId, 'to', next);
           setCaseStatus(selectedCaseId, next);
           renderAll();
           renderDetails();
+          // Verify save worked
+          const saved = loadState();
+          const savedStatus = saved.cases[selectedCaseId]?.status;
+          if (savedStatus !== next) {
+            console.error('[Tracker] Status save verification failed! Expected', next, 'but got', savedStatus);
+          } else {
+            console.log('[Tracker] Status save verified successfully');
+          }
         });
       }
 
@@ -737,13 +1148,20 @@
     }
 
     function setCaseStatus(caseId, status) {
+      if (!caseId) {
+        console.error('[Tracker] Cannot set status: no caseId provided');
+        return;
+      }
       const existing = state.cases[caseId] || { status: 'todo', notes: '', evidence: '', updatedAt: null };
       state.cases[caseId] = { ...existing, status, updatedAt: nowIso() };
+      console.log('[Tracker] Updated case', caseId, 'status to', status, 'before save');
       saveState();
+      console.log('[Tracker] Case status saved for', caseId);
     }
 
     function renderAll() {
       renderStatbar();
+      renderLaunchBanner();
       renderCaseList();
     }
 
@@ -782,7 +1200,7 @@
     function toMarkdown() {
       const stats = computeStats();
       const header = [
-        `# CareLuva Functional Test Run`,
+        `# CareLuva Pre-Launch Functional Test Run`,
         ``,
         `- **Run name**: ${state.run.name || '(unnamed)'}`,
         `- **Environment**: ${state.run.env || '(not set)'}`,
@@ -800,22 +1218,47 @@
         `- **N/A**: ${stats.na}`,
         `- **Not run**: ${stats.todo}`,
         ``,
-        `## Results`
+        `## Launch readiness`,
+        ``,
+        ...(function () {
+          const gate = computeLaunchGate();
+          return [
+            gate.ready
+              ? `- **Launch status**: READY — all cases Pass or N/A; safe to proceed with LR1 sign-off`
+              : `- **Launch status**: NOT READY — ${gate.counts.fail} fail, ${gate.counts.skip} skip, ${gate.counts.todo} not run remaining`,
+            `- **Production URL tested**: ${state.run.env || '(set Environment field)'}`
+          ];
+        })(),
+        ``,
+        `## Results by audience`
       ];
 
-      const bySection = {};
+      const audienceCounts = {};
       for (const c of CASES) {
-        if (!bySection[c.section]) bySection[c.section] = [];
-        bySection[c.section].push(c);
+        audienceCounts[c.audience] = (audienceCounts[c.audience] || 0) + 1;
       }
+      header.push(
+        `- **By audience**: ` +
+        AUDIENCE_ORDER.map(a => `${AUDIENCE_LABELS[a]} ${audienceCounts[a] || 0}`).join(', ')
+      );
 
       const lines = [...header];
-      const sections = Object.keys(bySection).sort((a,b) => a.localeCompare(b));
-      for (const sec of sections) {
+      for (const aud of AUDIENCE_ORDER) {
+        const group = CASES.filter(c => c.audience === aud);
+        if (!group.length) continue;
         lines.push(``);
-        lines.push(`### ${sec}`);
+        lines.push(`### ${AUDIENCE_LABELS[aud]} (${group.length})`);
         lines.push(``);
-        for (const c of bySection[sec]) {
+        const bySection = {};
+        for (const c of group) {
+          if (!bySection[c.section]) bySection[c.section] = [];
+          bySection[c.section].push(c);
+        }
+        const sections = Object.keys(bySection).sort((a, b) => a.localeCompare(b));
+        for (const sec of sections) {
+          lines.push(`#### ${sec}`);
+          lines.push(``);
+          for (const c of bySection[sec]) {
           const r = state.cases[c.id] || { status: 'todo', notes: '', evidence: '', updatedAt: null };
           const status = r.status === 'todo' ? 'NOT RUN' : (STATUS[r.status]?.label || r.status).toUpperCase();
           lines.push(`- **${c.id}**: ${c.name} — **${status}**${r.updatedAt ? ` _(updated ${r.updatedAt})_` : ''}`);
@@ -830,6 +1273,7 @@
             }
           }
         }
+      }
       }
 
       lines.push(``);
@@ -937,6 +1381,35 @@
         clearStorage();
       });
 
+      el('btnVerifySave').addEventListener('click', () => {
+        const saved = loadState();
+        const currentPass = Object.values(state.cases).filter(c => c.status === 'pass').length;
+        const savedPass = Object.values(saved.cases).filter(c => c.status === 'pass').length;
+        const currentFail = Object.values(state.cases).filter(c => c.status === 'fail').length;
+        const savedFail = Object.values(saved.cases).filter(c => c.status === 'fail').length;
+        
+        const report = [
+          `Current in-memory: ${currentPass} pass, ${currentFail} fail`,
+          `Saved in localStorage: ${savedPass} pass, ${savedFail} fail`,
+          savedPass === currentPass && savedFail === currentFail 
+            ? '✅ Status: SAVED CORRECTLY' 
+            : '⚠️ Status: MISMATCH DETECTED - Clicking any status button will re-save'
+        ].join('\n');
+        
+        alert(report);
+        console.log('[Tracker] Verification report:', {
+          current: { pass: currentPass, fail: currentFail },
+          saved: { pass: savedPass, fail: savedFail },
+          match: savedPass === currentPass && savedFail === currentFail
+        });
+        
+        // If mismatch, re-save
+        if (savedPass !== currentPass || savedFail !== currentFail) {
+          console.log('[Tracker] Re-saving state to fix mismatch...');
+          saveState();
+        }
+      });
+
       el('btnExportJson').addEventListener('click', doExportJson);
       el('btnExportMd').addEventListener('click', doExportMd);
       el('btnDownloadMd').addEventListener('click', doExportMd);
@@ -945,12 +1418,55 @@
 
       el('search').addEventListener('input', renderCaseList);
       el('filterStatus').addEventListener('change', renderCaseList);
+      el('filterAudience').addEventListener('change', renderCaseList);
+    }
+
+    // Verify localStorage is working
+    function testLocalStorage() {
+      try {
+        const testKey = 'careluva.test';
+        localStorage.setItem(testKey, 'test');
+        const retrieved = localStorage.getItem(testKey);
+        localStorage.removeItem(testKey);
+        if (retrieved !== 'test') {
+          console.error('[Tracker] localStorage test failed - write/read mismatch');
+          return false;
+        }
+        console.log('[Tracker] localStorage test passed');
+        return true;
+      } catch (e) {
+        console.error('[Tracker] localStorage test failed:', e);
+        return false;
+      }
     }
 
     // Init
+    if (!testLocalStorage()) {
+      alert('Warning: localStorage may not be working properly. Progress may not be saved.');
+    }
+    
+    // Log initial state
+    console.log('[Tracker] Initial state loaded:', {
+      totalCases: Object.keys(state.cases).length,
+      passCount: Object.values(state.cases).filter(c => c.status === 'pass').length,
+      runName: state.run.name
+    });
+    
     wireMeta();
     renderAll();
     renderDetails();
+    
+    // Add periodic save verification (every 30 seconds)
+    setInterval(() => {
+      const saved = loadState();
+      const currentPassCount = Object.values(state.cases).filter(c => c.status === 'pass').length;
+      const savedPassCount = Object.values(saved.cases).filter(c => c.status === 'pass').length;
+      if (currentPassCount !== savedPassCount) {
+        console.warn('[Tracker] State mismatch detected! Current:', currentPassCount, 'Saved:', savedPassCount);
+        // Re-save to fix any issues
+        saveState();
+      }
+    }, 30000);
   </script>
 </body>
 </html>

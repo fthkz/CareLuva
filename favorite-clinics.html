@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Favorite Clinics - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('patientSession') || sessionStorage.getItem('patientSession') ||
+                localStorage.getItem('patientUser') || sessionStorage.getItem('patientUser');
+            if (!has) { window.location.replace('patient-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="verification-badges.js"></script>
@@ -19,7 +28,6 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
@@ -179,11 +187,11 @@
         }
     </style>
 </head>
-<body>
+<body data-patient-nav-active="favorites">
+    <script src="patient-nav.js"></script>
     <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-heart"></i> Favorite Clinics</h1>
-            <a href="patient-account.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Account</a>
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size:1.5rem;font-weight:600;color:#1f2937;"><i class="fas fa-heart"></i> Favorite Clinics</h1>
         </div>
         
         <div id="favoritesContainer">

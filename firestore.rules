@@ -17,6 +17,16 @@ service cloud.firestore {
       return isAuthenticated() && 
              exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
+
+    // Provider owns clinic via registration doc id (legacy) or firebaseAuthUid link (migrated)
+    function isProviderForClinic(clinicRegistrationId) {
+      return isAuthenticated() &&
+             clinicRegistrationId is string &&
+             clinicRegistrationId.size() > 0 &&
+             (clinicRegistrationId == request.auth.uid ||
+              (exists(/databases/$(database)/documents/providerRegistrations/$(clinicRegistrationId)) &&
+               get(/databases/$(database)/documents/providerRegistrations/$(clinicRegistrationId)).data.firebaseAuthUid == request.auth.uid));
+    }
     
     // Provider Registrations - Public submissions (anyone can create, only admins can read/update/delete)
     match /providerRegistrations/{registrationId} {
@@ -28,17 +38,26 @@ service cloud.firestore {
       // Users can read their own registration if:
       // 1. They are authenticated AND email matches, OR
       // 2. They are authenticated AND createdBy UID matches, OR
-      // 3. They are admin, OR
-      // 4. Unauthenticated user (for password reset - allows querying by email to create Auth account)
-      // SECURITY NOTE: This allows unauthenticated reads for password reset functionality.
-      // The user already knows the email (they're requesting reset for it), so minimal privacy impact.
-      // In production, consider using Cloud Functions for password reset to avoid exposing registration data.
-      allow read: if isAdmin() || 
+      // 3. They are authenticated AND registrationId matches their Firebase Auth UID (NEW: Firebase Auth), OR
+      // 4. They are authenticated AND firebaseAuthUid matches their auth UID (for migrated accounts), OR
+      // 5. They are admin
+      // SECURITY NOTE: Unauthenticated reads are NOT allowed for security. 
+      // Password reset functionality requires unauthenticated read access to query by email.
+      // This is a known limitation - password reset should be moved to Cloud Functions in production.
+      // Allow reading:
+      // - Any approved clinic profile (for search/browse experience)
+      // - Own registration (legacy + Firebase Auth ownership checks)
+      allow read: if 
+                     // Publicly visible, approved clinic profiles
+                     (resource.data.status == 'approved') ||
+                     // Admins can read all
+                     isAdmin() || 
+                     // Owners can read their own registration
                      (isAuthenticated() && 
                       (resource.data.email == request.auth.token.email || 
-                       resource.data.createdBy == request.auth.uid)) ||
-                     // Allow unauthenticated read for password reset (needed to create Firebase Auth from Firestore registration)
-                     !isAuthenticated();
+                       resource.data.createdBy == request.auth.uid ||
+                       registrationId == request.auth.uid ||
+                       resource.data.firebaseAuthUid == request.auth.uid));
       
       // Admins can update any field
       // Users can update their own profile fields (email must match, cannot change status/admin fields)
@@ -130,7 +149,8 @@ service cloud.firestore {
       allow read: if isAdmin() ||
                      (isAuthenticated() && 
                       (resource.data.patientId == request.auth.uid || 
-                       resource.data.providerId == request.auth.uid)) ||
+                       resource.data.providerId == request.auth.uid ||
+                       isProviderForClinic(resource.data.clinicId))) ||
                      // Allow reading appointments by clinicId for Firestore-only auth providers (no Firebase Auth)
                      // This allows providers to view their appointments even without Firebase Auth
                      (!isAuthenticated() && resource.data.clinicId != null) ||
@@ -141,20 +161,22 @@ service cloud.firestore {
       // Users can update their own appointments, admins can update any
       // Support both Firebase Auth and Firestore-only auth
       allow update: if isAdmin() ||
-                       // Firebase Auth: user's UID matches patientId or providerId
+                       // Firebase Auth: user's UID matches patientId or providerId, or owns clinic
                        (isAuthenticated() && 
                         (resource.data.patientId == request.auth.uid || 
-                         resource.data.providerId == request.auth.uid)) ||
+                         resource.data.providerId == request.auth.uid ||
+                         isProviderForClinic(resource.data.clinicId))) ||
                        // Firestore-only auth: allow update if clinicId exists (provider can update)
                        (!isAuthenticated() && resource.data.clinicId != null);
       
       // Users can delete their own appointments, admins can delete any
       // Support both Firebase Auth and Firestore-only auth
       allow delete: if isAdmin() ||
-                       // Firebase Auth: user's UID matches patientId or providerId
+                       // Firebase Auth: user's UID matches patientId or providerId, or owns clinic
                        (isAuthenticated() && 
                         (resource.data.patientId == request.auth.uid || 
-                         resource.data.providerId == request.auth.uid)) ||
+                         resource.data.providerId == request.auth.uid ||
+                         isProviderForClinic(resource.data.clinicId))) ||
                        // Firestore-only auth: allow delete if clinicId exists (provider can delete)
                        (!isAuthenticated() && resource.data.clinicId != null);
     }

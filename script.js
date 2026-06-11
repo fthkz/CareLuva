@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Registration event dispatched');
             });
         } else {
-            console.log('Provider registration button not found');
+            // Button not found - this is expected if buttons are not present in the DOM
+            // This is not an error, just informational
+            console.debug('Provider registration button not found (optional element)');
         }
 
         // Provider Login Button Handler
@@ -30,7 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Login event dispatched');
             });
         } else {
-            console.log('Provider login button not found');
+            // Button not found - this is expected if buttons are not present in the DOM
+            // This is not an error, just informational
+            console.debug('Provider login button not found (optional element)');
         }
     }, 100);
 
@@ -38,14 +42,61 @@ document.addEventListener('DOMContentLoaded', function() {
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navCta = document.querySelector('.nav-cta');
+    let isMenuOpen = false;
+
+    // Function to close mobile menu
+    function closeMobileMenu() {
+        if (hamburger) hamburger.classList.remove('active');
+        if (navMenu) navMenu.classList.remove('active');
+        if (navCta) navCta.classList.remove('active');
+        document.body.style.overflow = '';
+        isMenuOpen = false;
+    }
+
+    // Function to toggle mobile menu
+    function toggleMobileMenu() {
+        isMenuOpen = !isMenuOpen;
+        
+        if (hamburger) hamburger.classList.toggle('active');
+        if (navMenu) navMenu.classList.toggle('active');
+        if (navCta) navCta.classList.toggle('active');
+        
+        // Position nav-cta below nav-menu dynamically
+        if (isMenuOpen && navMenu && navCta) {
+            const navMenuHeight = navMenu.offsetHeight;
+            navCta.style.top = `calc(100% + ${navMenuHeight}px)`;
+        } else if (navCta) {
+            navCta.style.top = '';
+        }
+        
+        // Prevent body scroll when menu is open
+        if (isMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }
 
     if (hamburger) {
-        hamburger.addEventListener('click', function() {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-            navCta.classList.toggle('active');
+        hamburger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobileMenu();
         });
     }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (isMenuOpen && navMenu && !navMenu.contains(e.target) && !hamburger.contains(e.target)) {
+            closeMobileMenu();
+        }
+    });
+
+    // Close menu on window resize (if resizing to desktop)
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768 && isMenuOpen) {
+            closeMobileMenu();
+        }
+    });
 
     // Smooth scrolling for navigation links
     const navLinks = document.querySelectorAll('.nav-menu a[href^="#"]');
@@ -56,11 +107,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetSection = document.querySelector(targetId);
             
             if (targetSection) {
-                const offsetTop = targetSection.offsetTop - 70; // Account for fixed navbar
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
+                // Close mobile menu if open
+                if (isMenuOpen) {
+                    closeMobileMenu();
+                }
+                
+                // Calculate offset - adjust for fixed navbar height
+                const navbarHeight = 70;
+                // Use scroll-margin-top if available, otherwise calculate manually
+                const scrollMarginTop = parseInt(window.getComputedStyle(targetSection).scrollMarginTop) || navbarHeight;
+                const offsetTop = targetSection.offsetTop - scrollMarginTop;
+                
+                // Use setTimeout to ensure menu closes before scrolling
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: Math.max(0, offsetTop),
+                        behavior: 'smooth'
+                    });
+                }, isMenuOpen ? 100 : 0);
             }
         });
     });
@@ -311,3 +375,4 @@ if (trustSection) {
 
     console.log('CareLuva landing page initialized successfully!');
 });
+

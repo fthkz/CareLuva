@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('patientSession') || sessionStorage.getItem('patientSession') ||
+                localStorage.getItem('patientUser') || sessionStorage.getItem('patientUser');
+            if (!has) { window.location.replace('patient-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -80,9 +89,9 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2rem 1.25rem;
             display: grid;
             grid-template-columns: 1fr;
             gap: 2rem;
@@ -557,21 +566,13 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body data-patient-nav-active="dashboard">
     <!-- Authentication Utilities -->
     <script src="auth-utils.js"></script>
-    
-    <header class="header">
-        <div class="logo">
-            <a href="index.html" style="text-decoration: none; color: inherit;">CareLuva</a>
-        </div>
-        <div class="user-info">
-            <a href="patient-account.html" class="welcome" id="userWelcome" style="text-decoration: none; color: inherit;">Welcome, Patient!</a>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-    </header>
+    <script src="patient-nav.js"></script>
+    <span id="userWelcome" style="display:none;"></span>
 
-    <div class="container">
+    <div class="container" id="main-content" style="display: none;">
         <!-- Welcome Section -->
         <div class="welcome-section fade-in" id="welcomeSection" style="margin-bottom: 2rem;">
             <h1 id="welcomeMessage" style="font-size: 2rem; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem;">Welcome!</h1>
@@ -992,6 +993,7 @@
                 const professionalName = appointment.professionalName || null;
                 const specialization = appointment.specialization || '';
                 const reason = appointment.reason || 'No reason provided';
+                const proposedAlternative = appointment.proposedAlternative || null;
 
                 return `
                     <div class="appointment-item">
@@ -1019,12 +1021,140 @@
                                 <span class="detail-value">${reason}</span>
                             </div>
                         </div>
+                        ${proposedAlternative ? `
+                            <div style="margin-top: 15px; padding: 15px; background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px;">
+                                <div style="font-weight: 600; color: #1e40af; margin-bottom: 8px;">
+                                    <i class="fas fa-info-circle"></i> Clinic Proposed Alternative:
+                                </div>
+                                <div style="color: #1e3a8a; font-size: 14px; margin-bottom: 12px;">
+                                    <div><strong>Date:</strong> ${new Date(proposedAlternative.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                    <div><strong>Time:</strong> ${proposedAlternative.time}</div>
+                                    ${proposedAlternative.professionalName ? `<div><strong>Professional:</strong> ${proposedAlternative.professionalName}</div>` : ''}
+                                    ${proposedAlternative.message ? `<div style="margin-top: 8px; font-style: italic;">"${proposedAlternative.message}"</div>` : ''}
+                                </div>
+                                <div style="display: flex; gap: 10px; margin-top: 12px;">
+                                    <button onclick="acceptProposedAlternative('${appointment.id}')" style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                        <i class="fas fa-check"></i> Accept Alternative
+                                    </button>
+                                    <button onclick="rejectProposedAlternative('${appointment.id}')" style="background: #ef4444; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                        <i class="fas fa-times"></i> Decline
+                                    </button>
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${status === 'pending' ? `
+                            <div style="margin-top: 12px; padding: 10px; background: #fef3c7; border-radius: 6px; font-size: 13px; color: #92400e;">
+                                <i class="fas fa-clock"></i> Waiting for clinic response...
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
 
             container.innerHTML = `<div class="appointments-list">${appointmentsHTML}</div>`;
         }
+
+        // Accept proposed alternative
+        window.acceptProposedAlternative = async function(appointmentId) {
+            if (!confirm('Are you sure you want to accept this alternative appointment time?')) {
+                return;
+            }
+
+            try {
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not available');
+                }
+
+                const { doc, getDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const appointmentRef = doc(window.firebase.db, 'appointments', appointmentId);
+                const appointmentSnap = await getDoc(appointmentRef);
+                
+                if (!appointmentSnap.exists()) {
+                    throw new Error('Appointment not found');
+                }
+                
+                const appointmentData = appointmentSnap.data();
+                
+                if (!appointmentData.proposedAlternative) {
+                    alert('No proposed alternative found for this appointment');
+                    return;
+                }
+                
+                // Update appointment with proposed alternative details and confirm
+                const updateData = {
+                    status: 'confirmed',
+                    date: appointmentData.proposedAlternative.date,
+                    time: appointmentData.proposedAlternative.time,
+                    professionalId: appointmentData.proposedAlternative.professionalId,
+                    professionalName: appointmentData.proposedAlternative.professionalName,
+                    specialization: appointmentData.proposedAlternative.specialization,
+                    proposedAlternative: null, // Clear proposed alternative
+                    confirmedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                // Track response time
+                if (appointmentData.proposedAlternative.proposedAt) {
+                    const proposedTime = new Date(appointmentData.proposedAlternative.proposedAt);
+                    const acceptedTime = new Date();
+                    const responseTimeMs = acceptedTime - proposedTime;
+                    const responseTimeHours = responseTimeMs / (1000 * 60 * 60);
+                    updateData.patientResponseTimeHours = responseTimeHours;
+                }
+                
+                await updateDoc(appointmentRef, updateData);
+                
+                // Reload appointments
+                await loadAppointments();
+                
+                alert('Alternative appointment accepted! Your appointment has been confirmed.');
+            } catch (error) {
+                console.error('Error accepting proposed alternative:', error);
+                alert('Error accepting alternative. Please try again.');
+            }
+        };
+
+        // Reject proposed alternative
+        window.rejectProposedAlternative = async function(appointmentId) {
+            if (!confirm('Are you sure you want to decline this alternative? The clinic may propose another time or cancel the appointment.')) {
+                return;
+            }
+
+            try {
+                if (!window.firebase || !window.firebase.db) {
+                    throw new Error('Firebase not available');
+                }
+
+                const { doc, getDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                
+                const appointmentRef = doc(window.firebase.db, 'appointments', appointmentId);
+                const appointmentSnap = await getDoc(appointmentRef);
+                
+                if (!appointmentSnap.exists()) {
+                    throw new Error('Appointment not found');
+                }
+                
+                const appointmentData = appointmentSnap.data();
+                
+                // Update status back to pending and clear proposed alternative
+                const updateData = {
+                    status: 'pending',
+                    proposedAlternative: null,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                await updateDoc(appointmentRef, updateData);
+                
+                // Reload appointments
+                await loadAppointments();
+                
+                alert('Alternative declined. The clinic will be notified and may propose another time.');
+            } catch (error) {
+                console.error('Error rejecting proposed alternative:', error);
+                alert('Error rejecting alternative. Please try again.');
+            }
+        };
 
         // Edit Profile Modal
         function openEditProfileModal() {
@@ -1100,6 +1230,12 @@
             }
         });
     </script>
+    <script src="auth-guard.js"></script>
+    <script>
+        // Setup authentication guard for patient pages (auth-utils already loaded above)
+        window.setupAuthGuard('patient');
+    </script>
+    </div> <!-- Close main-content -->
 </body>
 </html>
 

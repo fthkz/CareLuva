@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treatment Plans - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession') ||
+                localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
+            if (!has) { window.location.replace('provider-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -198,17 +207,14 @@
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <div class="logo">CareLuva</div>
-        <div class="header-actions">
-            <a href="create-treatment-plan.html" class="btn btn-primary">Create Treatment Plan</a>
-            <a href="provider-dashboard.html" class="back-btn">Back to Dashboard</a>
-        </div>
-    </div>
-    
+<body data-provider-nav-active="treatments">
+    <script src="provider-nav.js"></script>
+    <div id="main-content" style="display: none;">
     <div class="container">
-        <h1 style="font-size: 2rem; font-weight: 700; color: #1f2937; margin-bottom: 2rem;">Treatment Plans</h1>
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size: 1.5rem; font-weight: 600; color: #1f2937;"><i class="fas fa-notes-medical"></i> Treatment Plans</h1>
+            <a href="create-treatment-plan.html" class="btn btn-primary"><i class="fas fa-plus"></i> Create Treatment Plan</a>
+        </div>
         
         <div id="plansList">
             <div style="text-align: center; padding: 4rem; color: #6b7280;">
@@ -372,6 +378,13 @@
         // Initialize
         loadClinicId();
     </script>
+    <script src="auth-guard.js"></script>
+    <script src="provider-data-verification.js"></script>
+    <script>
+        // Setup authentication guard for provider pages
+        window.setupAuthGuard('provider');
+    </script>
+    </div> <!-- Close main-content -->
 </body>
 </html>
 

@@ -16,6 +16,54 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: 0;
+        }
+
+        .auth-hub-bar {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0.65rem 1.25rem;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .auth-hub-logo {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .auth-hub-logo h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            line-height: 1;
+        }
+
+        .auth-hub-logo:hover h2 {
+            color: #1d4ed8;
+        }
+
+        .auth-hub-context {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .auth-hub-main {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -278,24 +326,6 @@
             to { transform: rotate(360deg); }
         }
         
-        .back-link {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            opacity: 0.9;
-            transition: opacity 0.3s ease;
-        }
-        
-        .back-link:hover {
-            opacity: 1;
-        }
-        
         .error-message {
             background: #fee2e2;
             color: #991b1b;
@@ -331,17 +361,23 @@
             .auth-left h1 {
                 font-size: 2rem;
             }
+
+            .auth-hub-context {
+                display: none;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-        <!-- Authentication Utilities -->
-        <script src="auth-utils.js"></script>
-    <a href="index.html" class="back-link">
-        ← Back to CareLuva
-    </a>
-    
+    <script src="auth-utils.js"></script>
+    <header class="auth-hub-bar" role="navigation">
+        <a href="index.html" class="auth-hub-logo" aria-label="CareLuva home">
+            <h2>CareLuva</h2>
+        </a>
+        <span class="auth-hub-context">Patient</span>
+    </header>
+    <div class="auth-hub-main">
     <div class="auth-container">
         <div class="auth-left">
             <h1>Welcome to CareLuva</h1>
@@ -514,6 +550,7 @@
             </div>
         </div>
     </div>
+    </div>
 
     <!-- Firebase Configuration -->
     <script type="module">
@@ -524,14 +561,21 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+        // Analytics import removed - not needed and causes API permission errors
+        // import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
 
         try {
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const analytics = getAnalytics(app);
+            
+            // Initialize Analytics (optional - may fail if API is not enabled)
+            // Note: getAnalytics() may throw async errors, so we handle it separately
+            let analytics = null;
+            // Don't initialize Analytics if API is not enabled to avoid errors
+            // Analytics can be enabled later if needed
+            // analytics = getAnalytics(app);
 
             // Make available globally
             window.firebase = { app, auth, db, analytics };
@@ -684,9 +728,18 @@
                     );
                     window.authUtils.saveSession(session, patientData, rememberMe);
                     
-                    // Also store patient ID separately for backward compatibility
+                    // Also store patient session in patient-specific keys
                     const storage = rememberMe ? localStorage : sessionStorage;
                     storage.setItem('patientUserId', patientDoc.id);
+                    const sessionData = {
+                        uid: patientDoc.id,
+                        email: patientData.email,
+                        loginTime: new Date().toISOString()
+                    };
+                    storage.setItem('patientSession', JSON.stringify(sessionData));
+                    const safeData = { ...patientData };
+                    delete safeData.password;
+                    storage.setItem('patientUser', JSON.stringify(safeData));
                 } else {
                     // Fallback: basic session storage
                     const sessionData = {
@@ -853,6 +906,15 @@
                     
                     const storage = sessionStorage;
                     storage.setItem('patientUserId', docRef.id);
+                    const sessionData = {
+                        uid: docRef.id,
+                        email: email,
+                        loginTime: new Date().toISOString()
+                    };
+                    sessionStorage.setItem('patientSession', JSON.stringify(sessionData));
+                    const safeData = { ...patientData };
+                    delete safeData.password;
+                    sessionStorage.setItem('patientUser', JSON.stringify(safeData));
                 } else {
                     // Fallback: basic session storage
                     const sessionData = {
@@ -1096,7 +1158,7 @@
             resetContainer.innerHTML = `
                 <div style="background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 450px; padding: 40px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="font-size: 2rem; color: #3b82f6; margin-bottom: 10px;">🏥 CareLuva</h1>
+                        <h2 style="margin: 0 0 10px; font-size: 1.5rem; font-weight: 700; color: #2563eb;">CareLuva</h2>
                         <h2 style="margin: 0 0 10px 0; color: #1f2937; font-size: 1.5rem;">Reset Your Password</h2>
                         <p style="color: #6b7280; font-size: 14px;">Enter your new password for <strong>${email}</strong></p>
                     </div>

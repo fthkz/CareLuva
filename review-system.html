@@ -17,7 +17,6 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
@@ -272,14 +271,98 @@
             font-size: 1.5rem;
             margin-bottom: 10px;
         }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .back-btn {
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+                min-height: 44px; /* Touch-friendly */
+            }
+            
+            .review-form {
+                padding: 20px;
+            }
+            
+            .clinic-info {
+                padding: 15px;
+            }
+            
+            .clinic-name {
+                font-size: 1.25rem;
+            }
+            
+            .rating-categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-rating {
+                padding: 15px;
+            }
+            
+            .stars {
+                font-size: 1.5rem;
+            }
+            
+            .submit-btn {
+                width: 100%;
+                padding: 14px;
+                min-height: 44px; /* Touch-friendly */
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Forms */
+            input, select, textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px;
+                padding: 12px;
+            }
+            
+            textarea {
+                min-height: 120px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .review-form {
+                padding: 15px;
+            }
+            
+            .form-section h2 {
+                font-size: 1.25rem;
+            }
+        }
     </style>
 </head>
-<body>
+<body data-patient-nav-active="review">
+    <script src="patient-nav.js"></script>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1><i class="fas fa-star"></i> Leave a Review</h1>
-            <a href="provider-directory.html" id="backLink" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size:1.5rem;font-weight:600;color:#1f2937;"><i class="fas fa-star"></i> Leave a Review</h1>
         </div>
         
         <!-- Review Form -->
@@ -394,11 +477,13 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        console.log('Review system: Firebase initialized');
 
         // Get clinic ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const clinicId = urlParams.get('clinic') || urlParams.get('id');
-        
+        console.log('Review system: clinic ID from URL:', clinicId || '(none)');
+
         let clinicData = null;
         let overallRating = 0;
         let categoryRatings = {
@@ -437,6 +522,7 @@
                     <div class="clinic-name">${clinicData.clinicName || clinicData.name || 'Clinic'}</div>
                     <div class="clinic-specialization">${clinicData.specialization || 'General Medicine'}</div>
                 `;
+                console.log('Review system: clinic data loaded', clinicData.clinicName || clinicData.name);
             } catch (error) {
                 console.error('Error loading clinic info:', error);
             }

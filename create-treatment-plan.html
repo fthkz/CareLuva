@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Treatment Plan - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession') ||
+                localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
+            if (!has) { window.location.replace('provider-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -203,11 +212,9 @@
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <div class="logo">CareLuva</div>
-        <a href="provider-dashboard.html" class="back-btn">Back to Dashboard</a>
-    </div>
+<body data-provider-nav-active="treatments">
+    <div id="main-content" style="display: none;">
+    <script src="provider-nav.js"></script>
     
     <div class="container">
         <div class="form-card">
@@ -453,6 +460,13 @@
         loadClinicData();
         addAppointment(); // Add first appointment by default
     </script>
+    <script src="auth-guard.js"></script>
+    <script src="auth-utils.js"></script>
+    <script>
+        // Setup authentication guard for provider pages
+        window.setupAuthGuard('provider');
+    </script>
+    </div> <!-- Close main-content -->
 </body>
 </html>
 

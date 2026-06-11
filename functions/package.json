@@ -1,0 +1,15 @@
+{
+  "name": "careluva-functions",
+  "description": "HttpOnly Firebase session cookies for provider auth (scale-ready)",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^5.1.1"
+  },
+  "private": true
+}

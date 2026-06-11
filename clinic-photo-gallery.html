@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Gallery Management - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession') ||
+                localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
+            if (!has) { window.location.replace('provider-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,7 +26,6 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
@@ -325,17 +333,21 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-images"></i> Photo Gallery Management</h1>
-            <a href="provider-account.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Account</a>
+<body data-provider-nav-active="gallery">
+    <script src="provider-nav.js"></script>
+    <div class="container" id="main-content" style="display: none;">
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size:1.5rem;font-weight:600;color:#1f2937;"><i class="fas fa-images"></i> Photo Gallery Management</h1>
         </div>
         
         <div id="status-message"></div>
         
         <div class="upload-section">
             <h2><i class="fas fa-upload"></i> Upload New Photos</h2>
+            <div id="categoryLimitInfo" style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-bottom: 20px; display: none;">
+                <strong><i class="fas fa-info-circle"></i> Image Limit:</strong>
+                <span id="limitText">Select a category to see remaining slots</span>
+            </div>
             <form class="upload-form" id="uploadForm">
                 <div class="form-group">
                     <label for="photoCategory">Category *</label>
@@ -345,6 +357,7 @@
                         <option value="professionals">Professionals</option>
                         <option value="services">Services</option>
                     </select>
+                    <small style="color: #6b7280; font-size: 0.75rem; margin-top: 4px; display: block;">Maximum 4 images per category</small>
                 </div>
                 
                 <div class="form-group" id="professionalSelectGroup" style="display: none;">
@@ -386,7 +399,13 @@
         </div>
     </div>
 
+    <script src="auth-guard.js"></script>
     <script src="auth-utils.js"></script>
+    <script src="provider-data-verification.js"></script>
+    <script>
+        // Setup authentication guard for provider pages
+        window.setupAuthGuard('provider');
+    </script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
         import { getFirestore, collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
@@ -403,20 +422,95 @@
         let selectedFiles = [];
         let professionals = [];
 
-        // Check authentication
-        if (!window.authUtils || !window.authUtils.getSession()) {
-            alert('Please log in to access this page.');
-            window.location.href = 'provider-auth.html';
-        } else {
-            const session = window.authUtils.getSession();
-            if (session && session.session && session.session.uid) {
-                currentProviderId = session.session.uid;
+        // Get provider ID from authentication checkpoint with verification
+        // Wait for auth-verified event or use the stored ID
+        async function initializeProviderId() {
+            let providerId = null;
+            
+            if (window.__authenticatedUserId) {
+                providerId = window.__authenticatedUserId;
+            } else if (window.authUtils) {
+                const session = window.authUtils.getSession();
+                if (session && session.session && session.session.uid) {
+                    providerId = session.session.uid;
+                }
             }
+            
+            // Verify ownership if verification utility is available
+            if (providerId && window.providerDataVerification) {
+                const verification = await window.providerDataVerification.verifyClinicOwnership(providerId);
+                if (!verification.valid) {
+                    console.error('[Photo Gallery] Ownership verification failed:', verification.error);
+                    document.getElementById('galleryContainer').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Access Denied</h3>
+                            <p>${verification.error || 'You do not have permission to access this gallery.'}</p>
+                            <button onclick="window.location.href='provider-dashboard.html'" class="btn btn-primary" style="margin-top: 1rem;">
+                                Go to Dashboard
+                            </button>
+                        </div>
+                    `;
+                    return false;
+                }
+            }
+            
+            if (providerId) {
+                currentProviderId = providerId;
+                console.log('Provider ID verified:', currentProviderId);
+                return true;
+            }
+            
+            // Listen for auth-verified event
+            window.addEventListener('auth-verified', async (e) => {
+                const id = e.detail.userId;
+                
+                // Verify ownership
+                if (window.providerDataVerification) {
+                    const verification = await window.providerDataVerification.verifyClinicOwnership(id);
+                    if (!verification.valid) {
+                        console.error('[Photo Gallery] Ownership verification failed:', verification.error);
+                        return;
+                    }
+                }
+                
+                currentProviderId = id;
+                console.log('Provider ID from auth-verified event:', currentProviderId);
+                // Load gallery once we have the ID
+                if (currentProviderId) {
+                    loadGallery();
+                }
+            });
+            
+            return false;
         }
-
-        if (!currentProviderId) {
-            alert('Unable to identify provider. Please log in again.');
-            window.location.href = 'provider-auth.html';
+        
+        // Try to initialize provider ID
+        let providerIdInitialized = initializeProviderId();
+        
+        // If not initialized, wait a bit and try again
+        if (!providerIdInitialized) {
+            let attempts = 0;
+            const maxAttempts = 10;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (window.__authenticatedUserId || (window.authUtils && window.authUtils.getSession())) {
+                    providerIdInitialized = initializeProviderId();
+                    if (providerIdInitialized) {
+                        clearInterval(checkInterval);
+                        loadGallery();
+                    }
+                }
+                if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    if (!currentProviderId) {
+                        console.error('No provider ID found after', maxAttempts, 'attempts.');
+                        console.log('Waiting for auth guard to handle authentication...');
+                        // Don't redirect here - let auth guard handle it
+                        // The auth guard will redirect if needed
+                    }
+                }
+            }, 200);
         }
 
         // Load professionals
@@ -441,15 +535,68 @@
             }
         }
 
+        // Check image limit for category
+        // Check image limit for category
+        async function checkImageLimit(category) {
+            try {
+                const q = query(
+                    collection(db, 'clinicPhotos'),
+                    where('clinicId', '==', currentProviderId),
+                    where('category', '==', category)
+                );
+                const snapshot = await getDocs(q);
+                return snapshot.size; // Return current count
+            } catch (error) {
+                console.error('Error checking image limit:', error);
+                return 0;
+            }
+        }
+
+        // Update category limit info when category changes
+        async function updateCategoryLimitInfo(category) {
+            const limitInfo = document.getElementById('categoryLimitInfo');
+            const limitText = document.getElementById('limitText');
+            
+            if (!category) {
+                limitInfo.style.display = 'none';
+                return;
+            }
+            
+            const currentCount = await checkImageLimit(category);
+            const maxImages = 4;
+            const remaining = maxImages - currentCount;
+            
+            limitInfo.style.display = 'block';
+            
+            if (remaining <= 0) {
+                limitInfo.style.background = '#fee2e2';
+                limitInfo.style.borderColor = '#ef4444';
+                limitText.innerHTML = `<span style="color: #991b1b;"><strong>${getCategoryLabel(category)}:</strong> Limit reached (${currentCount}/${maxImages}). Delete an image to upload a new one.</span>`;
+            } else if (remaining === 1) {
+                limitInfo.style.background = '#fef3c7';
+                limitInfo.style.borderColor = '#f59e0b';
+                limitText.innerHTML = `<span style="color: #92400e;"><strong>${getCategoryLabel(category)}:</strong> ${remaining} slot remaining (${currentCount}/${maxImages} used)</span>`;
+            } else {
+                limitInfo.style.background = '#dbeafe';
+                limitInfo.style.borderColor = '#3b82f6';
+                limitText.innerHTML = `<span style="color: #1e40af;"><strong>${getCategoryLabel(category)}:</strong> ${remaining} slots remaining (${currentCount}/${maxImages} used)</span>`;
+            }
+        }
+
         // Show/hide professional select based on category
-        document.getElementById('photoCategory').addEventListener('change', (e) => {
+        document.getElementById('photoCategory').addEventListener('change', async (e) => {
+            const category = e.target.value;
             const professionalGroup = document.getElementById('professionalSelectGroup');
-            if (e.target.value === 'professionals') {
+            
+            if (category === 'professionals') {
                 professionalGroup.style.display = 'block';
                 loadProfessionals();
             } else {
                 professionalGroup.style.display = 'none';
             }
+            
+            // Update limit info
+            await updateCategoryLimitInfo(category);
         });
 
         // File upload handling
@@ -534,6 +681,23 @@
                 return;
             }
             
+            // Check image limit for this category
+            const currentCount = await checkImageLimit(category);
+            const maxImages = 4;
+            const remainingSlots = maxImages - currentCount;
+            
+            if (currentCount >= maxImages) {
+                showMessage(`You have reached the limit of ${maxImages} images for ${getCategoryLabel(category)}. Please delete an existing image before uploading a new one.`, 'error');
+                await updateCategoryLimitInfo(category); // Refresh limit info
+                return;
+            }
+            
+            if (selectedFiles.length > remainingSlots) {
+                showMessage(`You can only upload ${remainingSlots} more image(s) for ${getCategoryLabel(category)}. You currently have ${currentCount} of ${maxImages} images.`, 'error');
+                await updateCategoryLimitInfo(category); // Refresh limit info
+                return;
+            }
+            
             const professionalIndex = document.getElementById('professionalSelect').value;
             const professionalName = professionalIndex !== '' ? professionals[parseInt(professionalIndex)]?.name : null;
             
@@ -543,19 +707,35 @@
             
             try {
                 const uploadPromises = selectedFiles.map(async (file) => {
-                    const fileName = `${Date.now()}_${file.name}`;
-                    const storageRef = ref(storage, `clinic-photos/${currentProviderId}/${category}/${fileName}`);
-                    await uploadBytes(storageRef, file);
-                    const downloadURL = await getDownloadURL(storageRef);
-                    
-                    return {
-                        url: downloadURL,
-                        category: category,
-                        professionalName: professionalName,
-                        professionalIndex: professionalIndex !== '' ? parseInt(professionalIndex) : null,
-                        fileName: fileName,
-                        uploadedAt: new Date().toISOString()
-                    };
+                    try {
+                        // Sanitize file name: remove spaces and special characters, keep extension
+                        const fileExtension = file.name.split('.').pop();
+                        const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '_');
+                        const sanitizedFileName = `${Date.now()}_${baseName}.${fileExtension}`;
+                        const storageRef = ref(storage, `clinic-photos/${currentProviderId}/${category}/${sanitizedFileName}`);
+                        
+                        console.log('Uploading file:', file.name, 'to path:', `clinic-photos/${currentProviderId}/${category}/${sanitizedFileName}`);
+                        
+                        // Upload file to Storage
+                        const uploadResult = await uploadBytes(storageRef, file);
+                        console.log('✅ File uploaded successfully:', uploadResult.metadata.fullPath);
+                        
+                        // Get download URL
+                        const downloadURL = await getDownloadURL(storageRef);
+                        console.log('✅ Download URL obtained:', downloadURL);
+                        
+                        return {
+                            url: downloadURL,
+                            category: category,
+                            professionalName: professionalName,
+                            professionalIndex: professionalIndex !== '' ? parseInt(professionalIndex) : null,
+                            fileName: sanitizedFileName,
+                            uploadedAt: new Date().toISOString()
+                        };
+                    } catch (fileError) {
+                        console.error('Error uploading file:', file.name, fileError);
+                        throw new Error(`Failed to upload ${file.name}: ${fileError.message}`);
+                    }
                 });
                 
                 const photos = await Promise.all(uploadPromises);
@@ -577,8 +757,9 @@
                 document.getElementById('uploadForm').reset();
                 document.getElementById('professionalSelectGroup').style.display = 'none';
                 
-                // Reload gallery
+                // Reload gallery and update limit info
                 loadGallery();
+                await updateCategoryLimitInfo(category);
                 
             } catch (error) {
                 console.error('Upload error:', error);
@@ -594,6 +775,20 @@
             const container = document.getElementById('galleryContainer');
             container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading gallery...</p></div>';
             
+            // Check if provider ID is set
+            if (!currentProviderId) {
+                console.error('Cannot load gallery: currentProviderId is null');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error: Provider ID not found. Please log in again.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            console.log('Loading gallery for provider ID:', currentProviderId, 'filter:', filter);
+            
             try {
                 let q;
                 if (filter === 'all') {
@@ -605,13 +800,56 @@
                 }
                 
                 const snapshot = await getDocs(q);
-                const photos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log('Gallery query result:', snapshot.size, 'photos found');
+                let photos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log('Photos data:', photos);
+                
+                // If no photos found, try to find provider by email as fallback
+                if (photos.length === 0 && window.authUtils) {
+                    console.log('No photos found with document ID, trying email lookup...');
+                    try {
+                        const sessionData = window.authUtils.getSessionData();
+                        if (sessionData && sessionData.email) {
+                            // Find provider registration by email
+                            const registrationsRef = collection(db, 'providerRegistrations');
+                            const emailQuery = query(registrationsRef, where('email', '==', sessionData.email));
+                            const regSnapshot = await getDocs(emailQuery);
+                            
+                            if (!regSnapshot.empty) {
+                                const actualProviderId = regSnapshot.docs[0].id;
+                                console.log('Found provider by email, actual ID:', actualProviderId);
+                                
+                                // Update currentProviderId
+                                currentProviderId = actualProviderId;
+                                
+                                // Query photos again with correct ID
+                                let q2;
+                                if (filter === 'all') {
+                                    q2 = query(collection(db, 'clinicPhotos'), where('clinicId', '==', actualProviderId));
+                                } else {
+                                    q2 = query(collection(db, 'clinicPhotos'), 
+                                        where('clinicId', '==', actualProviderId),
+                                        where('category', '==', filter));
+                                }
+                                
+                                const snapshot2 = await getDocs(q2);
+                                photos = snapshot2.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                                console.log('Photos found with correct ID:', photos.length);
+                            }
+                        }
+                    } catch (fallbackError) {
+                        console.error('Error in fallback email lookup:', fallbackError);
+                    }
+                }
                 
                 if (photos.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-images"></i>
                             <p>No photos found. Upload some photos to get started!</p>
+                            <p style="font-size: 0.875rem; color: #6b7280; margin-top: 10px;">
+                                Provider ID: ${currentProviderId || 'Not set'}
+                            </p>
                         </div>
                     `;
                     return;
@@ -675,7 +913,14 @@
                 await deleteDoc(doc(db, 'clinicPhotos', photoId));
                 
                 showMessage('Photo deleted successfully!', 'success');
-                loadGallery(document.querySelector('.filter-btn.active').dataset.filter);
+                const currentFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+                loadGallery(currentFilter);
+                
+                // Update limit info if category matches the deleted photo's category
+                const selectedCategory = document.getElementById('photoCategory').value;
+                if (selectedCategory === category) {
+                    await updateCategoryLimitInfo(category);
+                }
                 
             } catch (error) {
                 console.error('Error deleting photo:', error);
@@ -694,8 +939,35 @@
             }, 5000);
         }
 
-        // Initial load
-        loadGallery();
+        // Initial load - wait for provider ID to be set
+        if (currentProviderId) {
+            loadGallery();
+        } else {
+            // Wait for provider ID to be set
+            const waitForProviderId = setInterval(() => {
+                if (currentProviderId) {
+                    clearInterval(waitForProviderId);
+                    loadGallery();
+                }
+            }, 100);
+            
+            // Timeout after 3 seconds
+            setTimeout(() => {
+                clearInterval(waitForProviderId);
+                if (!currentProviderId) {
+                    console.error('Timeout waiting for provider ID');
+                    const container = document.getElementById('galleryContainer');
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Unable to load gallery. Please refresh the page.</p>
+                            </div>
+                        `;
+                    }
+                }
+            }, 3000);
+        }
     </script>
 </body>
 </html>

@@ -3,18 +3,57 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
   "hosting": {
     "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "dev/**"
+      "dev/**",
+      "functions/**"
     ],
     "rewrites": [
       {
+        "source": "/api/auth/session-login",
+        "function": "authApi"
+      },
+      {
+        "source": "/api/auth/session-logout",
+        "function": "authApi"
+      },
+      {
+        "source": "/api/auth/session-verify",
+        "function": "authApi"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/api/auth/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, private"
+          }
+        ]
       }
     ]
   }

@@ -269,11 +269,11 @@ async function runSessionTests() {
                     return { passed: false, message: 'Session UID mismatch' };
                 }
                 
-                if (retrieved.storage !== sessionStorage) {
-                    return { passed: false, message: 'Session stored in wrong storage' };
+                if (retrieved.storage !== localStorage) {
+                    return { passed: false, message: 'Session stored in wrong storage (expected localStorage)' };
                 }
                 
-                return { passed: true, message: 'Session saved and retrieved correctly' };
+                return { passed: true, message: 'Session saved in localStorage and retrieved correctly' };
             }
         },
         {
@@ -390,7 +390,7 @@ async function runSessionTests() {
                     version: '1.0'
                 };
                 
-                sessionStorage.setItem('providerSession', JSON.stringify(expiredSession));
+                localStorage.setItem('providerSession', JSON.stringify(expiredSession));
                 
                 // Should return null for expired session
                 const retrieved = window.authUtils.getSession();
@@ -399,7 +399,7 @@ async function runSessionTests() {
                 }
                 
                 // Verify storage was cleared
-                const stillInStorage = sessionStorage.getItem('providerSession');
+                const stillInStorage = localStorage.getItem('providerSession');
                 if (stillInStorage) {
                     return { passed: false, message: 'Expired session not cleared from storage' };
                 }

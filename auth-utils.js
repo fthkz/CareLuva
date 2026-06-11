@@ -123,6 +123,9 @@ const SESSION_CONFIG = {
     REGISTRATION_KEY: 'providerRegistration'
 };
 
+/** Same-origin API (Firebase Hosting rewrite → Cloud Function). */
+const AUTH_SESSION_API_BASE = '/api/auth';
+
 /**
  * Create a session object
  * @param {string} uid - User ID (document ID)
@@ -149,11 +152,11 @@ function createSession(uid, email, registrationData, rememberMe = false) {
  * Save session to storage
  * @param {Object} session - Session object
  * @param {Object} registrationData - Registration data
- * @param {boolean} rememberMe - Whether to use localStorage or sessionStorage
+ * @param {boolean} rememberMe - Controls session TTL only; storage is always localStorage so new tabs share the session (HttpOnly cookie adds server-verified layer when deployed).
  */
 function saveSession(session, registrationData, rememberMe = false) {
-    const storage = rememberMe ? localStorage : sessionStorage;
-    
+    const storage = localStorage;
+
     // Save session
     storage.setItem(SESSION_CONFIG.STORAGE_KEY, JSON.stringify(session));
     
@@ -244,6 +247,16 @@ function clearSession() {
     localStorage.removeItem(SESSION_CONFIG.REGISTRATION_KEY);
     sessionStorage.removeItem(SESSION_CONFIG.STORAGE_KEY);
     sessionStorage.removeItem(SESSION_CONFIG.REGISTRATION_KEY);
+
+    // Also clear legacy registration ID keys for backward compatibility
+    localStorage.removeItem('providerRegistrationId');
+    localStorage.removeItem('patientUserId');
+    sessionStorage.removeItem('providerRegistrationId');
+    sessionStorage.removeItem('patientUserId');
+
+    if (typeof window !== 'undefined' && typeof window.clearAuthGuardCache === 'function') {
+        window.clearAuthGuardCache();
+    }
 }
 
 /**
@@ -290,6 +303,172 @@ function getSessionTimeRemaining() {
     return remaining > 0 ? remaining : 0;
 }
 
+/**
+ * Exchange a fresh Firebase ID token for an HttpOnly session cookie (provider only).
+ * No-op if the API is not deployed (network error).
+ */
+async function exchangeFirebaseSessionCookie(idToken) {
+    try {
+        const res = await fetch(`${AUTH_SESSION_API_BASE}/session-login`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken })
+        });
+        if (!res.ok) {
+            let detail = '';
+            try {
+                const body = await res.json();
+                detail = body.error || JSON.stringify(body);
+            } catch (e) {
+                detail = res.statusText || 'unknown error';
+            }
+            console.warn('[auth] session-login failed:', res.status, detail);
+            return false;
+        }
+        console.log('[auth] ✅ HttpOnly session cookie set via session-login');
+        return true;
+    } catch (e) {
+        console.warn('[auth] HttpOnly session exchange unavailable:', e.message || e);
+        return false;
+    }
+}
+
+/**
+ * Clear HttpOnly provider session cookie (call on logout).
+ */
+async function clearFirebaseSessionCookie() {
+    try {
+        await fetch(`${AUTH_SESSION_API_BASE}/session-logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch (e) {
+        console.warn('[auth] HttpOnly session clear skipped:', e.message || e);
+    }
+}
+
+/**
+ * Verify HttpOnly session cookie with backend; returns { ok, registrationId, firebaseUid } or { ok:false }.
+ */
+async function verifyProviderSessionCookie() {
+    try {
+        const res = await fetch(`${AUTH_SESSION_API_BASE}/session-verify`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store'
+        });
+        if (!res.ok) {
+            let detail = null;
+            try {
+                detail = await res.json();
+            } catch (e) {
+                detail = null;
+            }
+            if (res.status === 401) {
+                const reason = detail && detail.error ? detail.error : 'no valid HttpOnly cookie';
+                console.info('[auth] session-verify: 401 —', reason);
+            } else {
+                console.warn('[auth] session-verify failed:', res.status, detail);
+            }
+            return { ok: false, status: res.status, error: detail && detail.error ? detail.error : undefined };
+        }
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) {
+            return { ok: false, status: res.status, error: 'non-json response' };
+        }
+        return await res.json();
+    } catch (e) {
+        console.warn('[auth] session-verify unavailable:', e.message || e);
+        return { ok: false, error: e.message || String(e) };
+    }
+}
+
+/**
+ * Wait until window.firebase.app exists (Firebase module init is often after auth-guard).
+ */
+async function waitForFirebaseApp(timeoutMs = 8000) {
+    if (window.firebase && window.firebase.app) {
+        return window.firebase.app;
+    }
+    return new Promise(function (resolve) {
+        var resolved = false;
+        function finish(app) {
+            if (resolved) return;
+            resolved = true;
+            resolve(app || null);
+        }
+        window.addEventListener('firebaseReady', function () {
+            finish(window.firebase && window.firebase.app ? window.firebase.app : null);
+        }, { once: true });
+        var deadline = Date.now() + timeoutMs;
+        (function poll() {
+            if (window.firebase && window.firebase.app) {
+                finish(window.firebase.app);
+                return;
+            }
+            if (Date.now() >= deadline) {
+                finish(null);
+                return;
+            }
+            setTimeout(poll, 50);
+        })();
+    });
+}
+
+/**
+ * Wait for Firebase Auth to restore persisted user (currentUser is null briefly on page load).
+ */
+async function waitForFirebaseAuthUser(timeoutMs = 8000) {
+    var app = await waitForFirebaseApp(timeoutMs);
+    if (!app) {
+        return null;
+    }
+    var authModule = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+    var auth = authModule.getAuth(app);
+    if (auth.currentUser) {
+        return auth.currentUser;
+    }
+    return new Promise(function (resolve) {
+        var resolved = false;
+        function finish(user) {
+            if (resolved) return;
+            resolved = true;
+            resolve(user || null);
+        }
+        var timer = setTimeout(function () {
+            finish(auth.currentUser);
+        }, timeoutMs);
+        var unsub = authModule.onAuthStateChanged(auth, function (user) {
+            clearTimeout(timer);
+            unsub();
+            finish(user);
+        });
+    });
+}
+
+/**
+ * If Firebase Auth still has a signed-in user, exchange a fresh ID token for the HttpOnly cookie.
+ * Used when localStorage session exists but session-verify returns 401 (e.g. login before Functions deploy).
+ */
+async function syncProviderSessionCookieFromFirebaseAuth() {
+    try {
+        var user = await waitForFirebaseAuthUser();
+        if (!user) {
+            return { ok: false, reason: 'no-firebase-auth-user' };
+        }
+        const idToken = await user.getIdToken();
+        const cookieSet = await exchangeFirebaseSessionCookie(idToken);
+        if (!cookieSet) {
+            return { ok: false, reason: 'session-login-failed' };
+        }
+        return verifyProviderSessionCookie();
+    } catch (e) {
+        console.warn('[auth] syncProviderSessionCookieFromFirebaseAuth:', e.message || e);
+        return { ok: false, reason: 'sync-error', error: e.message || String(e) };
+    }
+}
+
 // Export functions for use in other files
 if (typeof window !== 'undefined') {
     window.authUtils = {
@@ -303,6 +482,11 @@ if (typeof window !== 'undefined') {
         clearSession,
         refreshSession,
         getSessionTimeRemaining,
+        exchangeFirebaseSessionCookie,
+        clearFirebaseSessionCookie,
+        verifyProviderSessionCookie,
+        syncProviderSessionCookieFromFirebaseAuth,
+        waitForFirebaseAuthUser,
         SESSION_CONFIG
     };
 }
@@ -320,6 +504,11 @@ if (typeof module !== 'undefined' && module.exports) {
         clearSession,
         refreshSession,
         getSessionTimeRemaining,
+        exchangeFirebaseSessionCookie,
+        clearFirebaseSessionCookie,
+        verifyProviderSessionCookie,
+        syncProviderSessionCookieFromFirebaseAuth,
+        waitForFirebaseAuthUser,
         SESSION_CONFIG
     };
 }

@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Provider Dashboard - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession') ||
+                localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
+            if (!has) { window.location.replace('provider-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -94,9 +103,9 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2rem 1.25rem;
             display: grid;
             grid-template-columns: 1fr;
             gap: 2rem;
@@ -498,31 +507,32 @@
         }
     </style>
 </head>
-<body>
+<body data-provider-nav-active="dashboard">
+    <script src="provider-nav.js"></script>
+    <div id="main-content" style="display: none;">
     <!-- Authentication Utilities -->
+    <script src="auth-guard.js"></script>
     <script src="auth-utils.js"></script>
+    <script>
+        // Setup authentication guard for provider pages
+        window.setupAuthGuard('provider');
+    </script>
     <!-- Verification Badges -->
     <script src="verification-badges.js"></script>
-    <header class="header">
-        <div class="logo">
-            CareLuva
-        </div>
-        <div class="user-info">
-            <a href="provider-account.html" class="welcome" id="userWelcome" style="text-decoration: none; color: inherit;">Welcome, Provider!</a>
-            <span id="header-status-badge" class="status-badge status-pending">Pending</span>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-    </header>
 
     <div class="container">
         <!-- Welcome Message with Status -->
         <div class="welcome-section fade-in" id="welcomeSection" style="margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
                 <div>
                     <h1 id="welcomeMessage" style="font-size: 2rem; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem;">Welcome!</h1>
                     <p id="statusMessage" style="color: #6b7280; font-size: 1rem;">Loading...</p>
                 </div>
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                    <span id="header-status-badge" class="status-badge status-pending">Pending</span>
+                </div>
             </div>
+            <span id="userWelcome" style="display:none;"></span>
             <!-- Verification Badges -->
             <div id="verificationBadgesContainer" style="margin-top: 1rem;"></div>
         </div>
@@ -571,14 +581,16 @@
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
         try {
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+            const auth = getAuth(app);
 
             // Make available globally
-            window.firebase = { app, db };
+            window.firebase = { app, db, auth };
             window.firebaseReady = true;
 
             console.log('✅ Firebase initialized successfully!');
@@ -1738,19 +1750,22 @@
             }
         }
         
-        function logout() {
-            // Use improved session management if available
+        async function logout() {
+            try {
+                if (window.authUtils && typeof window.authUtils.clearFirebaseSessionCookie === 'function') {
+                    await window.authUtils.clearFirebaseSessionCookie();
+                }
+            } catch (e) {}
             if (window.authUtils) {
                 window.authUtils.clearSession();
             } else {
-                // Fallback: clear storage manually
-            localStorage.removeItem('providerRegistration');
-            localStorage.removeItem('providerSession');
+                localStorage.removeItem('providerRegistration');
+                localStorage.removeItem('providerSession');
+                localStorage.removeItem('providerRegistrationId');
                 sessionStorage.removeItem('providerRegistration');
                 sessionStorage.removeItem('providerSession');
+                sessionStorage.removeItem('providerRegistrationId');
             }
-            
-            // Redirect to provider login page
             window.location.href = 'provider-auth.html';
         }
         
@@ -2391,5 +2406,6 @@
             setTimeout(startStatusRefresh, 2000);
         });
     </script>
+    </div> <!-- Close main-content -->
 </body>
 </html>

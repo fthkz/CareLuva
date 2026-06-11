@@ -1,7 +1,7 @@
 {
   "name": "careluva",
   "version": "1.0.0",
-  "description": "CareLuva - Healthcare Provider Platform",
+  "description": "CareLuva - Healthcare Provider Platform - Automated code review with CodeRabbit",
   "type": "module",
   "scripts": {
     "test": "vitest run",

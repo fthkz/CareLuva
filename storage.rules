@@ -1,0 +1,50 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is authenticated via Firebase Auth
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Clinic Photos - Allow providers to upload photos for their clinic
+    match /clinic-photos/{providerId}/{category}/{fileName} {
+      // Allow read for anyone (photos are public)
+      allow read: if true;
+      
+      // Allow write (upload/delete) for now
+      // Note: Storage rules don't have access to Firestore data for provider verification
+      // In production, consider using Cloud Functions for uploads with proper verification
+      allow write: if true; // Allow all uploads - TODO: Restrict in production with proper auth
+    }
+    
+    // Professional Photos - Allow providers to upload photos for their professionals
+    match /professional-photos/{providerId}/{fileName} {
+      // Allow read for anyone (photos are public)
+      allow read: if true;
+      
+      // Allow write (upload/delete) for now
+      // Note: Storage rules don't have access to Firestore data for provider verification
+      // In production, consider using Cloud Functions for uploads with proper verification
+      allow write: if true; // Allow all uploads - TODO: Restrict in production with proper auth
+    }
+    
+    // Provider Registration Documents
+    match /provider-documents/{providerId}/{documentType}/{fileName} {
+      // Allow read for authenticated users or admins
+      allow read: if isAuthenticated();
+      
+      // Allow write for authenticated users
+      // TODO: Verify providerId matches authenticated user
+      allow write: if isAuthenticated();
+    }
+    
+    // Default: Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

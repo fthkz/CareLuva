@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Professionals - CareLuva</title>
+    <style id="auth-pending-style">body{visibility:hidden}</style>
+    <script>
+        (function() {
+            var has = localStorage.getItem('providerSession') || sessionStorage.getItem('providerSession') ||
+                localStorage.getItem('providerRegistration') || sessionStorage.getItem('providerRegistration');
+            if (!has) { window.location.replace('provider-auth.html'); return; }
+            var s = document.getElementById('auth-pending-style'); if (s) s.disabled = true;
+        })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #4b5563;
+        }
+        
+        .professionals-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+        }
+        
+        .btn-secondary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .professionals-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .professional-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: start;
+            transition: all 0.2s;
+        }
+        
+        .professional-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .professional-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+        
+        .professional-image-placeholder {
+            width: 120px;
+            height: 120px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            flex-shrink: 0;
+        }
+        
+        .professional-info {
+            flex: 1;
+        }
+        
+        .professional-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .professional-details {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+        }
+        
+        .professional-bio {
+            color: #374151;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .checkbox-group {
+            padding: 0.75rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        .checkbox-group label {
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            cursor: pointer;
+        }
+        
+        .professional-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #d1d5db;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+        
+        /* Form Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .image-upload-section {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .image-preview {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f9fafb;
+            flex-shrink: 0;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview-placeholder {
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .image-upload-controls {
+            flex: 1;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        @media (max-width: 768px) {
+            .professional-card {
+                flex-direction: column;
+            }
+            
+            .professional-actions {
+                width: 100%;
+            }
+            
+            .professional-actions button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body data-provider-nav-active="professionals">
+    <script src="provider-nav.js"></script>
+    <div class="container" id="main-content" style="display: none;">
+        <!-- Header -->
+        <div class="page-title-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <h1 style="font-size:1.5rem;font-weight:600;color:#1f2937;"><i class="fas fa-user-md"></i> Manage Professionals</h1>
+        </div>
+        
+        <!-- Professionals Section -->
+        <div class="professionals-section">
+            <div class="section-header">
+                <h2>Your Professionals</h2>
+                <button class="btn btn-primary" id="add-professional-btn">
+                    <i class="fas fa-plus"></i> Add Professional
+                </button>
+            </div>
+            
+            <div id="professionals-list" class="professionals-list">
+                <!-- Professionals will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Utilities -->
+    <script src="auth-utils.js"></script>
+    <script src="provider-data-verification.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js';
+        import firebaseConfig from './firebase-config.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        window.firebase = { app, db, storage };
+        window.firebaseReady = true;
+
+        let registrationId = null;
+        let professionals = [];
+
+        // Get registration ID
+        function getRegistrationId() {
+            if (window.authUtils) {
+                const sessionInfo = window.authUtils.getSession();
+                if (sessionInfo && sessionInfo.session && sessionInfo.session.uid) {
+                    return sessionInfo.session.uid;
+                }
+            }
+            return localStorage.getItem('providerRegistrationId') || sessionStorage.getItem('providerRegistrationId');
+        }
+
+        // Load professionals
+        async function loadProfessionals() {
+            // Use verified clinic ID to ensure user can only access their own data
+            if (window.providerDataVerification) {
+                const verification = await window.providerDataVerification.getVerifiedClinicId();
+                if (!verification.registrationId) {
+                    document.getElementById('professionals-list').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Access Denied</h3>
+                            <p>${verification.error || 'Unable to verify clinic ownership. Please log in again.'}</p>
+                            <button onclick="window.location.href='provider-dashboard.html'" class="btn btn-primary" style="margin-top: 1rem;">
+                                Go to Dashboard
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                registrationId = verification.registrationId;
+            } else {
+                // Fallback to old method if verification utility not available
+                registrationId = getRegistrationId();
+                if (!registrationId) {
+                    document.getElementById('professionals-list').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Unable to load clinic information</h3>
+                            <p>Please try logging in again.</p>
+                        </div>
+                    `;
+                    return;
+                }
+            }
+
+            try {
+                const docRef = doc(db, 'providerRegistrations', registrationId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const clinicData = docSnap.data();
+                    
+                    // Additional verification: ensure email matches session
+                    if (window.providerDataVerification) {
+                        const verification = await window.providerDataVerification.verifyClinicOwnership(registrationId);
+                        if (!verification.valid) {
+                            document.getElementById('professionals-list').innerHTML = `
+                                <div class="empty-state">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <h3>Access Denied</h3>
+                                    <p>This registration does not belong to your account.</p>
+                                    <button onclick="window.location.href='provider-dashboard.html'" class="btn btn-primary" style="margin-top: 1rem;">
+                                        Go to Dashboard
+                                    </button>
+                                </div>
+                            `;
+                            return;
+                        }
+                    }
+                    
+                    professionals = clinicData.professionals || [];
+                } else {
+                    professionals = [];
+                }
+                
+                renderProfessionals();
+            } catch (error) {
+                console.error('Error loading professionals:', error);
+                
+                // Check if it's a permission error
+                if (error.code === 'permission-denied' || error.message.includes('permission')) {
+                    document.getElementById('professionals-list').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Access Denied</h3>
+                            <p>You do not have permission to access this data. Please ensure you are logged in with the correct account.</p>
+                            <button onclick="window.location.href='provider-dashboard.html'" class="btn btn-primary" style="margin-top: 1rem;">
+                                Go to Dashboard
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('professionals-list').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Error loading professionals</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Render professionals list
+        function renderProfessionals() {
+            const listContainer = document.getElementById('professionals-list');
+            
+            if (professionals.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-md"></i>
+                        <h3>No professionals added yet</h3>
+                        <p>Click "Add Professional" to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = professionals.map((prof, index) => {
+                const specializationDisplay = prof.specialization 
+                    ? prof.specialization.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    : 'Not specified';
+                
+                return `
+                    <div class="professional-card">
+                        ${prof.imageUrl ? `
+                            <img src="${prof.imageUrl}" alt="${prof.name || 'Professional'}" class="professional-image">
+                        ` : `
+                            <div class="professional-image-placeholder">
+                                <i class="fas fa-user-md" style="font-size: 3rem;"></i>
+                            </div>
+                        `}
+                            <div class="professional-info">
+                                <div class="professional-name">
+                                    ${prof.title ? `<span style="color: #6b7280; font-size: 0.875rem; margin-right: 0.5rem;">${prof.title}</span>` : ''}
+                                    ${prof.name || 'Unnamed Professional'}
+                                </div>
+                                <div class="professional-details">
+                                    <strong>Specialization:</strong> ${specializationDisplay}
+                                </div>
+                                <div class="professional-details">
+                                    <strong>Experience:</strong> ${prof.experienceYears || 0} years
+                                </div>
+                                ${prof.languages && prof.languages.length > 0 ? `
+                                    <div class="professional-details">
+                                        <strong>Languages:</strong> ${prof.languages.join(', ')}
+                                    </div>
+                                ` : ''}
+                                ${prof.educationHistory && prof.educationHistory.length > 0 ? `
+                                    <div class="professional-details">
+                                        <strong>Education:</strong> ${prof.educationHistory.map(edu => `${edu.degree || ''}${edu.institution ? ' from ' + edu.institution : ''}${edu.year ? ' (' + edu.year + ')' : ''}`).filter(e => e.trim()).join('; ')}
+                                    </div>
+                                ` : ''}
+                                ${prof.certifications && prof.certifications.length > 0 ? `
+                                    <div class="professional-details">
+                                        <strong>Certifications:</strong> ${prof.certifications.length} certification${prof.certifications.length !== 1 ? 's' : ''}
+                                    </div>
+                                ` : ''}
+                                ${prof.bio ? `
+                                    <div class="professional-bio">
+                                        <strong>Bio:</strong> ${prof.bio}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        <div class="professional-actions">
+                            <button class="btn btn-secondary" onclick="editProfessional(${index})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteProfessional(${index})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Show professional form
+        function showProfessionalForm(index = -1) {
+            const isEdit = index >= 0;
+            const professional = isEdit ? professionals[index] : {
+                title: '',
+                name: '',
+                specialization: '',
+                experienceYears: 0,
+                bio: '',
+                languages: [],
+                educationHistory: [],
+                certifications: [],
+                imageUrl: '',
+                imagePath: ''
+            };
+
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${isEdit ? 'Edit Professional' : 'Add Professional'}</h3>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    
+                    <form id="professional-form">
+                        <div class="form-group">
+                            <label>Professional Photo</label>
+                            <div class="image-upload-section">
+                                <div class="image-preview" id="image-preview">
+                                    ${professional.imageUrl ? `
+                                        <img src="${professional.imageUrl}" alt="Preview">
+                                    ` : `
+                                        <div class="image-preview-placeholder">
+                                            <i class="fas fa-user-md" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                            <p style="font-size: 0.75rem; margin: 0;">No image</p>
+                                        </div>
+                                    `}
+                                </div>
+                                <div class="image-upload-controls">
+                                    <input type="file" id="professional-image" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('professional-image').click()">
+                                        <i class="fas fa-upload"></i> ${professional.imageUrl ? 'Change Image' : 'Upload Image'}
+                                    </button>
+                                    ${professional.imageUrl ? `
+                                        <button type="button" class="btn btn-danger" id="remove-image-btn" style="margin-top: 0.5rem;">
+                                            <i class="fas fa-trash"></i> Remove Image
+                                        </button>
+                                    ` : ''}
+                                    <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">Recommended: Square image, max 2MB</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional-title">Professional Title</label>
+                            <input type="text" id="professional-title" value="${professional.title || ''}" placeholder="e.g., Dr., Prof., Chief of Surgery">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional-name">Name *</label>
+                            <input type="text" id="professional-name" value="${professional.name || ''}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional-specialization">Specialization *</label>
+                            <select id="professional-specialization" required>
+                                <option value="">Select specialization</option>
+                                <option value="general-practice" ${professional.specialization === 'general-practice' ? 'selected' : ''}>General Practice</option>
+                                <option value="cardiology" ${professional.specialization === 'cardiology' ? 'selected' : ''}>Cardiology</option>
+                                <option value="dermatology" ${professional.specialization === 'dermatology' ? 'selected' : ''}>Dermatology</option>
+                                <option value="dentistry" ${professional.specialization === 'dentistry' ? 'selected' : ''}>Dentistry</option>
+                                <option value="orthopedics" ${professional.specialization === 'orthopedics' ? 'selected' : ''}>Orthopedics</option>
+                                <option value="pediatrics" ${professional.specialization === 'pediatrics' ? 'selected' : ''}>Pediatrics</option>
+                                <option value="gynecology" ${professional.specialization === 'gynecology' ? 'selected' : ''}>Gynecology</option>
+                                <option value="neurology" ${professional.specialization === 'neurology' ? 'selected' : ''}>Neurology</option>
+                                <option value="oncology" ${professional.specialization === 'oncology' ? 'selected' : ''}>Oncology</option>
+                                <option value="psychiatry" ${professional.specialization === 'psychiatry' ? 'selected' : ''}>Psychiatry</option>
+                                <option value="other" ${professional.specialization === 'other' ? 'selected' : ''}>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional-experience">Experience (Years) *</label>
+                            <input type="number" id="professional-experience" value="${professional.experienceYears || 0}" min="0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="professional-bio">Bio</label>
+                            <textarea id="professional-bio" rows="4" placeholder="Tell patients about this professional's background, expertise, and approach to care...">${professional.bio || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Languages Spoken</label>
+                            <div class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 0.5rem;">
+                                ${['Turkish', 'English', 'Arabic', 'German', 'French', 'Russian', 'Spanish', 'Italian', 'Portuguese', 'Chinese', 'Japanese', 'Korean'].map(lang => `
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" name="professional-languages" value="${lang}" ${professional.languages && professional.languages.includes(lang) ? 'checked' : ''}>
+                                        <span>${lang}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Education History</label>
+                            <p style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.75rem;">Add educational background (degrees, universities, graduation years)</p>
+                            <div id="education-container" style="display: grid; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                ${(professional.educationHistory && professional.educationHistory.length > 0 ? professional.educationHistory : [{degree: '', institution: '', year: ''}]).map((edu, idx) => `
+                                    <div class="education-item" style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 0.5rem; align-items: end;">
+                                        <input type="text" class="education-degree" placeholder="Degree (e.g., M.D., D.D.S.)" value="${edu.degree || ''}" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="text" class="education-institution" placeholder="Institution/University" value="${edu.institution || ''}" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="number" class="education-year" placeholder="Year" value="${edu.year || ''}" min="1950" max="2030" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <button type="button" class="remove-education" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; ${idx === 0 && (!professional.educationHistory || professional.educationHistory.length <= 1) ? 'display: none;' : ''}">Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="add-education-btn" style="font-size: 0.875rem;">
+                                <i class="fas fa-plus"></i> Add Education
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Professional Certifications</label>
+                            <p style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.75rem;">Add all relevant professional certifications</p>
+                            <div id="certifications-container" style="display: grid; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                ${(professional.certifications && professional.certifications.length > 0 ? professional.certifications : [{name: '', number: '', issueDate: ''}]).map((cert, idx) => `
+                                    <div class="certification-item" style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto; gap: 0.5rem; align-items: end;">
+                                        <input type="text" class="certification-name" placeholder="Certification name" value="${cert.name || ''}" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="text" class="certification-number" placeholder="Certification #" value="${cert.number || ''}" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <input type="date" class="certification-date" placeholder="Issue Date" value="${cert.issueDate || ''}" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                        <button type="button" class="remove-certification" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; ${idx === 0 && (!professional.certifications || professional.certifications.length <= 1) ? 'display: none;' : ''}">Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button type="button" class="btn btn-secondary" id="add-certification-btn" style="font-size: 0.875rem;">
+                                <i class="fas fa-plus"></i> Add Certification
+                            </button>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                ${isEdit ? 'Update' : 'Add'} Professional
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Image preview
+            const imageInput = modal.querySelector('#professional-image');
+            const imagePreview = modal.querySelector('#image-preview');
+            let selectedImageFile = null;
+            let imageToRemove = false;
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Image size must be less than 2MB');
+                        return;
+                    }
+                    selectedImageFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        imagePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Remove image button
+            const removeImageBtn = modal.querySelector('#remove-image-btn');
+            if (removeImageBtn) {
+                removeImageBtn.addEventListener('click', () => {
+                    imageToRemove = true;
+                    selectedImageFile = null;
+                    imagePreview.innerHTML = `
+                        <div class="image-preview-placeholder">
+                            <i class="fas fa-user-md" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p style="font-size: 0.75rem; margin: 0;">No image</p>
+                        </div>
+                    `;
+                    imageInput.value = '';
+                });
+            }
+
+            // Education management
+            function updateEducationRemoveButtons() {
+                const educationItems = modal.querySelectorAll('.education-item');
+                educationItems.forEach((item, index) => {
+                    const removeBtn = item.querySelector('.remove-education');
+                    if (removeBtn) {
+                        removeBtn.style.display = educationItems.length > 1 ? 'block' : 'none';
+                    }
+                });
+            }
+
+            modal.querySelector('#add-education-btn').addEventListener('click', () => {
+                const container = modal.querySelector('#education-container');
+                const newItem = document.createElement('div');
+                newItem.className = 'education-item';
+                newItem.style.cssText = 'display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 0.5rem; align-items: end;';
+                newItem.innerHTML = `
+                    <input type="text" class="education-degree" placeholder="Degree (e.g., M.D., D.D.S.)" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="text" class="education-institution" placeholder="Institution/University" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="number" class="education-year" placeholder="Year" min="1950" max="2030" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <button type="button" class="remove-education" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer;">Remove</button>
+                `;
+                container.appendChild(newItem);
+                updateEducationRemoveButtons();
+                
+                newItem.querySelector('.remove-education').addEventListener('click', () => {
+                    newItem.remove();
+                    updateEducationRemoveButtons();
+                });
+            });
+
+            modal.querySelectorAll('.remove-education').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.education-item').remove();
+                    updateEducationRemoveButtons();
+                });
+            });
+
+            // Certifications management
+            function updateCertificationRemoveButtons() {
+                const certItems = modal.querySelectorAll('.certification-item');
+                certItems.forEach((item, index) => {
+                    const removeBtn = item.querySelector('.remove-certification');
+                    if (removeBtn) {
+                        removeBtn.style.display = certItems.length > 1 ? 'block' : 'none';
+                    }
+                });
+            }
+
+            modal.querySelector('#add-certification-btn').addEventListener('click', () => {
+                const container = modal.querySelector('#certifications-container');
+                const newItem = document.createElement('div');
+                newItem.className = 'certification-item';
+                newItem.style.cssText = 'display: grid; grid-template-columns: 2fr 1.5fr 1.5fr auto; gap: 0.5rem; align-items: end;';
+                newItem.innerHTML = `
+                    <input type="text" class="certification-name" placeholder="Certification name" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="text" class="certification-number" placeholder="Certification #" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <input type="date" class="certification-date" placeholder="Issue Date" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <button type="button" class="remove-certification" style="background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer;">Remove</button>
+                `;
+                container.appendChild(newItem);
+                updateCertificationRemoveButtons();
+                
+                newItem.querySelector('.remove-certification').addEventListener('click', () => {
+                    newItem.remove();
+                    updateCertificationRemoveButtons();
+                });
+            });
+
+            modal.querySelectorAll('.remove-certification').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.certification-item').remove();
+                    updateCertificationRemoveButtons();
+                });
+            });
+
+            // Form submission
+            modal.querySelector('#professional-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const submitButton = modal.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Saving...';
+                
+                try {
+                    const title = modal.querySelector('#professional-title').value.trim();
+                    const name = modal.querySelector('#professional-name').value.trim();
+                    const specialization = modal.querySelector('#professional-specialization').value;
+                    const experienceYears = parseInt(modal.querySelector('#professional-experience').value) || 0;
+                    const bio = modal.querySelector('#professional-bio').value.trim();
+                    
+                    // Collect languages
+                    const languageCheckboxes = modal.querySelectorAll('input[name="professional-languages"]:checked');
+                    const languages = Array.from(languageCheckboxes).map(cb => cb.value);
+                    
+                    // Collect education history
+                    const educationHistory = [];
+                    modal.querySelectorAll('.education-item').forEach(eduItem => {
+                        const degree = eduItem.querySelector('.education-degree')?.value.trim();
+                        const institution = eduItem.querySelector('.education-institution')?.value.trim();
+                        const year = eduItem.querySelector('.education-year')?.value.trim();
+                        
+                        if (degree || institution) {
+                            educationHistory.push({
+                                degree: degree || null,
+                                institution: institution || null,
+                                year: year || null
+                            });
+                        }
+                    });
+                    
+                    // Collect certifications
+                    const certifications = [];
+                    modal.querySelectorAll('.certification-item').forEach(certItem => {
+                        const certName = certItem.querySelector('.certification-name')?.value.trim();
+                        const certNumber = certItem.querySelector('.certification-number')?.value.trim();
+                        const certDate = certItem.querySelector('.certification-date')?.value;
+                        
+                        if (certName) {
+                            certifications.push({
+                                name: certName,
+                                number: certNumber || null,
+                                issueDate: certDate || null
+                            });
+                        }
+                    });
+                    
+                    if (!name || !specialization) {
+                        alert('Please fill in all required fields.');
+                        submitButton.disabled = false;
+                        submitButton.textContent = (isEdit ? 'Update' : 'Add') + ' Professional';
+                        return;
+                    }
+                    
+                    let imageUrl = professional.imageUrl || '';
+                    let imagePath = professional.imagePath || '';
+                    
+                    // Handle image upload/removal
+                    if (imageToRemove && professional.imagePath) {
+                        // Delete old image
+                        try {
+                            const oldImageRef = ref(storage, professional.imagePath);
+                            await deleteObject(oldImageRef);
+                        } catch (storageError) {
+                            console.warn('Error deleting old image:', storageError);
+                        }
+                        imageUrl = '';
+                        imagePath = '';
+                    } else if (selectedImageFile) {
+                        // Upload new image
+                        const timestamp = Date.now();
+                        const fileExtension = selectedImageFile.name.split('.').pop();
+                        const baseName = selectedImageFile.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '_');
+                        const sanitizedFileName = `${timestamp}_${baseName}.${fileExtension}`;
+                        const imageStoragePath = `professional-photos/${registrationId}/${sanitizedFileName}`;
+                        const imageRef = ref(storage, imageStoragePath);
+                        
+                        await uploadBytes(imageRef, selectedImageFile);
+                        imageUrl = await getDownloadURL(imageRef);
+                        imagePath = imageStoragePath;
+                        
+                        // Delete old image if editing
+                        if (isEdit && professional.imagePath && professional.imagePath !== imagePath) {
+                            try {
+                                const oldImageRef = ref(storage, professional.imagePath);
+                                await deleteObject(oldImageRef);
+                            } catch (storageError) {
+                                console.warn('Error deleting old image:', storageError);
+                            }
+                        }
+                    }
+                    
+                    const professionalData = {
+                        title: title || null,
+                        name,
+                        specialization,
+                        experienceYears,
+                        bio: bio || null,
+                        languages: languages.length > 0 ? languages : null,
+                        educationHistory: educationHistory.length > 0 ? educationHistory : null,
+                        certifications: certifications.length > 0 ? certifications : null,
+                        imageUrl,
+                        imagePath
+                    };
+                    
+                    if (isEdit) {
+                        professionals[index] = professionalData;
+                    } else {
+                        professionals.push(professionalData);
+                    }
+                    
+                    // Update Firestore
+                    const docRef = doc(db, 'providerRegistrations', registrationId);
+                    await updateDoc(docRef, { professionals: professionals });
+                    
+                    alert(`Professional ${isEdit ? 'updated' : 'added'} successfully!`);
+                    modal.remove();
+                    renderProfessionals();
+                    
+                } catch (error) {
+                    console.error('Error saving professional:', error);
+                    alert('Error saving professional: ' + error.message);
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = (isEdit ? 'Update' : 'Add') + ' Professional';
+                }
+            });
+
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Edit professional
+        window.editProfessional = (index) => {
+            showProfessionalForm(index);
+        };
+
+        // Delete professional
+        window.deleteProfessional = async (index) => {
+            if (!confirm(`Are you sure you want to delete ${professionals[index].name || 'this professional'}?`)) {
+                return;
+            }
+            
+            try {
+                // Delete image from storage if exists
+                if (professionals[index].imageUrl && professionals[index].imagePath) {
+                    try {
+                        const imageRef = ref(storage, professionals[index].imagePath);
+                        await deleteObject(imageRef);
+                    } catch (storageError) {
+                        console.warn('Error deleting image from storage:', storageError);
+                    }
+                }
+                
+                professionals.splice(index, 1);
+                
+                // Update Firestore
+                const docRef = doc(db, 'providerRegistrations', registrationId);
+                await updateDoc(docRef, { professionals: professionals });
+                
+                renderProfessionals();
+                alert('Professional deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting professional:', error);
+                alert('Error deleting professional: ' + error.message);
+            }
+        };
+
+        // Add professional button
+        document.getElementById('add-professional-btn').addEventListener('click', () => {
+            showProfessionalForm();
+        });
+
+        // Load professionals when page is ready
+        window.addEventListener('auth-verified', () => {
+            loadProfessionals();
+        });
+
+        // Also try loading if auth is already verified
+        if (window.__authenticatedUserId) {
+            loadProfessionals();
+        }
+    </script>
+    
+    <script src="auth-guard.js"></script>
+    <script>
+        // Setup authentication guard for provider pages
+        window.setupAuthGuard('provider');
+    </script>
+</body>
+</html>
+

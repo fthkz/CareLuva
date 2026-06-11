@@ -164,6 +164,105 @@
             gap: 20px;
             margin-bottom: 20px;
         }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .step-indicator {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .step {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 14px 16px;
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px; /* Touch-friendly */
+            }
+            
+            /* Buttons */
+            button, .btn {
+                width: 100%;
+                padding: 14px;
+                min-height: 44px; /* Touch-friendly */
+                font-size: 16px;
+            }
+            
+            /* File upload area */
+            .file-upload-area {
+                padding: 1.5rem;
+            }
+            
+            /* Step navigation buttons */
+            .step-navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .step-navigation button {
+                width: 100%;
+            }
+            
+            /* Tables should scroll horizontally */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .form-container {
+                padding: 15px;
+            }
+            
+            .step {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.6rem;
+            }
+            
+            .step-number {
+                width: 20px;
+                height: 20px;
+                font-size: 0.7rem;
+            }
+        }
         .form-group {
             margin-bottom: 20px;
         }
@@ -1118,48 +1217,87 @@
                     });
                 }
                 
-                if (!window.firebase || !window.firebase.db) {
+                if (!window.firebase || !window.firebase.db || !window.firebase.auth) {
                     throw new Error('Firebase not initialized');
                 }
                 
                 // Check if this is a Google user
                 const isGoogleUser = new URLSearchParams(window.location.search).get('google') === 'true';
                 
+                let firebaseAuthUser = null;
+                let registrationId = null;
+                
+                // Create Firebase Auth account (unless already authenticated via Google)
+                if (!isGoogleUser && registrationData.password) {
+                    try {
+                        const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                        
+                        console.log('🔐 Creating Firebase Auth account...');
+                        const userCredential = await createUserWithEmailAndPassword(
+                            window.firebase.auth,
+                            registrationData.email,
+                            registrationData.password
+                        );
+                        
+                        firebaseAuthUser = userCredential.user;
+                        registrationId = firebaseAuthUser.uid;
+                        console.log('✅ Firebase Auth account created:', registrationId);
+                        
+                    } catch (authError) {
+                        console.error('❌ Firebase Auth creation error:', authError);
+                        
+                        // Handle specific errors
+                        if (authError.code === 'auth/email-already-in-use') {
+                            throw new Error('An account with this email already exists. Please log in instead.');
+                        } else if (authError.code === 'auth/invalid-email') {
+                            throw new Error('Invalid email address. Please check your email.');
+                        } else if (authError.code === 'auth/weak-password') {
+                            throw new Error('Password is too weak. Please use a stronger password.');
+                        } else {
+                            throw new Error(`Account creation failed: ${authError.message}`);
+                        }
+                    }
+                } else if (isGoogleUser) {
+                    // For Google users, check if already authenticated
+                    if (window.firebase.auth.currentUser) {
+                        firebaseAuthUser = window.firebase.auth.currentUser;
+                        registrationId = firebaseAuthUser.uid;
+                    } else {
+                        // Generate a temporary ID for Google users (will be set after Google auth)
+                        const { doc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                        const { collection } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                        const tempDocRef = doc(collection(window.firebase.db, 'providerRegistrations'));
+                        registrationId = tempDocRef.id;
+                    }
+                } else {
+                    // Fallback: generate document ID
+                    const { doc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const { collection } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const tempDocRef = doc(collection(window.firebase.db, 'providerRegistrations'));
+                    registrationId = tempDocRef.id;
+                }
+                
                 // Prepare data for Firebase
                 const firebaseData = {
                     ...registrationData,
+                    // Use Firebase Auth UID as document ID
+                    // Store Firebase Auth UID for reference
+                    firebaseAuthUid: firebaseAuthUser ? firebaseAuthUser.uid : null,
                     status: 'pending',
                     submittedAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                     // Add Google user info if applicable
                     isGoogleUser: isGoogleUser,
-                    authProvider: isGoogleUser ? 'google' : 'email',
+                    authProvider: isGoogleUser ? 'google' : (firebaseAuthUser ? 'firebase-email' : 'legacy'),
                     // Terms & Conditions acceptance
                     termsAccepted: registrationData.termsAccepted || false,
                     termsAcceptedAt: registrationData.termsAccepted ? new Date().toISOString() : null,
                     termsVersion: '1.0'
                 };
                 
-                // Keep password for authentication (remove confirmPassword only)
+                // Remove password from Firestore (now handled by Firebase Auth)
+                delete firebaseData.password;
                 delete firebaseData.confirmPassword;
-                
-                // Hash password before storing (security)
-                if (firebaseData.password && window.authUtils) {
-                    try {
-                        firebaseData.password = await window.authUtils.hashPassword(firebaseData.password);
-                        console.log('✅ Password hashed before storage');
-                    } catch (hashError) {
-                        console.error('Error hashing password:', hashError);
-                        throw new Error('Failed to secure password. Please try again.');
-                    }
-                }
-                
-                // Import Firebase functions
-                const { collection, addDoc, doc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
-                
-                // Create a temporary document ID for file uploads
-                const tempDocRef = doc(collection(window.firebase.db, 'providerRegistrations'));
-                const registrationId = tempDocRef.id;
                 
                 // Upload files to Firebase Storage before saving to Firestore
                 let uploadedFiles = null;
@@ -1183,10 +1321,22 @@
                     };
                 }
                 
-                // Save to Firestore
-                const docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), firebaseData);
+                // Import Firebase functions
+                const { collection, addDoc, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                 
-                console.log('✅ Registration saved to Firebase with ID:', docRef.id);
+                // Save to Firestore using Firebase Auth UID as document ID (if available)
+                let docRef;
+                if (firebaseAuthUser && registrationId === firebaseAuthUser.uid) {
+                    // Use Firebase Auth UID as document ID for better security
+                    docRef = doc(window.firebase.db, 'providerRegistrations', registrationId);
+                    await setDoc(docRef, firebaseData);
+                    console.log('✅ Registration saved to Firebase with Auth UID:', registrationId);
+                } else {
+                    // Fallback: create new document (for Google users or legacy)
+                    docRef = await addDoc(collection(window.firebase.db, 'providerRegistrations'), firebaseData);
+                    registrationId = docRef.id;
+                    console.log('✅ Registration saved to Firebase with ID:', registrationId);
+                }
                 
                 // Save Terms & Conditions acceptance separately
                 if (registrationData.termsAccepted) {
@@ -1209,8 +1359,24 @@
                 }
                 
                 // Store the document ID for later reference
-                localStorage.setItem('providerRegistrationId', docRef.id);
+                localStorage.setItem('providerRegistrationId', registrationId);
                 localStorage.setItem('providerRegistration', JSON.stringify(firebaseData));
+                
+                // If Firebase Auth account was created, sign in automatically
+                if (firebaseAuthUser) {
+                    console.log('✅ Auto-signing in with Firebase Auth...');
+                    // User is already signed in after createUserWithEmailAndPassword
+                    // Store session info
+                    if (window.authUtils) {
+                        const session = window.authUtils.createSession(
+                            registrationId,
+                            registrationData.email,
+                            firebaseData,
+                            false
+                        );
+                        window.authUtils.saveSession(session, firebaseData, false);
+                    }
+                }
                 
                 // Complete form analytics
                 completeFormAnalytics();
